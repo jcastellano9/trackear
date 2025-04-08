@@ -20,10 +20,11 @@ type PixWallet = {
   lastUpdated: string;
 };
 
-// Mock data for PIX wallets
+// Mock data for PIX wallets with logos
 const MOCK_PIX_WALLETS: PixWallet[] = [
   {
     name: "Prex",
+    logo: "https://play-lh.googleusercontent.com/A_OUicxIe4zyoF0QgXFkr4Jp9-KquJt1U_g6r-UcEpspfT_lmMt1J-aWbFtJQ9MdcQ=w240-h480-rw",
     exchangeRate: 3.89,
     fee: 0.5,
     processingTime: "1-2 horas",
@@ -34,6 +35,7 @@ const MOCK_PIX_WALLETS: PixWallet[] = [
   },
   {
     name: "Belo",
+    logo: "https://belo.app/static/img/logo-belo.svg",
     exchangeRate: 3.91,
     fee: 0.3,
     processingTime: "30 min - 1 hora",
@@ -44,6 +46,7 @@ const MOCK_PIX_WALLETS: PixWallet[] = [
   },
   {
     name: "Ripio",
+    logo: "https://ripio.com/wp-content/uploads/2020/09/logo-brand.svg",
     exchangeRate: 3.85,
     fee: 0.7,
     processingTime: "1-3 horas",
@@ -54,6 +57,7 @@ const MOCK_PIX_WALLETS: PixWallet[] = [
   },
   {
     name: "Western Union",
+    logo: "https://brand.westernunion.com/content/dam/wu/logo/logo_detail_yellow.png",
     exchangeRate: 3.80,
     fee: 1.0,
     processingTime: "2-4 horas",
@@ -64,6 +68,7 @@ const MOCK_PIX_WALLETS: PixWallet[] = [
   },
   {
     name: "Wise",
+    logo: "https://wise.com/public-resources/assets/logos/wise/brand_logo.svg",
     exchangeRate: 3.92,
     fee: 0.6,
     processingTime: "1-2 horas",
@@ -74,6 +79,7 @@ const MOCK_PIX_WALLETS: PixWallet[] = [
   },
   {
     name: "Global66",
+    logo: "https://global66.com/static/logo-light-3ea2f326dc87da06a8fcd6d1c71badc7.svg",
     exchangeRate: 3.87,
     fee: 0.4,
     processingTime: "1-2 horas",
@@ -231,7 +237,16 @@ export function PixComparison() {
                   Mejor opción para {formatCurrency(amount, "ARS")}
                 </div>
                 <div className="flex justify-between items-center mb-3">
-                  <div className="text-xl font-semibold">{getBestWallet(amount)?.name}</div>
+                  <div className="flex items-center gap-2">
+                    {getBestWallet(amount)?.logo && (
+                      <img 
+                        src={getBestWallet(amount)?.logo} 
+                        alt={getBestWallet(amount)?.name || "Logo"} 
+                        className="h-8 w-8 object-contain" 
+                      />
+                    )}
+                    <div className="text-xl font-semibold">{getBestWallet(amount)?.name}</div>
+                  </div>
                   <Badge variant="success">Recomendado</Badge>
                 </div>
                 
@@ -312,12 +327,23 @@ export function PixComparison() {
                           className={`border-b hover:bg-muted/50 ${isBest ? 'bg-muted/30' : ''}`}
                         >
                           <td className="py-4">
-                            <div className="font-medium flex items-center gap-2">
-                              {wallet.name}
-                              {isBest && <Badge variant="success" className="text-xs">Mejor</Badge>}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              actualizado {formatTime(wallet.lastUpdated)}
+                            <div className="flex items-center gap-2">
+                              {wallet.logo && (
+                                <img 
+                                  src={wallet.logo} 
+                                  alt={`${wallet.name} logo`} 
+                                  className="h-8 w-8 object-contain" 
+                                />
+                              )}
+                              <div>
+                                <div className="font-medium flex items-center gap-1">
+                                  {wallet.name}
+                                  {isBest && <Badge variant="success" className="text-xs">Mejor</Badge>}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  actualizado {formatTime(wallet.lastUpdated)}
+                                </div>
+                              </div>
                             </div>
                           </td>
                           <td className="text-center py-4 px-2">

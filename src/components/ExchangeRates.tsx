@@ -8,17 +8,19 @@ import { ArrowDown, ArrowUp, RefreshCw } from "lucide-react";
 type ExchangeRate = {
   name: string;
   code: string;
+  logo?: string;
   buy: number;
   sell: number;
   variation: number;
   lastUpdated: string;
 };
 
-// Mock exchange rate data
+// Mock exchange rate data with logos
 const MOCK_RATES: ExchangeRate[] = [
   {
     name: "Dólar Oficial",
     code: "USD",
+    logo: "https://cdn-icons-png.flaticon.com/512/197/197484.png",
     buy: 975.5,
     sell: 1015.5,
     variation: 0.25,
@@ -27,6 +29,7 @@ const MOCK_RATES: ExchangeRate[] = [
   {
     name: "Dólar Blue",
     code: "USD",
+    logo: "https://cdn-icons-png.flaticon.com/512/197/197484.png",
     buy: 1285,
     sell: 1305,
     variation: -0.5,
@@ -35,6 +38,7 @@ const MOCK_RATES: ExchangeRate[] = [
   {
     name: "Dólar MEP",
     code: "USD",
+    logo: "https://cdn-icons-png.flaticon.com/512/197/197484.png",
     buy: 1230,
     sell: 1250,
     variation: 0.75,
@@ -43,6 +47,7 @@ const MOCK_RATES: ExchangeRate[] = [
   {
     name: "Dólar CCL",
     code: "USD",
+    logo: "https://cdn-icons-png.flaticon.com/512/197/197484.png",
     buy: 1245,
     sell: 1265,
     variation: 1.2,
@@ -51,6 +56,7 @@ const MOCK_RATES: ExchangeRate[] = [
   {
     name: "Euro",
     code: "EUR",
+    logo: "https://cdn-icons-png.flaticon.com/512/197/197615.png",
     buy: 1050,
     sell: 1100,
     variation: 0.3,
@@ -58,11 +64,12 @@ const MOCK_RATES: ExchangeRate[] = [
   },
 ];
 
-// Mock crypto rates
+// Mock crypto rates with logos
 const MOCK_CRYPTO: ExchangeRate[] = [
   {
     name: "USDT",
     code: "USDT",
+    logo: "https://cryptologos.cc/logos/tether-usdt-logo.png",
     buy: 1275,
     sell: 1295,
     variation: 0.15,
@@ -71,6 +78,7 @@ const MOCK_CRYPTO: ExchangeRate[] = [
   {
     name: "DAI",
     code: "DAI",
+    logo: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png",
     buy: 1270,
     sell: 1290,
     variation: 0.1,
@@ -79,6 +87,7 @@ const MOCK_CRYPTO: ExchangeRate[] = [
   {
     name: "USDC",
     code: "USDC",
+    logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png",
     buy: 1265,
     sell: 1285,
     variation: -0.2,
@@ -180,7 +189,16 @@ export function ExchangeRates() {
                 <div className="divide-y">
                   {rates.map((rate) => (
                     <div key={rate.name} className="grid grid-cols-4 gap-4 py-3 text-sm">
-                      <div className="font-medium">{rate.name}</div>
+                      <div className="font-medium flex items-center gap-2">
+                        {rate.logo && (
+                          <img 
+                            src={rate.logo} 
+                            alt={`${rate.name} logo`} 
+                            className="h-5 w-5 object-contain" 
+                          />
+                        )}
+                        {rate.name}
+                      </div>
                       <div className="text-right">{formatCurrency(rate.buy)}</div>
                       <div className="text-right">{formatCurrency(rate.sell)}</div>
                       <div className="text-right flex items-center justify-end gap-1">
@@ -228,7 +246,16 @@ export function ExchangeRates() {
                 <div className="divide-y">
                   {cryptoRates.map((rate) => (
                     <div key={rate.name} className="grid grid-cols-4 gap-4 py-3 text-sm">
-                      <div className="font-medium">{rate.name}</div>
+                      <div className="font-medium flex items-center gap-2">
+                        {rate.logo && (
+                          <img 
+                            src={rate.logo} 
+                            alt={`${rate.name} logo`} 
+                            className="h-5 w-5 object-contain" 
+                          />
+                        )}
+                        {rate.name}
+                      </div>
                       <div className="text-right">{formatCurrency(rate.buy)}</div>
                       <div className="text-right">{formatCurrency(rate.sell)}</div>
                       <div className="text-right flex items-center justify-end gap-1">

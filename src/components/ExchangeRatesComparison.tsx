@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,60 +31,60 @@ type VirtualWallet = {
   lastUpdated: string;
 };
 
-// Sample data - this will be replaced with API data
+// Updated sample data with more realistic rates
 const MOCK_WALLETS: VirtualWallet[] = [
   {
     name: "Lemon",
-    logo: "lemon.svg",
-    usdRate: { buy: 1275, sell: 1295 },
-    usdtRate: { buy: 1270, sell: 1290 },
-    daiRate: { buy: 1265, sell: 1285 },
-    usdcRate: { buy: 1268, sell: 1288 },
+    logo: "https://assets.website-files.com/6364e65656ab107e465325d2/636b2cecd8971b169cf89aa0_isotipo-lemon-cash.svg",
+    usdRate: { buy: 1290, sell: 1315 },
+    usdtRate: { buy: 1285, sell: 1310 },
+    daiRate: { buy: 1280, sell: 1305 },
+    usdcRate: { buy: 1282, sell: 1307 },
     lastUpdated: "2025-04-08T12:30:00Z",
   },
   {
     name: "Buenbit",
-    logo: "buenbit.svg",
-    usdRate: { buy: 1278, sell: 1298 },
-    usdtRate: { buy: 1272, sell: 1292 },
-    daiRate: { buy: 1268, sell: 1288 },
-    usdcRate: { buy: 1270, sell: 1290 },
+    logo: "https://www.datocms-assets.com/45680/1673553925-buenbit-icon.svg",
+    usdRate: { buy: 1292, sell: 1318 },
+    usdtRate: { buy: 1287, sell: 1312 },
+    daiRate: { buy: 1283, sell: 1308 },
+    usdcRate: { buy: 1285, sell: 1310 },
     lastUpdated: "2025-04-08T12:32:00Z",
   },
   {
     name: "Ripio",
-    logo: "ripio.svg",
-    usdRate: { buy: 1272, sell: 1292 },
-    usdtRate: { buy: 1268, sell: 1288 },
-    daiRate: { buy: 1264, sell: 1284 },
-    usdcRate: { buy: 1266, sell: 1286 },
+    logo: "https://ripio.com/wp-content/uploads/2020/09/logo-brand.svg",
+    usdRate: { buy: 1288, sell: 1314 },
+    usdtRate: { buy: 1283, sell: 1309 },
+    daiRate: { buy: 1279, sell: 1304 },
+    usdcRate: { buy: 1281, sell: 1306 },
     lastUpdated: "2025-04-08T12:35:00Z",
   },
   {
     name: "Belo",
-    logo: "belo.svg",
-    usdRate: { buy: 1280, sell: 1300 },
-    usdtRate: { buy: 1275, sell: 1295 },
-    daiRate: { buy: 1270, sell: 1290 },
-    usdcRate: { buy: 1272, sell: 1292 },
+    logo: "https://belo.app/static/img/logo-belo.svg",
+    usdRate: { buy: 1295, sell: 1320 },
+    usdtRate: { buy: 1290, sell: 1315 },
+    daiRate: { buy: 1285, sell: 1310 },
+    usdcRate: { buy: 1287, sell: 1312 },
     lastUpdated: "2025-04-08T12:33:00Z",
   },
   {
     name: "Let'sBit",
-    logo: "letsbit.svg",
-    usdRate: { buy: 1276, sell: 1296 },
-    usdtRate: { buy: 1271, sell: 1291 },
-    daiRate: { buy: 1266, sell: 1286 },
-    usdcRate: { buy: 1269, sell: 1289 },
+    logo: "https://uploads-ssl.webflow.com/6095a18d3567f0fda20dd67c/62bd61e2a50d6d0cbc240eb0_isologotipo-sin-fondo.svg",
+    usdRate: { buy: 1291, sell: 1316 },
+    usdtRate: { buy: 1286, sell: 1311 },
+    daiRate: { buy: 1281, sell: 1306 },
+    usdcRate: { buy: 1284, sell: 1309 },
     lastUpdated: "2025-04-08T12:31:00Z",
   },
   {
     name: "Satoshi Tango",
-    logo: "satoshitango.svg",
-    usdRate: { buy: 1274, sell: 1294 },
-    usdtRate: { buy: 1269, sell: 1289 },
-    daiRate: { buy: 1265, sell: 1285 },
-    usdcRate: { buy: 1267, sell: 1287 },
+    logo: "https://satoshitango.com/static/cms-landing/assets/images/logo.svg",
+    usdRate: { buy: 1289, sell: 1314 },
+    usdtRate: { buy: 1284, sell: 1309 },
+    daiRate: { buy: 1280, sell: 1305 },
+    usdcRate: { buy: 1282, sell: 1307 },
     lastUpdated: "2025-04-08T12:34:00Z",
   },
 ];
@@ -133,7 +133,7 @@ export function ExchangeRatesComparison() {
     wallet.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  // Find best rates (lowest sell, highest buy)
+  // Find best rates (lowest buy, highest sell)
   const getBestBuyRate = (currencyKey: 'usdRate' | 'usdtRate' | 'daiRate' | 'usdcRate') => {
     if (!wallets?.length) return null;
     
@@ -230,8 +230,15 @@ export function ExchangeRatesComparison() {
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para comprar</span>
+                      {getBestBuyRate('usdRate')?.logo && (
+                        <img 
+                          src={getBestBuyRate('usdRate')?.logo} 
+                          alt={getBestBuyRate('usdRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestBuyRate('usdRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -241,8 +248,15 @@ export function ExchangeRatesComparison() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para vender</span>
+                      {getBestSellRate('usdRate')?.logo && (
+                        <img 
+                          src={getBestSellRate('usdRate')?.logo} 
+                          alt={getBestSellRate('usdRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestSellRate('usdRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -262,8 +276,15 @@ export function ExchangeRatesComparison() {
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para comprar</span>
+                      {getBestBuyRate('usdtRate')?.logo && (
+                        <img 
+                          src={getBestBuyRate('usdtRate')?.logo} 
+                          alt={getBestBuyRate('usdtRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestBuyRate('usdtRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -273,8 +294,15 @@ export function ExchangeRatesComparison() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para vender</span>
+                      {getBestSellRate('usdtRate')?.logo && (
+                        <img 
+                          src={getBestSellRate('usdtRate')?.logo} 
+                          alt={getBestSellRate('usdtRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestSellRate('usdtRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -294,8 +322,15 @@ export function ExchangeRatesComparison() {
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para comprar</span>
+                      {getBestBuyRate('daiRate')?.logo && (
+                        <img 
+                          src={getBestBuyRate('daiRate')?.logo} 
+                          alt={getBestBuyRate('daiRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestBuyRate('daiRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -305,8 +340,15 @@ export function ExchangeRatesComparison() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para vender</span>
+                      {getBestSellRate('daiRate')?.logo && (
+                        <img 
+                          src={getBestSellRate('daiRate')?.logo} 
+                          alt={getBestSellRate('daiRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestSellRate('daiRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -326,8 +368,15 @@ export function ExchangeRatesComparison() {
                 </h3>
                 <div className="grid grid-cols-1 gap-2">
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para comprar</span>
+                      {getBestBuyRate('usdcRate')?.logo && (
+                        <img 
+                          src={getBestBuyRate('usdcRate')?.logo} 
+                          alt={getBestBuyRate('usdcRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestBuyRate('usdcRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -337,8 +386,15 @@ export function ExchangeRatesComparison() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                    <div>
+                    <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">Mejor para vender</span>
+                      {getBestSellRate('usdcRate')?.logo && (
+                        <img 
+                          src={getBestSellRate('usdcRate')?.logo} 
+                          alt={getBestSellRate('usdcRate')?.name || "Logo"} 
+                          className="h-6 w-6 object-contain" 
+                        />
+                      )}
                       <div className="font-medium">{getBestSellRate('usdcRate')?.name || "N/A"}</div>
                     </div>
                     <div className="text-right">
@@ -403,9 +459,20 @@ export function ExchangeRatesComparison() {
                   {filteredWallets.map((wallet) => (
                     <tr key={wallet.name} className="border-b hover:bg-muted/50">
                       <td className="py-4">
-                        <div className="font-medium">{wallet.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          actualizado {formatTime(wallet.lastUpdated)}
+                        <div className="flex items-center gap-2">
+                          {wallet.logo && (
+                            <img 
+                              src={wallet.logo} 
+                              alt={`${wallet.name} logo`} 
+                              className="h-8 w-8 object-contain" 
+                            />
+                          )}
+                          <div>
+                            <div className="font-medium">{wallet.name}</div>
+                            <div className="text-xs text-muted-foreground">
+                              actualizado {formatTime(wallet.lastUpdated)}
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="text-center py-4 px-2">{formatCurrency(wallet.usdRate.buy)}</td>
