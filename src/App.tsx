@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
 import Index from "./pages/Index";
 import Investments from "./pages/Investments";
+import Comparisons from "./pages/Comparisons";
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -22,6 +23,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/investments" element={<Investments />} />
+            <Route path="/comparisons" element={<Comparisons />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
