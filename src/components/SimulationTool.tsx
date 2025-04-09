@@ -10,11 +10,29 @@ import { SimulationWarning } from "@/components/SimulationWarning";
 import { FixedTermSimulator } from "@/components/FixedTermSimulator";
 import { WalletSimulator } from "@/components/WalletSimulator";
 import { Wallet, Landmark } from "lucide-react";
+import { toast } from "sonner";
 
 export function SimulationTool() {
+  const [acknowledged, setAcknowledged] = useState(false);
+
+  const handleCancel = () => {
+    toast.error("Simulación cancelada");
+    // Optionally redirect to another page
+  };
+
+  const handleContinue = () => {
+    setAcknowledged(true);
+    toast.success("Simulación activada");
+  };
+
   return (
     <div className="space-y-6">
-      <SimulationWarning />
+      {!acknowledged && (
+        <SimulationWarning 
+          onCancel={handleCancel} 
+          onContinue={handleContinue} 
+        />
+      )}
       
       <Tabs defaultValue="fixed-term">
         <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
