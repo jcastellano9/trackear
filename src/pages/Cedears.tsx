@@ -1,31 +1,19 @@
 
 import { Navbar } from "@/components/Navbar";
-import { UserProfileForm } from "@/components/UserProfileForm";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { CedearsExplorer } from "@/components/CedearsExplorer";
 
-const Profile = () => {
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Check if user is logged in
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
-      navigate("/login");
-    }
-  }, [navigate]);
-  
+const Cedears = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <main className="flex-grow">
         <div className="container px-4 py-6 mx-auto space-y-8">
-          <h1 className="text-3xl font-bold">Mi Perfil</h1>
+          <h1 className="text-3xl font-bold">CEDEARS</h1>
           <p className="text-muted-foreground">
-            Gestiona tu información personal y configura tus preferencias
+            Explora y compara los principales CEDEARS disponibles en el mercado argentino
           </p>
           
-          <UserProfileForm />
+          <CedearsExplorer />
         </div>
       </main>
       <footer className="py-6 border-t">
@@ -37,4 +25,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default Cedears;
