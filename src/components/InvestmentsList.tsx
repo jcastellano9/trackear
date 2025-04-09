@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,8 +27,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { ResponsiveContainer, LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Esta sería una llamada a la API en una versión real
 const getMockInvestments = (filter: string) => {
   const allInvestments = [
     {
@@ -184,7 +189,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
   const [selectedInvestment, setSelectedInvestment] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
   
-  // Calcular totales
   const totalCurrentValue = investments.reduce((sum, inv) => sum + inv.currentValue, 0);
   const totalPurchaseValue = investments.reduce((sum, inv) => sum + inv.purchaseValue, 0);
   const totalProfit = totalCurrentValue - totalPurchaseValue;
@@ -234,7 +238,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
   };
 
   const handleSaveEdit = (updatedInvestment: any) => {
-    // En una aplicación real, aquí se actualizaría la inversión en la base de datos
     setInvestments(
       investments.map(inv => 
         inv.id === updatedInvestment.id ? {...updatedInvestment, currentValue: updatedInvestment.quantity * inv.currentPrice} : inv
@@ -249,11 +252,8 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
     return sortConfig.direction === 'ascending' ? <ChevronUp className="ml-1 h-4 w-4" /> : <ChevronDown className="ml-1 h-4 w-4" />;
   };
 
-  // Obtener los datos de rendimiento para el gráfico
   const getChartData = () => {
     if (!selectedInvestment) {
-      // Si no hay inversión seleccionada, mostrar el rendimiento total de todas las inversiones
-      // Crear un conjunto de todas las fechas disponibles
       const allDates = new Set<string>();
       investments.forEach(inv => {
         inv.history.forEach(item => {
@@ -261,14 +261,11 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
         });
       });
       
-      // Ordenar las fechas
       const sortedDates = Array.from(allDates).sort();
       
-      // Crear los datos para el gráfico
       return sortedDates.map(date => {
         const dataPoint: any = { date };
         
-        // Para cada inversión, encontrar el valor correspondiente a la fecha
         investments.forEach(inv => {
           const historyItem = inv.history.find(item => item.date === date);
           if (historyItem) {
@@ -279,7 +276,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
         return dataPoint;
       });
     } else {
-      // Mostrar solo la inversión seleccionada
       const investment = investments.find(inv => inv.id === selectedInvestment);
       if (!investment) return [];
       
@@ -558,7 +554,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
         </CardContent>
       </Card>
 
-      {/* Modal de edición */}
       {editingInvestment && (
         <EditInvestmentModal 
           isOpen={isEditModalOpen} 
@@ -568,7 +563,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
         />
       )}
 
-      {/* Alerta de confirmación de eliminación */}
       <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
