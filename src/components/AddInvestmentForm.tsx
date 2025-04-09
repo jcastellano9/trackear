@@ -18,6 +18,13 @@ import { getOptionsByType } from "@/utils/investmentOptions";
 import { investmentFormSchema, type InvestmentFormValues } from "@/utils/investmentValidation";
 import { SimulationWarning } from "@/components/SimulationWarning";
 import { AssetSelectionField } from "@/components/AssetSelectionField";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type AddInvestmentFormProps = {
   onSuccess?: () => void;
