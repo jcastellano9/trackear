@@ -4,8 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvestmentsList } from "./InvestmentsList";
 import { AddInvestmentForm } from "./AddInvestmentForm";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, X, Bitcoin, DollarSign, Wallet, Landmark } from "lucide-react";
 import { Button } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
 
 export function InvestmentsOverview() {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -19,7 +20,7 @@ export function InvestmentsOverview() {
         </div>
         
         <Button onClick={() => setShowAddForm(!showAddForm)} className="w-full md:w-auto">
-          <PlusCircle className="mr-2 h-4 w-4" />
+          {showAddForm ? <X className="mr-2 h-4 w-4" /> : <PlusCircle className="mr-2 h-4 w-4" />}
           {showAddForm ? "Cancelar" : "Agregar inversión"}
         </Button>
       </div>
@@ -37,13 +38,30 @@ export function InvestmentsOverview() {
       )}
       
       <Tabs defaultValue="all">
-        <TabsList className="mb-4">
-          <TabsTrigger value="all">Todas</TabsTrigger>
-          <TabsTrigger value="crypto">Criptomonedas</TabsTrigger>
-          <TabsTrigger value="cedears">CEDEARs</TabsTrigger>
-          <TabsTrigger value="fixed">Plazos Fijos</TabsTrigger>
-          <TabsTrigger value="wallets">Billeteras</TabsTrigger>
-        </TabsList>
+        <ScrollArea className="w-full whitespace-nowrap">
+          <TabsList className="mb-4 w-max">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4" />
+              Todas
+            </TabsTrigger>
+            <TabsTrigger value="crypto" className="flex items-center gap-2">
+              <Bitcoin className="h-4 w-4" />
+              Criptomonedas
+            </TabsTrigger>
+            <TabsTrigger value="cedears" className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-4 h-4 bg-blue-500 text-white rounded-full text-xs font-bold">C</span>
+              CEDEARs
+            </TabsTrigger>
+            <TabsTrigger value="fixed" className="flex items-center gap-2">
+              <Landmark className="h-4 w-4" />
+              Plazos Fijos
+            </TabsTrigger>
+            <TabsTrigger value="wallets" className="flex items-center gap-2">
+              <Wallet className="h-4 w-4" />
+              Billeteras
+            </TabsTrigger>
+          </TabsList>
+        </ScrollArea>
         
         <TabsContent value="all">
           <InvestmentsList filter="all" />

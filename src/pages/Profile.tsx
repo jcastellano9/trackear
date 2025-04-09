@@ -1,19 +1,19 @@
 
 import { Navbar } from "@/components/Navbar";
-import { InvestmentsOverview } from "@/components/InvestmentsOverview";
+import { UserProfileForm } from "@/components/UserProfileForm";
 
-const Investments = () => {
+const Profile = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <main className="flex-grow">
         <div className="container px-4 py-6 mx-auto space-y-8">
-          <h1 className="text-3xl font-bold">Inversiones</h1>
+          <h1 className="text-3xl font-bold">Mi Perfil</h1>
           <p className="text-muted-foreground">
-            Gestiona y analiza tus inversiones en un solo lugar
+            Gestiona tu información personal y configura tus preferencias
           </p>
           
-          <InvestmentsOverview />
+          <UserProfileForm />
         </div>
       </main>
       <footer className="py-6 border-t">
@@ -25,4 +25,4 @@ const Investments = () => {
   );
 };
 
-export default Investments;
+export default Profile;
