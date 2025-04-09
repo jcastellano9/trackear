@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvestmentsList } from "./InvestmentsList";
 import { AddInvestmentForm } from "./AddInvestmentForm";
-import { PlusCircle, X, Bitcoin, DollarSign, Wallet, Landmark } from "lucide-react";
+import { PlusCircle, X, Bitcoin, DollarSign } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 
@@ -52,14 +52,6 @@ export function InvestmentsOverview() {
               <span className="flex items-center justify-center w-4 h-4 bg-blue-500 text-white rounded-full text-xs font-bold">C</span>
               CEDEARs
             </TabsTrigger>
-            <TabsTrigger value="fixed" className="flex items-center gap-2">
-              <Landmark className="h-4 w-4" />
-              Plazos Fijos
-            </TabsTrigger>
-            <TabsTrigger value="wallets" className="flex items-center gap-2">
-              <Wallet className="h-4 w-4" />
-              Billeteras
-            </TabsTrigger>
           </TabsList>
         </ScrollArea>
         
@@ -73,14 +65,6 @@ export function InvestmentsOverview() {
         
         <TabsContent value="cedears">
           <InvestmentsList filter="cedears" />
-        </TabsContent>
-        
-        <TabsContent value="fixed">
-          <InvestmentsList filter="fixed" />
-        </TabsContent>
-        
-        <TabsContent value="wallets">
-          <InvestmentsList filter="wallets" />
         </TabsContent>
       </Tabs>
     </div>

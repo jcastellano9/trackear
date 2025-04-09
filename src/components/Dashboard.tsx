@@ -2,7 +2,8 @@
 import { AssetAllocation } from "./AssetAllocation";
 import { InvestmentSummary } from "./InvestmentSummary";
 import { ExchangeRates } from "./ExchangeRates";
-import { FavoriteCryptos } from "./FavoriteCryptos";
+import { CryptoPrices } from "./CryptoPrices";
+import { InvestmentChart } from "./InvestmentChart";
 
 export function Dashboard() {
   return (
@@ -21,8 +22,9 @@ export function Dashboard() {
         <ExchangeRates />
       </div>
 
-      <div className="mt-8">
-        <FavoriteCryptos />
+      <div className="mt-8 space-y-6">
+        <CryptoPrices />
+        <InvestmentChart />
       </div>
     </div>
   );
