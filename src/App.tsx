@@ -12,6 +12,7 @@ import Cedears from "./pages/Cedears";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import Simulation from "./pages/Simulation"; 
 import NotFound from "./pages/NotFound";
 
 const App = () => {
@@ -29,6 +30,7 @@ const App = () => {
             <Route path="/investments" element={<Investments />} />
             <Route path="/comparisons" element={<Comparisons />} />
             <Route path="/cedears" element={<Cedears />} />
+            <Route path="/simulation" element={<Simulation />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<Profile />} />

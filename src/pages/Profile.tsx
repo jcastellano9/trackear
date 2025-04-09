@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { UserProfileForm } from "@/components/UserProfileForm";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Logo } from "@/components/Logo";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const Profile = () => {
       </main>
       <footer className="py-6 border-t">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © 2025 TrackeArBit - Universidad Siglo 21 - Trabajo Final de Grado en Ingeniería de Software
+          © 2025 <Logo size="sm" withText={true} className="inline-flex mx-1" /> - Universidad Siglo 21 - Trabajo Final de Grado en Ingeniería de Software
         </div>
       </footer>
     </div>
