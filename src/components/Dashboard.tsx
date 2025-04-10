@@ -2,7 +2,6 @@
 import { AssetAllocation } from "./AssetAllocation";
 import { InvestmentSummary } from "./InvestmentSummary";
 import { ExchangeRates } from "./ExchangeRates";
-import { CryptoPrices } from "./CryptoPrices";
 import { InvestmentChart } from "./InvestmentChart";
 
 export function Dashboard() {
@@ -24,10 +23,6 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AssetAllocation />
         <ExchangeRates />
-      </div>
-
-      <div className="mt-8 space-y-6">
-        <CryptoPrices />
       </div>
     </div>
   );
