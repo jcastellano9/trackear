@@ -17,6 +17,10 @@ export function Dashboard() {
         <InvestmentSummary />
       </div>
       
+      <div className="mt-8 space-y-6">
+        <InvestmentChart />
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <AssetAllocation />
         <ExchangeRates />
@@ -24,7 +28,6 @@ export function Dashboard() {
 
       <div className="mt-8 space-y-6">
         <CryptoPrices />
-        <InvestmentChart />
       </div>
     </div>
   );

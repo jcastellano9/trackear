@@ -1,11 +1,6 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SimulationWarning } from "@/components/SimulationWarning";
 import { FixedTermSimulator } from "@/components/FixedTermSimulator";
 import { WalletSimulator } from "@/components/WalletSimulator";
@@ -27,14 +22,12 @@ export function SimulationTool() {
 
   return (
     <div className="space-y-6">
-      {!acknowledged && (
+      {!acknowledged ? (
         <SimulationWarning 
           onCancel={handleCancel} 
           onContinue={handleContinue} 
         />
-      )}
-      
-      {acknowledged && (
+      ) : (
         <Tabs defaultValue="fixed-term">
           <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
             <TabsTrigger value="fixed-term" className="flex items-center gap-2">

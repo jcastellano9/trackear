@@ -25,10 +25,15 @@ export const cedearsOptions = [
 ];
 
 export const walletsOptions = [
-  { value: "MP", name: "Mercado Pago", logo: "https://logodownload.org/wp-content/uploads/2019/06/mercado-pago-logo-1.png" },
-  { value: "UALA", name: "Ualá", logo: "https://play-lh.googleusercontent.com/Av_0YMJmES8v_vvbHZ27umL1o5mlUh7FQhuH2tGrO36gI6TXQ4DI6PJtgjHCzCkQQA=w240-h480-rw" },
-  { value: "NAR", name: "Naranja X", logo: "https://www.redusers.com/noticias/wp-content/uploads/2020/07/naranjax_logo.png" },
-  { value: "BRU", name: "Brubank", logo: "https://play-lh.googleusercontent.com/exoS4C9cm_GQD-RFKG2LNK0_-KQYtnJNcHCTc-qEKYPRDHVUz0abUnNNHWmTjh2Hh4Pk" },
+  { value: "MP", name: "Mercado Pago", logo: "https://logodownload.org/wp-content/uploads/2019/06/mercado-pago-logo-1.png", rate: 97.5 },
+  { value: "UALA", name: "Ualá", logo: "https://play-lh.googleusercontent.com/Av_0YMJmES8v_vvbHZ27umL1o5mlUh7FQhuH2tGrO36gI6TXQ4DI6PJtgjHCzCkQQA=w240-h480-rw", rate: 95.0 },
+  { value: "NAR", name: "Naranja X", logo: "https://www.redusers.com/noticias/wp-content/uploads/2020/07/naranjax_logo.png", rate: 94.0 },
+  { value: "BRU", name: "Brubank", logo: "https://play-lh.googleusercontent.com/exoS4C9cm_GQD-RFKG2LNK0_-KQYtnJNcHCTc-qEKYPRDHVUz0abUnNNHWmTjh2Hh4Pk", rate: 96.5 },
+  { value: "WILO", name: "Wilobank", logo: "https://play-lh.googleusercontent.com/4HGTrkhub3HBEB_5TULRC-f7HJl-Ekg8LUy-ea7AeKCFQeOEP-5J9Pt_JX4tKNtCPA", rate: 91.0 },
+  { value: "PROIT", name: "Prex", logo: "https://play-lh.googleusercontent.com/Zi1oCQTLp8Ox-FOhMBR4S6VsSDNZuK-5OvCnS3WWJ5mM5isnt0SDcwuuuU2f1G4jBA", rate: 92.0 },
+  { value: "MODO", name: "MODO", logo: "https://play-lh.googleusercontent.com/EKvs9NXmF9kreYnuGSOFLMyVV7CcVLCJn_IvBFp8oBFZO-Thn5WnCrR-iWRJfT5gPeE", rate: 93.5 },
+  { value: "BELO", name: "Belo", logo: "https://play-lh.googleusercontent.com/RoAXmMNHCURBW8FtDzx7Ex1_oKQRdO71-A8Jyz6uxA6K9wuLMc41PsHPDyJpxxRRXg", rate: 90.0 },
+  { value: "LEMON", name: "Lemon Cash", logo: "https://play-lh.googleusercontent.com/Vd4W8OxV1z6VP0xTZxLrVyh5CfQN5pM8GUwDI8zBn5NYmj6w3Ao_V_6a0FHRcCsg0cw", rate: 93.0 }
 ];
 
 // Default favorite cryptocurrencies

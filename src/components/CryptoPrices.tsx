@@ -1,377 +1,235 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowUp, ArrowDown, Plus, X, RefreshCw } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-  DialogClose
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const cryptoLogos = {
-  USDT: "https://cryptologos.cc/logos/tether-usdt-logo.png",
-  DAI: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png",
-  USDC: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png",
-  BTC: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
-  ETH: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
-  SOL: "https://cryptologos.cc/logos/solana-sol-logo.png",
-  ADA: "https://cryptologos.cc/logos/cardano-ada-logo.png",
-  DOT: "https://cryptologos.cc/logos/polkadot-new-dot-logo.png",
+type CryptoPrice = {
+  id: string;
+  name: string;
+  symbol: string;
+  currentPrice: number;
+  priceChange24h: number;
+  priceChangePercentage24h: number;
+  marketCap: number;
+  volume24h: number;
+  logo: string;
 };
 
-const defaultCryptos = [
-  { 
-    name: "Tether", 
-    symbol: "USDT", 
-    price: 950, 
-    change24h: 0.5,
-    logo: cryptoLogos.USDT
-  },
-  { 
-    name: "Dai", 
-    symbol: "DAI", 
-    price: 970, 
-    change24h: -0.2,
-    logo: cryptoLogos.DAI
-  },
-  { 
-    name: "USD Coin", 
-    symbol: "USDC", 
-    price: 960, 
-    change24h: 0.8,
-    logo: cryptoLogos.USDC
-  }
-];
-
-const availableCryptos = [
-  { 
-    name: "Bitcoin", 
-    symbol: "BTC", 
-    price: 34500, 
-    change24h: 2.3,
-    logo: cryptoLogos.BTC
-  },
-  { 
-    name: "Ethereum", 
-    symbol: "ETH", 
-    price: 1850, 
-    change24h: 1.5,
-    logo: cryptoLogos.ETH
-  },
-  { 
-    name: "Solana", 
-    symbol: "SOL", 
-    price: 141, 
-    change24h: 3.2,
-    logo: cryptoLogos.SOL
-  },
-  { 
-    name: "Cardano", 
-    symbol: "ADA", 
-    price: 0.45, 
-    change24h: -1.2,
-    logo: cryptoLogos.ADA
-  },
-  { 
-    name: "Polkadot", 
-    symbol: "DOT", 
-    price: 5.8, 
-    change24h: 0.7,
-    logo: cryptoLogos.DOT
-  }
-];
-
 export function CryptoPrices() {
-  const [cryptos, setCryptos] = useState<any[]>([]);
+  const [cryptos, setCryptos] = useState<CryptoPrice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("list");
-  
-  useEffect(() => {
-    const fetchData = () => {
-      setTimeout(() => {
-        const storedCryptos = localStorage.getItem("cryptoPrices");
-        if (storedCryptos) {
-          setCryptos(JSON.parse(storedCryptos));
-        } else {
-          setCryptos(defaultCryptos);
-          localStorage.setItem("cryptoPrices", JSON.stringify(defaultCryptos));
-        }
-        setLoading(false);
-      }, 800);
-    };
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-    fetchData();
+  const fetchCryptoData = async () => {
+    try {
+      // Here we would use a real API like CoinGecko
+      // For now, let's use mock data
+      const mockData: CryptoPrice[] = [
+        {
+          id: "bitcoin",
+          name: "Bitcoin",
+          symbol: "BTC",
+          currentPrice: 64250,
+          priceChange24h: 850,
+          priceChangePercentage24h: 1.35,
+          marketCap: 1265000000000,
+          volume24h: 32500000000,
+          logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png"
+        },
+        {
+          id: "ethereum",
+          name: "Ethereum",
+          symbol: "ETH",
+          currentPrice: 3120,
+          priceChange24h: -75,
+          priceChangePercentage24h: -2.35,
+          marketCap: 375000000000,
+          volume24h: 18500000000,
+          logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png"
+        },
+        {
+          id: "binancecoin",
+          name: "Binance Coin",
+          symbol: "BNB",
+          currentPrice: 570,
+          priceChange24h: 15,
+          priceChangePercentage24h: 2.7,
+          marketCap: 87500000000,
+          volume24h: 2800000000,
+          logo: "https://cryptologos.cc/logos/bnb-bnb-logo.png"
+        },
+        {
+          id: "cardano",
+          name: "Cardano",
+          symbol: "ADA",
+          currentPrice: 0.45,
+          priceChange24h: 0.02,
+          priceChangePercentage24h: 4.65,
+          marketCap: 16000000000,
+          volume24h: 850000000,
+          logo: "https://cryptologos.cc/logos/cardano-ada-logo.png"
+        },
+        {
+          id: "solana",
+          name: "Solana",
+          symbol: "SOL",
+          currentPrice: 143,
+          priceChange24h: 7.5,
+          priceChangePercentage24h: 5.53,
+          marketCap: 62000000000,
+          volume24h: 3900000000,
+          logo: "https://cryptologos.cc/logos/solana-sol-logo.png"
+        },
+        {
+          id: "ripple",
+          name: "XRP",
+          symbol: "XRP",
+          currentPrice: 0.53,
+          priceChange24h: -0.015,
+          priceChangePercentage24h: -2.75,
+          marketCap: 28500000000,
+          volume24h: 1250000000,
+          logo: "https://cryptologos.cc/logos/xrp-xrp-logo.png"
+        }
+      ];
+      
+      setCryptos(mockData);
+      setLastUpdated(new Date());
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching crypto data:", error);
+      toast.error("No se pudieron cargar los datos de criptomonedas");
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCryptoData();
+    
+    // Refresh every 5 minutes
+    const interval = setInterval(() => {
+      fetchCryptoData();
+    }, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
-  const handleRefresh = () => {
+  const refreshData = () => {
     setLoading(true);
-    setTimeout(() => {
-      const updatedCryptos = cryptos.map(crypto => ({
-        ...crypto,
-        price: Math.round(crypto.price * (1 + (Math.random() * 0.02 - 0.01))),
-        change24h: Number((crypto.change24h + (Math.random() * 0.4 - 0.2)).toFixed(2))
-      }));
-      
-      setCryptos(updatedCryptos);
-      localStorage.setItem("cryptoPrices", JSON.stringify(updatedCryptos));
-      setLoading(false);
-      toast.success("Cotizaciones actualizadas");
-    }, 1000);
+    fetchCryptoData();
+    toast.success("Actualizando precios de criptomonedas...");
   };
 
-  const getAvailableCryptos = () => {
-    const currentSymbols = cryptos.map(c => c.symbol);
-    return availableCryptos.filter(c => !currentSymbols.includes(c.symbol));
-  };
-
-  const addCrypto = (crypto: any) => {
-    if (cryptos.length >= 5) {
-      toast.error("Puedes tener hasta 5 criptomonedas en el listado");
-      return;
+  const formatLargeNumber = (num: number) => {
+    if (num >= 1000000000) {
+      return `$${(num / 1000000000).toFixed(1)}B`;
+    } else if (num >= 1000000) {
+      return `$${(num / 1000000).toFixed(1)}M`;
+    } else if (num >= 1000) {
+      return `$${(num / 1000).toFixed(1)}K`;
     }
-    
-    const updatedCryptos = [...cryptos, crypto];
-    setCryptos(updatedCryptos);
-    localStorage.setItem("cryptoPrices", JSON.stringify(updatedCryptos));
-    toast.success(`${crypto.name} agregada al listado`);
+    return `$${num.toFixed(2)}`;
   };
 
-  const removeCrypto = (symbol: string) => {
-    const updatedCryptos = cryptos.filter(c => c.symbol !== symbol);
-    setCryptos(updatedCryptos);
-    localStorage.setItem("cryptoPrices", JSON.stringify(updatedCryptos));
-    toast.success("Criptomoneda eliminada del listado");
+  const formatCurrency = (num: number) => {
+    if (num >= 1000) {
+      return `$${num.toLocaleString('es-AR')}`;
+    } else if (num >= 1) {
+      return `$${num.toFixed(2)}`;
+    } else {
+      return `$${num.toFixed(num < 0.01 ? 4 : 2)}`;
+    }
   };
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Cotizaciones</CardTitle>
-            <CardDescription>Valores de referencia en ARS</CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <Tabs 
-              value={activeTab} 
-              onValueChange={setActiveTab}
-              className="w-[180px]"
-            >
-              <TabsList className="grid grid-cols-2 w-full">
-                <TabsTrigger value="list">Monedas</TabsTrigger>
-                <TabsTrigger value="crypto">Cripto</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="list" className="mt-0">
-                {loading ? (
-                  <div className="space-y-2 animate-pulse">
-                    {[1, 2, 3].map((_, i) => (
-                      <div key={i} className="h-14 bg-muted rounded-md" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="grid grid-cols-3 text-sm text-muted-foreground px-2 py-1">
-                        <div>Tipo</div>
-                        <div className="text-center">Compra</div>
-                        <div className="text-center">Venta</div>
-                      </div>
-                      
-                      {cryptos.map((crypto) => (
-                        <div key={crypto.symbol} className="flex items-center justify-between p-2 border rounded-md">
-                          <div className="flex items-center gap-2">
-                            <div className="flex-shrink-0 w-10 h-10 bg-background rounded-full overflow-hidden border flex items-center justify-center">
-                              {crypto.logo ? (
-                                <img src={crypto.logo} alt={crypto.name} className="h-8 w-8 object-contain" />
-                              ) : (
-                                <span className="text-xs font-bold">{crypto.symbol.substring(0, 2)}</span>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium">{crypto.symbol}</p>
-                            </div>
-                          </div>
-                          <div className="text-center font-medium">
-                            $ {(crypto.price - 25).toLocaleString('es-AR')}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="text-right font-medium">
-                              $ {crypto.price.toLocaleString('es-AR')}
-                            </div>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="text-muted-foreground hover:text-destructive" 
-                              onClick={() => removeCrypto(crypto.symbol)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {cryptos.length === 0 && (
-                        <div className="text-center p-4 text-muted-foreground">
-                          <p>No hay monedas en el listado</p>
-                          <p className="text-sm">Agrega algunas para ver su cotización aquí</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="mt-4 text-right text-xs text-muted-foreground">
-                  Actualizado a las {new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="crypto" className="mt-0">
-                {loading ? (
-                  <div className="space-y-2 animate-pulse">
-                    {[1, 2, 3].map((_, i) => (
-                      <div key={i} className="h-14 bg-muted rounded-md" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="grid grid-cols-4 text-sm text-muted-foreground px-2 py-1">
-                        <div>Tipo</div>
-                        <div className="text-center">Precio</div>
-                        <div className="text-center">Var. 24h</div>
-                        <div></div>
-                      </div>
-                      
-                      {cryptos.map((crypto) => (
-                        <div key={crypto.symbol} className="flex items-center justify-between p-2 border rounded-md">
-                          <div className="flex items-center gap-2">
-                            <div className="flex-shrink-0 w-10 h-10 bg-background rounded-full overflow-hidden border flex items-center justify-center">
-                              {crypto.logo ? (
-                                <img src={crypto.logo} alt={crypto.name} className="h-8 w-8 object-contain" />
-                              ) : (
-                                <span className="text-xs font-bold">{crypto.symbol.substring(0, 2)}</span>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium">{crypto.name}</p>
-                              <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
-                            </div>
-                          </div>
-                          <div className="text-center font-medium">
-                            $ {crypto.price.toLocaleString('es-AR')}
-                          </div>
-                          <div className="text-center">
-                            <Badge variant={crypto.change24h >= 0 ? "default" : "destructive"} className="flex items-center">
-                              {crypto.change24h >= 0 ? 
-                                <ArrowUp className="mr-1 h-3 w-3" /> : 
-                                <ArrowDown className="mr-1 h-3 w-3" />}
-                              {Math.abs(crypto.change24h).toFixed(2)}%
-                            </Badge>
-                          </div>
-                          <div>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="text-muted-foreground hover:text-destructive"
-                              onClick={() => removeCrypto(crypto.symbol)}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {cryptos.length === 0 && (
-                        <div className="text-center p-4 text-muted-foreground">
-                          <p>No hay criptomonedas en el listado</p>
-                          <p className="text-sm">Agrega algunas para ver su cotización aquí</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                
-                <div className="mt-4 text-right text-xs text-muted-foreground">
-                  Actualizado a las {new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
-                </div>
-              </TabsContent>
-            </Tabs>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" disabled={cryptos.length >= 5}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Agregar
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Agregar criptomoneda al listado</DialogTitle>
-                  <DialogDescription>
-                    Puedes agregar hasta 5 criptomonedas a tu lista
-                  </DialogDescription>
-                </DialogHeader>
-                
-                <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto py-2">
-                  {getAvailableCryptos().map((crypto) => (
-                    <div key={crypto.symbol} className="flex items-center justify-between p-2 border rounded-md">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-shrink-0 w-8 h-8 bg-background rounded-full overflow-hidden border flex items-center justify-center">
-                          {crypto.logo ? (
-                            <img src={crypto.logo} alt={crypto.name} className="h-6 w-6 object-contain" />
-                          ) : (
-                            <span className="text-xs font-bold">{crypto.symbol.substring(0, 2)}</span>
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-medium">{crypto.name}</p>
-                          <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm" onClick={() => addCrypto(crypto)}>
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-
-                  {getAvailableCryptos().length === 0 && (
-                    <p className="text-center text-muted-foreground p-4">
-                      No hay más criptomonedas disponibles para agregar
-                    </p>
-                  )}
-                </div>
-                
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">Cerrar</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={handleRefresh} 
-              disabled={loading}
-              className="text-muted-foreground"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-            </Button>
-          </div>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <div>
+          <CardTitle className="text-xl">Precios de Criptomonedas</CardTitle>
+          <CardDescription>
+            {lastUpdated
+              ? `Última actualización: ${lastUpdated.toLocaleTimeString('es-AR')}`
+              : "Cargando datos de mercado..."
+            }
+          </CardDescription>
         </div>
+        <RefreshCw
+          className={`h-4 w-4 cursor-pointer text-muted-foreground ${loading ? "animate-spin" : ""}`}
+          onClick={refreshData}
+        />
       </CardHeader>
       <CardContent>
-        {/* We'll render the tabs content here */}
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nombre</TableHead>
+                <TableHead>Precio</TableHead>
+                <TableHead>24h %</TableHead>
+                <TableHead className="hidden md:table-cell">Cap. de Mercado</TableHead>
+                <TableHead className="hidden lg:table-cell">Volumen (24h)</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                Array(6).fill(0).map((_, i) => (
+                  <TableRow key={`skeleton-${i}`}>
+                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                    <TableCell className="hidden md:table-cell"><Skeleton className="h-6 w-24" /></TableCell>
+                    <TableCell className="hidden lg:table-cell"><Skeleton className="h-6 w-24" /></TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                cryptos.map((crypto) => (
+                  <TableRow key={crypto.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={crypto.logo} 
+                          alt={`${crypto.name} logo`}
+                          className="h-6 w-6 object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "https://via.placeholder.com/24?text=?";
+                          }}
+                        />
+                        <div>
+                          <div className="font-medium">{crypto.name}</div>
+                          <div className="text-xs text-muted-foreground">{crypto.symbol}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {formatCurrency(crypto.currentPrice)}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={crypto.priceChangePercentage24h >= 0 ? "default" : "destructive"}>
+                        {crypto.priceChangePercentage24h >= 0 ? (
+                          <ArrowUp className="mr-1 h-3 w-3" />
+                        ) : (
+                          <ArrowDown className="mr-1 h-3 w-3" />
+                        )}
+                        {Math.abs(crypto.priceChangePercentage24h).toFixed(2)}%
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {formatLargeNumber(crypto.marketCap)}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      {formatLargeNumber(crypto.volume24h)}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   );
