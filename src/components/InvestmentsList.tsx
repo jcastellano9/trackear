@@ -231,8 +231,11 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
           ...updatedInvestment, 
           currentValueUSD: updatedInvestment.quantity * inv.currentPrice,
           currentValueARS: updatedInvestment.quantity * inv.currentPrice * USD_TO_ARS_RATE,
-          purchaseValueARS: updatedInvestment.purchaseValueUSD * USD_TO_ARS_RATE,
-          profitARS: (updatedInvestment.quantity * inv.currentPrice - updatedInvestment.purchaseValueUSD) * USD_TO_ARS_RATE
+          purchaseValueUSD: updatedInvestment.quantity * updatedInvestment.purchasePrice,
+          purchaseValueARS: updatedInvestment.quantity * updatedInvestment.purchasePrice * USD_TO_ARS_RATE,
+          profitUSD: updatedInvestment.quantity * inv.currentPrice - updatedInvestment.quantity * updatedInvestment.purchasePrice,
+          profitARS: (updatedInvestment.quantity * inv.currentPrice - updatedInvestment.quantity * updatedInvestment.purchasePrice) * USD_TO_ARS_RATE,
+          profitPercentage: ((inv.currentPrice - updatedInvestment.purchasePrice) / updatedInvestment.purchasePrice) * 100
         } : inv
       )
     );

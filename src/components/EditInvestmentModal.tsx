@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -89,11 +88,16 @@ type Investment = {
   purchasePrice: number;
   currentPrice: number;
   purchaseDate: string;
-  currentValue: number;
-  purchaseValue: number;
-  profit: number;
+  currentValueUSD: number;
+  purchaseValueUSD: number;
+  profitUSD: number;
   profitPercentage: number;
   logo?: string;
+  performance24h?: number;
+  history?: { date: string; value: number }[];
+  currentValueARS?: number;
+  purchaseValueARS?: number;
+  profitARS?: number;
 };
 
 type EditInvestmentModalProps = {
