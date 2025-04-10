@@ -208,7 +208,7 @@ export function ExchangeRatesComparison() {
     return null;
   };
 
-  // Define chart config
+  // Define chart config properly
   const chartConfig = {
     dollar: {
       label: "Dólar",

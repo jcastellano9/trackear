@@ -4,12 +4,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recha
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Mock data to simulate asset allocation
+// Updated data to remove "Plazo Fijo" and "Efectivo"
 const MOCK_DATA = [
-  { name: "Cripto", value: 45, color: "#3b82f6" },
-  { name: "CEDEARs", value: 30, color: "#8b5cf6" },
-  { name: "Plazo Fijo", value: 15, color: "#10b981" },
-  { name: "Efectivo", value: 10, color: "#f59e0b" },
+  { name: "Cripto", value: 60, color: "#3b82f6" },
+  { name: "CEDEARs", value: 40, color: "#8b5cf6" },
 ];
 
 export function AssetAllocation() {

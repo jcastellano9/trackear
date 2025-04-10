@@ -15,6 +15,7 @@ export function InvestmentChart() {
   const [chartData, setChartData] = useState<InvestmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeframe, setTimeframe] = useState<'1m' | '3m' | '6m' | '1y' | 'all'>('3m');
+  const [assetType, setAssetType] = useState<'all' | 'crypto' | 'cedears'>('all');
 
   useEffect(() => {
     // Simulated fetch - in real app this would come from API
@@ -31,6 +32,15 @@ export function InvestmentChart() {
       let investedAmount = 3200;  // Initial investment
       let currentValue = 3200;
       
+      // Adjust values based on asset type
+      if (assetType === 'crypto') {
+        investedAmount = 2500;
+        currentValue = 2700;
+      } else if (assetType === 'cedears') {
+        investedAmount = 1800;
+        currentValue = 1950;
+      }
+      
       for (let i = totalDays; i >= 0; i -= 10) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
@@ -43,8 +53,15 @@ export function InvestmentChart() {
             investedAmount += 150;
           }
           
-          // Random market fluctuation
-          const change = (Math.random() - 0.45) * 0.05; // Slightly biased towards growth
+          // Random market fluctuation with different volatility based on asset type
+          let volatility = 0.05;
+          if (assetType === 'crypto') {
+            volatility = 0.08; // Crypto is more volatile
+          } else if (assetType === 'cedears') {
+            volatility = 0.03; // CEDEARs less volatile
+          }
+          
+          const change = (Math.random() - 0.45) * volatility; // Slightly biased towards growth
           currentValue = currentValue * (1 + change);
         }
         
@@ -58,7 +75,7 @@ export function InvestmentChart() {
       setChartData(data);
       setLoading(false);
     }, 1000);
-  }, [timeframe]);
+  }, [timeframe, assetType]);
 
   // Custom tooltip component for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -90,19 +107,33 @@ export function InvestmentChart() {
       <CardHeader>
         <CardTitle>Rendimiento de inversiones</CardTitle>
         <CardDescription>Evolución del capital invertido vs. valor actual</CardDescription>
-        <Tabs 
-          value={timeframe} 
-          onValueChange={(v) => setTimeframe(v as any)} 
-          className="w-full max-w-xs"
-        >
-          <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="1m">1M</TabsTrigger>
-            <TabsTrigger value="3m">3M</TabsTrigger>
-            <TabsTrigger value="6m">6M</TabsTrigger>
-            <TabsTrigger value="1y">1A</TabsTrigger>
-            <TabsTrigger value="all">Todo</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Tabs 
+            value={timeframe} 
+            onValueChange={(v) => setTimeframe(v as any)} 
+            className="w-full max-w-xs"
+          >
+            <TabsList className="grid grid-cols-5 w-full">
+              <TabsTrigger value="1m">1M</TabsTrigger>
+              <TabsTrigger value="3m">3M</TabsTrigger>
+              <TabsTrigger value="6m">6M</TabsTrigger>
+              <TabsTrigger value="1y">1A</TabsTrigger>
+              <TabsTrigger value="all">Todo</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <Tabs 
+            value={assetType} 
+            onValueChange={(v) => setAssetType(v as any)} 
+            className="w-full max-w-xs"
+          >
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="all">Todos</TabsTrigger>
+              <TabsTrigger value="crypto">Crypto</TabsTrigger>
+              <TabsTrigger value="cedears">CEDEARs</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </CardHeader>
       <CardContent>
         {loading ? (

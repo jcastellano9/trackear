@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUp, ArrowDown, Edit, Trash2, ChevronUp, ChevronDown, LineChart, DollarSign } from "lucide-react";
@@ -35,6 +36,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Current USD to ARS exchange rate (for demonstration)
+const USD_TO_ARS_RATE = 1180;
+
+// Modified to show USD values and exclude certain investment types
 const getMockInvestments = (filter: string) => {
   const allInvestments = [
     {
@@ -43,12 +48,12 @@ const getMockInvestments = (filter: string) => {
       name: "Bitcoin",
       symbol: "BTC",
       quantity: 0.05,
-      purchasePrice: 29500,
-      currentPrice: 34200,
+      purchasePrice: 29500, // USD
+      currentPrice: 34200, // USD
       purchaseDate: "2023-06-15",
-      currentValue: 1710,
-      purchaseValue: 1475,
-      profit: 235,
+      currentValueUSD: 1710, // USD
+      purchaseValueUSD: 1475, // USD
+      profitUSD: 235, // USD
       profitPercentage: 15.93,
       logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
       performance24h: 2.45,
@@ -71,12 +76,12 @@ const getMockInvestments = (filter: string) => {
       name: "Ethereum",
       symbol: "ETH",
       quantity: 1.2,
-      purchasePrice: 1850,
-      currentPrice: 1920,
+      purchasePrice: 1850, // USD
+      currentPrice: 1920, // USD 
       purchaseDate: "2023-08-10",
-      currentValue: 2304,
-      purchaseValue: 2220,
-      profit: 84,
+      currentValueUSD: 2304, // USD
+      purchaseValueUSD: 2220, // USD
+      profitUSD: 84, // USD
       profitPercentage: 3.78,
       logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
       performance24h: -0.32,
@@ -97,12 +102,12 @@ const getMockInvestments = (filter: string) => {
       name: "Apple Inc.",
       symbol: "AAPL",
       quantity: 5,
-      purchasePrice: 172.5,
-      currentPrice: 188.7,
+      purchasePrice: 172.5, // USD
+      currentPrice: 188.7, // USD
       purchaseDate: "2023-05-22",
-      currentValue: 943.5,
-      purchaseValue: 862.5,
-      profit: 81,
+      currentValueUSD: 943.5, // USD
+      purchaseValueUSD: 862.5, // USD
+      profitUSD: 81, // USD
       profitPercentage: 9.39,
       logo: "https://companieslogo.com/img/orig/AAPL-bf1a4314.png",
       performance24h: 1.27,
@@ -119,64 +124,22 @@ const getMockInvestments = (filter: string) => {
         { date: "2024-02-22", value: 940 },
         { date: "2024-03-22", value: 943.5 },
       ]
-    },
-    {
-      id: "4",
-      type: "fixed",
-      name: "Plazo Fijo Banco Provincia",
-      symbol: "PF-BAPRO",
-      quantity: 1,
-      purchasePrice: 100000,
-      currentPrice: 109730,
-      purchaseDate: "2023-09-01",
-      currentValue: 109730,
-      purchaseValue: 100000,
-      profit: 9730,
-      profitPercentage: 9.73,
-      logo: "https://www.bancoprovincia.com.ar/CDN/Get/logo_BP_og",
-      performance24h: 0.03,
-      history: [
-        { date: "2023-09-01", value: 100000 },
-        { date: "2023-10-01", value: 102500 },
-        { date: "2023-11-01", value: 104500 },
-        { date: "2023-12-01", value: 106000 },
-        { date: "2024-01-01", value: 107500 },
-        { date: "2024-02-01", value: 109000 },
-        { date: "2024-03-01", value: 109730 },
-      ]
-    },
-    {
-      id: "5",
-      type: "wallets",
-      name: "Mercado Pago",
-      symbol: "MP",
-      quantity: 1,
-      purchasePrice: 50000,
-      currentPrice: 52250,
-      purchaseDate: "2023-10-01",
-      currentValue: 52250,
-      purchaseValue: 50000,
-      profit: 2250,
-      profitPercentage: 4.5,
-      logo: "https://logodownload.org/wp-content/uploads/2019/06/mercado-pago-logo-1.png",
-      performance24h: 0.01,
-      history: [
-        { date: "2023-10-01", value: 50000 },
-        { date: "2023-11-01", value: 50750 },
-        { date: "2023-12-01", value: 51250 },
-        { date: "2024-01-01", value: 51750 },
-        { date: "2024-02-01", value: 52000 },
-        { date: "2024-03-01", value: 52250 },
-      ]
     }
   ];
+
+  // Add calculated ARS values to each investment
+  allInvestments.forEach(inv => {
+    inv.currentValueARS = inv.currentValueUSD * USD_TO_ARS_RATE;
+    inv.purchaseValueARS = inv.purchaseValueUSD * USD_TO_ARS_RATE;
+    inv.profitARS = inv.profitUSD * USD_TO_ARS_RATE;
+  });
 
   if (filter === "all") return allInvestments;
   return allInvestments.filter(inv => inv.type === filter);
 };
 
 type InvestmentsListProps = {
-  filter: "all" | "crypto" | "cedears" | "fixed" | "wallets";
+  filter: "all" | "crypto" | "cedears";
 };
 
 export function InvestmentsList({ filter }: InvestmentsListProps) {
@@ -188,11 +151,22 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
   const [investmentToDelete, setInvestmentToDelete] = useState<string | null>(null);
   const [selectedInvestment, setSelectedInvestment] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'table' | 'chart'>('table');
+  const [currencyDisplay, setCurrencyDisplay] = useState<'usd' | 'ars'>('usd');
   
-  const totalCurrentValue = investments.reduce((sum, inv) => sum + inv.currentValue, 0);
-  const totalPurchaseValue = investments.reduce((sum, inv) => sum + inv.purchaseValue, 0);
-  const totalProfit = totalCurrentValue - totalPurchaseValue;
-  const totalProfitPercentage = (totalProfit / totalPurchaseValue) * 100;
+  useEffect(() => {
+    // Update investments when filter changes
+    setInvestments(getMockInvestments(filter));
+  }, [filter]);
+  
+  const totalCurrentValueUSD = investments.reduce((sum, inv) => sum + inv.currentValueUSD, 0);
+  const totalPurchaseValueUSD = investments.reduce((sum, inv) => sum + inv.purchaseValueUSD, 0);
+  const totalProfitUSD = totalCurrentValueUSD - totalPurchaseValueUSD;
+  const totalProfitPercentage = (totalProfitUSD / totalPurchaseValueUSD) * 100;
+  
+  // Calculate ARS totals
+  const totalCurrentValueARS = totalCurrentValueUSD * USD_TO_ARS_RATE;
+  const totalPurchaseValueARS = totalPurchaseValueUSD * USD_TO_ARS_RATE;
+  const totalProfitARS = totalProfitUSD * USD_TO_ARS_RATE;
   
   const requestSort = (key: string) => {
     let direction: 'ascending' | 'descending' = 'ascending';
@@ -240,7 +214,7 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
   const handleSaveEdit = (updatedInvestment: any) => {
     setInvestments(
       investments.map(inv => 
-        inv.id === updatedInvestment.id ? {...updatedInvestment, currentValue: updatedInvestment.quantity * inv.currentPrice} : inv
+        inv.id === updatedInvestment.id ? {...updatedInvestment, currentValueUSD: updatedInvestment.quantity * inv.currentPrice} : inv
       )
     );
   };
@@ -298,31 +272,62 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
     );
   }
   
+  // Format currency based on selection
+  const formatCurrency = (value: number, currency: 'usd' | 'ars' = currencyDisplay) => {
+    if (currency === 'usd') {
+      return `$${value.toLocaleString('en-US')}`;
+    } else {
+      return `AR$${(value).toLocaleString('es-AR')}`;
+    }
+  };
+  
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader className="pb-2">
           <CardTitle>Resumen</CardTitle>
           <CardDescription>Valor total y rendimiento de tus inversiones</CardDescription>
+          <div className="mt-2">
+            <Tabs
+              value={currencyDisplay}
+              onValueChange={(v) => setCurrencyDisplay(v as 'usd' | 'ars')}
+              className="w-full max-w-xs"
+            >
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="usd">USD</TabsTrigger>
+                <TabsTrigger value="ars">ARS</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Valor actual</p>
-              <p className="text-2xl font-bold">${totalCurrentValue.toLocaleString('es-AR')}</p>
+              <p className="text-2xl font-bold">
+                {currencyDisplay === 'usd' 
+                  ? formatCurrency(totalCurrentValueUSD) 
+                  : formatCurrency(totalCurrentValueARS, 'ars')}
+              </p>
             </div>
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Inversión inicial</p>
-              <p className="text-2xl font-bold">${totalPurchaseValue.toLocaleString('es-AR')}</p>
+              <p className="text-2xl font-bold">
+                {currencyDisplay === 'usd' 
+                  ? formatCurrency(totalPurchaseValueUSD) 
+                  : formatCurrency(totalPurchaseValueARS, 'ars')}
+              </p>
             </div>
             <div className="p-4 border rounded-lg">
               <p className="text-sm text-muted-foreground">Rendimiento</p>
               <div className="flex items-center gap-2">
                 <p className="text-2xl font-bold">
-                  ${totalProfit.toLocaleString('es-AR')}
+                  {currencyDisplay === 'usd' 
+                    ? formatCurrency(totalProfitUSD) 
+                    : formatCurrency(totalProfitARS, 'ars')}
                 </p>
-                <Badge variant={totalProfit >= 0 ? "default" : "destructive"} className="flex items-center">
-                  {totalProfit >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
+                <Badge variant={totalProfitUSD >= 0 ? "default" : "destructive"} className="flex items-center">
+                  {totalProfitUSD >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
                   {Math.abs(totalProfitPercentage).toFixed(2)}%
                 </Badge>
               </div>
@@ -358,118 +363,138 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
         </CardHeader>
         <CardContent>
           {viewMode === 'table' ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="cursor-pointer" onClick={() => requestSort('name')}>
-                    <div className="flex items-center">
-                      Activo
-                      {getSortIcon('name')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => requestSort('currentPrice')}>
-                    <div className="flex items-center">
-                      Precio
-                      {getSortIcon('currentPrice')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => requestSort('performance24h')}>
-                    <div className="flex items-center">
-                      24h%
-                      {getSortIcon('performance24h')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => requestSort('quantity')}>
-                    <div className="flex items-center">
-                      Cantidad
-                      {getSortIcon('quantity')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => requestSort('currentValue')}>
-                    <div className="flex items-center">
-                      Valor actual
-                      {getSortIcon('currentValue')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => requestSort('purchasePrice')}>
-                    <div className="flex items-center">
-                      PPC
-                      {getSortIcon('purchasePrice')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="cursor-pointer" onClick={() => requestSort('profitPercentage')}>
-                    <div className="flex items-center">
-                      Rendimiento
-                      {getSortIcon('profitPercentage')}
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedInvestments.map((investment) => (
-                  <TableRow key={investment.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {investment.logo && (
-                          <img 
-                            src={investment.logo} 
-                            alt={`${investment.name} logo`} 
-                            className="h-5 w-5 object-contain" 
-                          />
-                        )}
-                        <div>
-                          <p className="font-medium">{investment.name}</p>
-                          <p className="text-xs text-muted-foreground">{investment.symbol}</p>
-                        </div>
+            <div>
+              <div className="mb-4 flex justify-end">
+                <Tabs
+                  value={currencyDisplay}
+                  onValueChange={(v) => setCurrencyDisplay(v as 'usd' | 'ars')}
+                  className="w-full max-w-xs"
+                >
+                  <TabsList className="grid grid-cols-2 w-full">
+                    <TabsTrigger value="usd">USD</TabsTrigger>
+                    <TabsTrigger value="ars">ARS</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="cursor-pointer" onClick={() => requestSort('name')}>
+                      <div className="flex items-center">
+                        Activo
+                        {getSortIcon('name')}
                       </div>
-                    </TableCell>
-                    <TableCell>${investment.currentPrice.toLocaleString('es-AR')}</TableCell>
-                    <TableCell>
-                      <Badge variant={investment.performance24h >= 0 ? "default" : "destructive"} className="flex items-center">
-                        {investment.performance24h >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
-                        {Math.abs(investment.performance24h).toFixed(2)}%
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{investment.quantity}</TableCell>
-                    <TableCell>${investment.currentValue.toLocaleString('es-AR')}</TableCell>
-                    <TableCell>${investment.purchasePrice.toLocaleString('es-AR')}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className={investment.profit >= 0 ? "text-green-500" : "text-red-500"}>
-                          ${investment.profit.toLocaleString('es-AR')}
-                        </span>
-                        <Badge variant={investment.profit >= 0 ? "default" : "destructive"} className="flex items-center">
-                          {investment.profit >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
-                          {Math.abs(investment.profitPercentage).toFixed(2)}%
-                        </Badge>
+                    </TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => requestSort('currentPrice')}>
+                      <div className="flex items-center">
+                        Precio (USD)
+                        {getSortIcon('currentPrice')}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleEditInvestment(investment)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteInvestment(investment.id)} className="text-red-500">
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+                    </TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => requestSort('performance24h')}>
+                      <div className="flex items-center">
+                        24h%
+                        {getSortIcon('performance24h')}
+                      </div>
+                    </TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => requestSort('quantity')}>
+                      <div className="flex items-center">
+                        Cantidad
+                        {getSortIcon('quantity')}
+                      </div>
+                    </TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => requestSort('currentValueUSD')}>
+                      <div className="flex items-center">
+                        Valor actual
+                        {getSortIcon('currentValueUSD')}
+                      </div>
+                    </TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => requestSort('purchasePrice')}>
+                      <div className="flex items-center">
+                        PPC (USD)
+                        {getSortIcon('purchasePrice')}
+                      </div>
+                    </TableHead>
+                    <TableHead className="cursor-pointer" onClick={() => requestSort('profitPercentage')}>
+                      <div className="flex items-center">
+                        Rendimiento
+                        {getSortIcon('profitPercentage')}
+                      </div>
+                    </TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {sortedInvestments.map((investment) => (
+                    <TableRow key={investment.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {investment.logo && (
+                            <img 
+                              src={investment.logo} 
+                              alt={`${investment.name} logo`} 
+                              className="h-5 w-5 object-contain" 
+                            />
+                          )}
+                          <div>
+                            <p className="font-medium">{investment.name}</p>
+                            <p className="text-xs text-muted-foreground">{investment.symbol}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>${investment.currentPrice.toLocaleString('en-US')}</TableCell>
+                      <TableCell>
+                        <Badge variant={investment.performance24h >= 0 ? "default" : "destructive"} className="flex items-center">
+                          {investment.performance24h >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
+                          {Math.abs(investment.performance24h).toFixed(2)}%
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{investment.quantity}</TableCell>
+                      <TableCell>
+                        {currencyDisplay === 'usd' 
+                          ? formatCurrency(investment.currentValueUSD) 
+                          : formatCurrency(investment.currentValueARS, 'ars')}
+                      </TableCell>
+                      <TableCell>${investment.purchasePrice.toLocaleString('en-US')}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className={investment.profitUSD >= 0 ? "text-green-500" : "text-red-500"}>
+                            {currencyDisplay === 'usd' 
+                              ? formatCurrency(investment.profitUSD) 
+                              : formatCurrency(investment.profitARS, 'ars')}
+                          </span>
+                          <Badge variant={investment.profitUSD >= 0 ? "default" : "destructive"} className="flex items-center">
+                            {investment.profitUSD >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
+                            {Math.abs(investment.profitPercentage).toFixed(2)}%
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleEditInvestment(investment)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteInvestment(investment.id)} className="text-red-500">
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           ) : (
             <div className="space-y-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -529,7 +554,9 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
                           return `${date.getMonth() + 1}/${date.getFullYear().toString().slice(2)}`;
                         }}
                       />
-                      <YAxis />
+                      <YAxis 
+                        tickFormatter={(value) => `$${value.toLocaleString('en-US')}`}
+                      />
                       <Tooltip content={<ChartTooltipContent />} />
                       <Legend />
                       {Object.keys(chartData[0] || {}).filter(key => key !== 'date').map((key, index) => {
