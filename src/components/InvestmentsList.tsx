@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,24 +35,43 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Current USD to ARS exchange rate (for demonstration)
 const USD_TO_ARS_RATE = 1180;
 
-// Modified to show USD values and exclude certain investment types
-const getMockInvestments = (filter: string) => {
-  const allInvestments = [
+interface Investment {
+  id: string;
+  type: string;
+  name: string;
+  symbol: string;
+  quantity: number;
+  purchasePrice: number;
+  currentPrice: number;
+  purchaseDate: string;
+  currentValueUSD: number;
+  purchaseValueUSD: number;
+  profitUSD: number;
+  profitPercentage: number;
+  logo?: string;
+  performance24h: number;
+  history: { date: string; value: number }[];
+  currentValueARS?: number;
+  purchaseValueARS?: number;
+  profitARS?: number;
+}
+
+const getMockInvestments = (filter: string): Investment[] => {
+  const allInvestments: Investment[] = [
     {
       id: "1",
       type: "crypto",
       name: "Bitcoin",
       symbol: "BTC",
       quantity: 0.05,
-      purchasePrice: 29500, // USD
-      currentPrice: 34200, // USD
+      purchasePrice: 29500,
+      currentPrice: 34200,
       purchaseDate: "2023-06-15",
-      currentValueUSD: 1710, // USD
-      purchaseValueUSD: 1475, // USD
-      profitUSD: 235, // USD
+      currentValueUSD: 1710,
+      purchaseValueUSD: 1475,
+      profitUSD: 235,
       profitPercentage: 15.93,
       logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
       performance24h: 2.45,
@@ -76,12 +94,12 @@ const getMockInvestments = (filter: string) => {
       name: "Ethereum",
       symbol: "ETH",
       quantity: 1.2,
-      purchasePrice: 1850, // USD
-      currentPrice: 1920, // USD 
+      purchasePrice: 1850,
+      currentPrice: 1920,
       purchaseDate: "2023-08-10",
-      currentValueUSD: 2304, // USD
-      purchaseValueUSD: 2220, // USD
-      profitUSD: 84, // USD
+      currentValueUSD: 2304,
+      purchaseValueUSD: 2220,
+      profitUSD: 84,
       profitPercentage: 3.78,
       logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
       performance24h: -0.32,
@@ -102,12 +120,12 @@ const getMockInvestments = (filter: string) => {
       name: "Apple Inc.",
       symbol: "AAPL",
       quantity: 5,
-      purchasePrice: 172.5, // USD
-      currentPrice: 188.7, // USD
+      purchasePrice: 172.5,
+      currentPrice: 188.7,
       purchaseDate: "2023-05-22",
-      currentValueUSD: 943.5, // USD
-      purchaseValueUSD: 862.5, // USD
-      profitUSD: 81, // USD
+      currentValueUSD: 943.5,
+      purchaseValueUSD: 862.5,
+      profitUSD: 81,
       profitPercentage: 9.39,
       logo: "https://companieslogo.com/img/orig/AAPL-bf1a4314.png",
       performance24h: 1.27,
@@ -127,15 +145,12 @@ const getMockInvestments = (filter: string) => {
     }
   ];
 
-  // Add calculated ARS values to each investment
-  allInvestments.forEach(inv => {
-    inv.currentValueARS = inv.currentValueUSD * USD_TO_ARS_RATE;
-    inv.purchaseValueARS = inv.purchaseValueUSD * USD_TO_ARS_RATE;
-    inv.profitARS = inv.profitUSD * USD_TO_ARS_RATE;
-  });
-
-  if (filter === "all") return allInvestments;
-  return allInvestments.filter(inv => inv.type === filter);
+  return allInvestments.map(inv => ({
+    ...inv,
+    currentValueARS: inv.currentValueUSD * USD_TO_ARS_RATE,
+    purchaseValueARS: inv.purchaseValueUSD * USD_TO_ARS_RATE,
+    profitARS: inv.profitUSD * USD_TO_ARS_RATE
+  })).filter(filter === "all" ? () => true : inv => inv.type === filter);
 };
 
 type InvestmentsListProps = {
@@ -143,9 +158,9 @@ type InvestmentsListProps = {
 };
 
 export function InvestmentsList({ filter }: InvestmentsListProps) {
-  const [investments, setInvestments] = useState(getMockInvestments(filter));
+  const [investments, setInvestments] = useState<Investment[]>(getMockInvestments(filter));
   const [sortConfig, setSortConfig] = useState<{key: string, direction: 'ascending' | 'descending'} | null>(null);
-  const [editingInvestment, setEditingInvestment] = useState<any>(null);
+  const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [investmentToDelete, setInvestmentToDelete] = useState<string | null>(null);
@@ -154,7 +169,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
   const [currencyDisplay, setCurrencyDisplay] = useState<'usd' | 'ars'>('usd');
   
   useEffect(() => {
-    // Update investments when filter changes
     setInvestments(getMockInvestments(filter));
   }, [filter]);
   
@@ -163,7 +177,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
   const totalProfitUSD = totalCurrentValueUSD - totalPurchaseValueUSD;
   const totalProfitPercentage = (totalProfitUSD / totalPurchaseValueUSD) * 100;
   
-  // Calculate ARS totals
   const totalCurrentValueARS = totalCurrentValueUSD * USD_TO_ARS_RATE;
   const totalPurchaseValueARS = totalPurchaseValueUSD * USD_TO_ARS_RATE;
   const totalProfitARS = totalProfitUSD * USD_TO_ARS_RATE;
@@ -192,7 +205,7 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
   
   const sortedInvestments = getSortedInvestments();
 
-  const handleEditInvestment = (investment: any) => {
+  const handleEditInvestment = (investment: Investment) => {
     setEditingInvestment(investment);
     setIsEditModalOpen(true);
   };
@@ -211,10 +224,16 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
     }
   };
 
-  const handleSaveEdit = (updatedInvestment: any) => {
+  const handleSaveEdit = (updatedInvestment: Investment) => {
     setInvestments(
       investments.map(inv => 
-        inv.id === updatedInvestment.id ? {...updatedInvestment, currentValueUSD: updatedInvestment.quantity * inv.currentPrice} : inv
+        inv.id === updatedInvestment.id ? {
+          ...updatedInvestment, 
+          currentValueUSD: updatedInvestment.quantity * inv.currentPrice,
+          currentValueARS: updatedInvestment.quantity * inv.currentPrice * USD_TO_ARS_RATE,
+          purchaseValueARS: updatedInvestment.purchaseValueUSD * USD_TO_ARS_RATE,
+          profitARS: (updatedInvestment.quantity * inv.currentPrice - updatedInvestment.purchaseValueUSD) * USD_TO_ARS_RATE
+        } : inv
       )
     );
   };
@@ -272,7 +291,6 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
     );
   }
   
-  // Format currency based on selection
   const formatCurrency = (value: number, currency: 'usd' | 'ars' = currencyDisplay) => {
     if (currency === 'usd') {
       return `$${value.toLocaleString('en-US')}`;
@@ -453,7 +471,7 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
                       <TableCell>
                         {currencyDisplay === 'usd' 
                           ? formatCurrency(investment.currentValueUSD) 
-                          : formatCurrency(investment.currentValueARS, 'ars')}
+                          : formatCurrency(investment.currentValueARS || 0, 'ars')}
                       </TableCell>
                       <TableCell>${investment.purchasePrice.toLocaleString('en-US')}</TableCell>
                       <TableCell>
@@ -461,7 +479,7 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
                           <span className={investment.profitUSD >= 0 ? "text-green-500" : "text-red-500"}>
                             {currencyDisplay === 'usd' 
                               ? formatCurrency(investment.profitUSD) 
-                              : formatCurrency(investment.profitARS, 'ars')}
+                              : formatCurrency(investment.profitARS || 0, 'ars')}
                           </span>
                           <Badge variant={investment.profitUSD >= 0 ? "default" : "destructive"} className="flex items-center">
                             {investment.profitUSD >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
