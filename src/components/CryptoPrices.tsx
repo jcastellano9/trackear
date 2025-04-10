@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,7 +16,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Default crypto logos
 const cryptoLogos = {
   USDT: "https://cryptologos.cc/logos/tether-usdt-logo.png",
   DAI: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png",
@@ -97,10 +95,8 @@ export function CryptoPrices() {
   const [activeTab, setActiveTab] = useState("list");
   
   useEffect(() => {
-    // Simulate API call
     const fetchData = () => {
       setTimeout(() => {
-        // In a real app, this would come from an API
         const storedCryptos = localStorage.getItem("cryptoPrices");
         if (storedCryptos) {
           setCryptos(JSON.parse(storedCryptos));
@@ -117,7 +113,6 @@ export function CryptoPrices() {
 
   const handleRefresh = () => {
     setLoading(true);
-    // Simulate API refresh with slight price changes
     setTimeout(() => {
       const updatedCryptos = cryptos.map(crypto => ({
         ...crypto,
@@ -174,6 +169,141 @@ export function CryptoPrices() {
                 <TabsTrigger value="list">Monedas</TabsTrigger>
                 <TabsTrigger value="crypto">Cripto</TabsTrigger>
               </TabsList>
+              
+              <TabsContent value="list" className="mt-0">
+                {loading ? (
+                  <div className="space-y-2 animate-pulse">
+                    {[1, 2, 3].map((_, i) => (
+                      <div key={i} className="h-14 bg-muted rounded-md" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-3 text-sm text-muted-foreground px-2 py-1">
+                        <div>Tipo</div>
+                        <div className="text-center">Compra</div>
+                        <div className="text-center">Venta</div>
+                      </div>
+                      
+                      {cryptos.map((crypto) => (
+                        <div key={crypto.symbol} className="flex items-center justify-between p-2 border rounded-md">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-shrink-0 w-10 h-10 bg-background rounded-full overflow-hidden border flex items-center justify-center">
+                              {crypto.logo ? (
+                                <img src={crypto.logo} alt={crypto.name} className="h-8 w-8 object-contain" />
+                              ) : (
+                                <span className="text-xs font-bold">{crypto.symbol.substring(0, 2)}</span>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{crypto.symbol}</p>
+                            </div>
+                          </div>
+                          <div className="text-center font-medium">
+                            $ {(crypto.price - 25).toLocaleString('es-AR')}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-right font-medium">
+                              $ {crypto.price.toLocaleString('es-AR')}
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-muted-foreground hover:text-destructive" 
+                              onClick={() => removeCrypto(crypto.symbol)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {cryptos.length === 0 && (
+                        <div className="text-center p-4 text-muted-foreground">
+                          <p>No hay monedas en el listado</p>
+                          <p className="text-sm">Agrega algunas para ver su cotización aquí</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mt-4 text-right text-xs text-muted-foreground">
+                  Actualizado a las {new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="crypto" className="mt-0">
+                {loading ? (
+                  <div className="space-y-2 animate-pulse">
+                    {[1, 2, 3].map((_, i) => (
+                      <div key={i} className="h-14 bg-muted rounded-md" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-4 text-sm text-muted-foreground px-2 py-1">
+                        <div>Tipo</div>
+                        <div className="text-center">Precio</div>
+                        <div className="text-center">Var. 24h</div>
+                        <div></div>
+                      </div>
+                      
+                      {cryptos.map((crypto) => (
+                        <div key={crypto.symbol} className="flex items-center justify-between p-2 border rounded-md">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-shrink-0 w-10 h-10 bg-background rounded-full overflow-hidden border flex items-center justify-center">
+                              {crypto.logo ? (
+                                <img src={crypto.logo} alt={crypto.name} className="h-8 w-8 object-contain" />
+                              ) : (
+                                <span className="text-xs font-bold">{crypto.symbol.substring(0, 2)}</span>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-medium">{crypto.name}</p>
+                              <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
+                            </div>
+                          </div>
+                          <div className="text-center font-medium">
+                            $ {crypto.price.toLocaleString('es-AR')}
+                          </div>
+                          <div className="text-center">
+                            <Badge variant={crypto.change24h >= 0 ? "default" : "destructive"} className="flex items-center">
+                              {crypto.change24h >= 0 ? 
+                                <ArrowUp className="mr-1 h-3 w-3" /> : 
+                                <ArrowDown className="mr-1 h-3 w-3" />}
+                              {Math.abs(crypto.change24h).toFixed(2)}%
+                            </Badge>
+                          </div>
+                          <div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-muted-foreground hover:text-destructive"
+                              onClick={() => removeCrypto(crypto.symbol)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {cryptos.length === 0 && (
+                        <div className="text-center p-4 text-muted-foreground">
+                          <p>No hay criptomonedas en el listado</p>
+                          <p className="text-sm">Agrega algunas para ver su cotización aquí</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mt-4 text-right text-xs text-muted-foreground">
+                  Actualizado a las {new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </TabsContent>
             </Tabs>
             
             <Dialog>
@@ -241,140 +371,7 @@ export function CryptoPrices() {
         </div>
       </CardHeader>
       <CardContent>
-        <TabsContent value="list" className="mt-0">
-          {loading ? (
-            <div className="space-y-2 animate-pulse">
-              {[1, 2, 3].map((_, i) => (
-                <div key={i} className="h-14 bg-muted rounded-md" />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid grid-cols-3 text-sm text-muted-foreground px-2 py-1">
-                  <div>Tipo</div>
-                  <div className="text-center">Compra</div>
-                  <div className="text-center">Venta</div>
-                </div>
-                
-                {cryptos.map((crypto) => (
-                  <div key={crypto.symbol} className="flex items-center justify-between p-2 border rounded-md">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-shrink-0 w-10 h-10 bg-background rounded-full overflow-hidden border flex items-center justify-center">
-                        {crypto.logo ? (
-                          <img src={crypto.logo} alt={crypto.name} className="h-8 w-8 object-contain" />
-                        ) : (
-                          <span className="text-xs font-bold">{crypto.symbol.substring(0, 2)}</span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{crypto.symbol}</p>
-                      </div>
-                    </div>
-                    <div className="text-center font-medium">
-                      $ {(crypto.price - 25).toLocaleString('es-AR')}
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-right font-medium">
-                        $ {crypto.price.toLocaleString('es-AR')}
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-muted-foreground hover:text-destructive" 
-                        onClick={() => removeCrypto(crypto.symbol)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                
-                {cryptos.length === 0 && (
-                  <div className="text-center p-4 text-muted-foreground">
-                    <p>No hay monedas en el listado</p>
-                    <p className="text-sm">Agrega algunas para ver su cotización aquí</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
-          <div className="mt-4 text-right text-xs text-muted-foreground">
-            Actualizado a las {new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="crypto" className="mt-0">
-          {loading ? (
-            <div className="space-y-2 animate-pulse">
-              {[1, 2, 3].map((_, i) => (
-                <div key={i} className="h-14 bg-muted rounded-md" />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="grid grid-cols-1 gap-4">
-                <div className="grid grid-cols-4 text-sm text-muted-foreground px-2 py-1">
-                  <div>Tipo</div>
-                  <div className="text-center">Precio</div>
-                  <div className="text-center">Var. 24h</div>
-                  <div></div>
-                </div>
-                
-                {cryptos.map((crypto) => (
-                  <div key={crypto.symbol} className="flex items-center justify-between p-2 border rounded-md">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-shrink-0 w-10 h-10 bg-background rounded-full overflow-hidden border flex items-center justify-center">
-                        {crypto.logo ? (
-                          <img src={crypto.logo} alt={crypto.name} className="h-8 w-8 object-contain" />
-                        ) : (
-                          <span className="text-xs font-bold">{crypto.symbol.substring(0, 2)}</span>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{crypto.name}</p>
-                        <p className="text-xs text-muted-foreground">{crypto.symbol}</p>
-                      </div>
-                    </div>
-                    <div className="text-center font-medium">
-                      $ {crypto.price.toLocaleString('es-AR')}
-                    </div>
-                    <div className="text-center">
-                      <Badge variant={crypto.change24h >= 0 ? "default" : "destructive"} className="flex items-center">
-                        {crypto.change24h >= 0 ? 
-                          <ArrowUp className="mr-1 h-3 w-3" /> : 
-                          <ArrowDown className="mr-1 h-3 w-3" />}
-                        {Math.abs(crypto.change24h).toFixed(2)}%
-                      </Badge>
-                    </div>
-                    <div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="text-muted-foreground hover:text-destructive"
-                        onClick={() => removeCrypto(crypto.symbol)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                
-                {cryptos.length === 0 && (
-                  <div className="text-center p-4 text-muted-foreground">
-                    <p>No hay criptomonedas en el listado</p>
-                    <p className="text-sm">Agrega algunas para ver su cotización aquí</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
-          <div className="mt-4 text-right text-xs text-muted-foreground">
-            Actualizado a las {new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
-          </div>
-        </TabsContent>
+        {/* We'll render the tabs content here */}
       </CardContent>
     </Card>
   );

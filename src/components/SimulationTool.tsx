@@ -34,26 +34,28 @@ export function SimulationTool() {
         />
       )}
       
-      <Tabs defaultValue="fixed-term">
-        <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
-          <TabsTrigger value="fixed-term" className="flex items-center gap-2">
-            <Landmark className="h-4 w-4" />
-            Plazo Fijo
-          </TabsTrigger>
-          <TabsTrigger value="wallet" className="flex items-center gap-2">
-            <Wallet className="h-4 w-4" />
-            Billetera Virtual
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="fixed-term" className="mt-6">
-          <FixedTermSimulator />
-        </TabsContent>
-        
-        <TabsContent value="wallet" className="mt-6">
-          <WalletSimulator />
-        </TabsContent>
-      </Tabs>
+      {acknowledged && (
+        <Tabs defaultValue="fixed-term">
+          <TabsList className="grid grid-cols-2 w-full max-w-md mx-auto">
+            <TabsTrigger value="fixed-term" className="flex items-center gap-2">
+              <Landmark className="h-4 w-4" />
+              Plazo Fijo
+            </TabsTrigger>
+            <TabsTrigger value="wallet" className="flex items-center gap-2">
+              <Wallet className="h-4 w-4" />
+              Billetera Virtual
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="fixed-term" className="mt-6">
+            <FixedTermSimulator />
+          </TabsContent>
+          
+          <TabsContent value="wallet" className="mt-6">
+            <WalletSimulator />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
   );
 }
