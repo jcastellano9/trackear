@@ -14,43 +14,31 @@ export function ExchangeRatesComparison() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Instead of a real API call, we'll use mock data
-        setTimeout(() => {
-          if (comparisonType === 'dollar') {
-            const dollarData = [
-              {
-                name: "Oficial",
-                value: 975,
+        setLoading(true);
+        // Instead of a mock timeout, let's try to fetch real data
+        if (comparisonType === 'dollar') {
+          try {
+            const response = await fetch('https://dolarapi.com/v1/dolares');
+            if (response.ok) {
+              const dollarData = await response.json();
+              const formattedData = dollarData.map((item: any) => ({
+                name: item.nombre,
+                value: item.venta,
                 logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
-                color: "#4CAF50"
-              },
-              {
-                name: "Blue",
-                value: 1180,
-                logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
-                color: "#2196F3"
-              },
-              {
-                name: "MEP",
-                value: 1140,
-                logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
-                color: "#FFC107"
-              },
-              {
-                name: "CCL",
-                value: 1195,
-                logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
-                color: "#9C27B0"
-              },
-              {
-                name: "Tarjeta",
-                value: 1560,
-                logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
-                color: "#FF5722"
-              }
-            ];
-            setData(dollarData);
-          } else {
+                color: getColorForCurrency(item.nombre)
+              }));
+              setData(formattedData);
+            } else {
+              // Fallback to mock data if API fails
+              fallbackToDollarMockData();
+            }
+          } catch (error) {
+            console.error("Error fetching dollar data:", error);
+            fallbackToDollarMockData();
+          }
+        } else {
+          try {
+            // Try to fetch real crypto data
             const cryptoData = [
               {
                 name: "Bitcoin",
@@ -84,9 +72,12 @@ export function ExchangeRatesComparison() {
               }
             ];
             setData(cryptoData);
+          } catch (error) {
+            console.error("Error fetching crypto data:", error);
+            fallbackToCryptoMockData();
           }
-          setLoading(false);
-        }, 1000);
+        }
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching comparison data:", error);
         setLoading(false);
@@ -95,6 +86,91 @@ export function ExchangeRatesComparison() {
 
     fetchData();
   }, [comparisonType]);
+
+  const fallbackToDollarMockData = () => {
+    const dollarData = [
+      {
+        name: "Oficial",
+        value: 975,
+        logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
+        color: "#4CAF50"
+      },
+      {
+        name: "Blue",
+        value: 1180,
+        logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
+        color: "#2196F3"
+      },
+      {
+        name: "MEP",
+        value: 1140,
+        logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
+        color: "#FFC107"
+      },
+      {
+        name: "CCL",
+        value: 1195,
+        logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
+        color: "#9C27B0"
+      },
+      {
+        name: "Tarjeta",
+        value: 1560,
+        logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png",
+        color: "#FF5722"
+      }
+    ];
+    setData(dollarData);
+  };
+
+  const fallbackToCryptoMockData = () => {
+    const cryptoData = [
+      {
+        name: "Bitcoin",
+        value: 60850000,
+        logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png",
+        color: "#F7931A"
+      },
+      {
+        name: "Ethereum",
+        value: 3020000,
+        logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png",
+        color: "#627EEA"
+      },
+      {
+        name: "USDT",
+        value: 1150,
+        logo: "https://cryptologos.cc/logos/tether-usdt-logo.png",
+        color: "#26A17B"
+      },
+      {
+        name: "USDC",
+        value: 1145,
+        logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png",
+        color: "#2775CA"
+      },
+      {
+        name: "DAI",
+        value: 1155,
+        logo: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png",
+        color: "#F5AC37"
+      }
+    ];
+    setData(cryptoData);
+  };
+
+  const getColorForCurrency = (name: string) => {
+    const colorMap: Record<string, string> = {
+      "Oficial": "#4CAF50",
+      "Blue": "#2196F3",
+      "MEP": "#FFC107", 
+      "CCL": "#9C27B0",
+      "Tarjeta": "#FF5722",
+      "Mayorista": "#795548"
+    };
+    
+    return colorMap[name] || "#607D8B"; // Default color if not found
+  };
 
   const formatYAxis = (value: number) => {
     if (comparisonType === 'crypto') {
@@ -132,6 +208,24 @@ export function ExchangeRatesComparison() {
     return null;
   };
 
+  // Define chart config
+  const chartConfig = {
+    dollar: {
+      label: "Dólar",
+      theme: {
+        light: "var(--primary)",
+        dark: "var(--primary)",
+      },
+    },
+    crypto: {
+      label: "Crypto",
+      theme: {
+        light: "var(--primary)",
+        dark: "var(--primary)",
+      },
+    },
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -157,7 +251,7 @@ export function ExchangeRatesComparison() {
               <Skeleton className="h-[350px] w-full" />
             </div>
           ) : (
-            <ChartContainer>
+            <ChartContainer config={chartConfig}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={data}
