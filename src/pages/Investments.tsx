@@ -2,9 +2,6 @@
 import { Navbar } from "@/components/Navbar";
 import { InvestmentsOverview } from "@/components/InvestmentsOverview";
 import { Logo } from "@/components/Logo";
-import { InvestmentChart } from "@/components/InvestmentChart";
-import { AssetAllocation } from "@/components/AssetAllocation";
-import { ExchangeRatesComparison } from "@/components/ExchangeRatesComparison";
 
 const Investments = () => {
   return (
@@ -18,13 +15,6 @@ const Investments = () => {
           </p>
           
           <div className="space-y-6">
-            <InvestmentChart />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <AssetAllocation />
-              <ExchangeRatesComparison />
-            </div>
-            
             <InvestmentsOverview />
           </div>
         </div>

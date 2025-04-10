@@ -39,7 +39,7 @@ export function InvestmentChart() {
         currentValue = 3100;  // Slightly worse performance
       }
       
-      // Generate data points that visually match the image
+      // Generate data points that visually match the image pattern
       for (let i = totalDays; i >= 0; i -= Math.floor(totalDays/20)) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
@@ -95,40 +95,40 @@ export function InvestmentChart() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row gap-4 mb-4">
+      <div className="flex flex-wrap gap-2 mb-4">
         <Tabs 
           value={timeframe} 
           onValueChange={(v) => setTimeframe(v as any)} 
-          className="w-full"
+          className="w-full max-w-[300px]"
         >
           <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="1m">1M</TabsTrigger>
-            <TabsTrigger value="3m">3M</TabsTrigger>
-            <TabsTrigger value="6m">6M</TabsTrigger>
-            <TabsTrigger value="1y">1A</TabsTrigger>
-            <TabsTrigger value="all">Todo</TabsTrigger>
+            <TabsTrigger value="1m" className="px-2 py-1 text-xs">1M</TabsTrigger>
+            <TabsTrigger value="3m" className="px-2 py-1 text-xs">3M</TabsTrigger>
+            <TabsTrigger value="6m" className="px-2 py-1 text-xs">6M</TabsTrigger>
+            <TabsTrigger value="1y" className="px-2 py-1 text-xs">1A</TabsTrigger>
+            <TabsTrigger value="all" className="px-2 py-1 text-xs">Todo</TabsTrigger>
           </TabsList>
         </Tabs>
         
         <Tabs 
           value={assetType} 
           onValueChange={(v) => setAssetType(v as any)} 
-          className="w-full"
+          className="w-full max-w-[240px]"
         >
           <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="all">Todos</TabsTrigger>
-            <TabsTrigger value="crypto">Crypto</TabsTrigger>
-            <TabsTrigger value="cedears">CEDEARs</TabsTrigger>
+            <TabsTrigger value="all" className="px-2 py-1 text-xs">Todos</TabsTrigger>
+            <TabsTrigger value="crypto" className="px-2 py-1 text-xs">Crypto</TabsTrigger>
+            <TabsTrigger value="cedears" className="px-2 py-1 text-xs">CEDEARs</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       {loading ? (
-        <div className="h-[300px] w-full flex items-center justify-center">
+        <div className="h-[200px] w-full flex items-center justify-center">
           <p className="text-muted-foreground">Cargando datos...</p>
         </div>
       ) : (
-        <div className="h-[300px] w-full">
+        <div className="h-[200px] w-full">
           <ChartContainer
             config={{
               primary: { color: "#9b87f5" },
@@ -138,23 +138,23 @@ export function InvestmentChart() {
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={chartData}
-                margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
+                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                 <XAxis 
                   dataKey="date" 
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 10 }}
                   tickFormatter={(value) => {
                     const date = new Date(value.split('/').reverse().join('-'));
                     return `${date.getDate()}/${date.getMonth() + 1}`;
                   }}
                 />
                 <YAxis 
-                  tick={{ fontSize: 12 }}
+                  tick={{ fontSize: 10 }}
                   tickFormatter={(value) => `$${(value).toLocaleString('es-AR')}`}
                 />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <Legend wrapperStyle={{ fontSize: '10px' }} />
                 <Line
                   type="monotone"
                   name="Capital invertido"
@@ -162,7 +162,7 @@ export function InvestmentChart() {
                   stroke="#f87171"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 5 }}
+                  activeDot={{ r: 4 }}
                 />
                 <Line
                   type="monotone"
@@ -171,7 +171,7 @@ export function InvestmentChart() {
                   stroke="#818cf8"
                   strokeWidth={2}
                   dot={false}
-                  activeDot={{ r: 5 }}
+                  activeDot={{ r: 4 }}
                 />
               </LineChart>
             </ResponsiveContainer>

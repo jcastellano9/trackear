@@ -1,6 +1,5 @@
 
 import { AssetAllocation } from "./AssetAllocation";
-import { InvestmentSummary } from "./InvestmentSummary";
 import { ExchangeRates } from "./ExchangeRates";
 import { InvestmentChart } from "./InvestmentChart";
 
@@ -58,15 +57,17 @@ export function Dashboard() {
         </div>
       </div>
       
-      <div className="border rounded-lg p-6 space-y-4">
-        <div>
-          <h2 className="text-xl font-bold">Rendimiento de inversiones</h2>
-          <p className="text-sm text-muted-foreground">Evolución del capital invertido vs. valor actual</p>
-        </div>
-        <InvestmentChart />
-      </div>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="border rounded-lg p-6 space-y-4">
+          <div>
+            <h2 className="text-xl font-bold">Rendimiento de inversiones</h2>
+            <p className="text-sm text-muted-foreground">Evolución del capital invertido vs. valor actual</p>
+          </div>
+          <div className="h-[250px]">
+            <InvestmentChart />
+          </div>
+        </div>
+        
         <div className="border rounded-lg p-6 space-y-4">
           <div>
             <h2 className="text-xl font-bold">Distribución de Activos</h2>
@@ -75,7 +76,7 @@ export function Dashboard() {
           <AssetAllocation />
         </div>
         
-        <div className="border rounded-lg p-6 space-y-4">
+        <div className="border rounded-lg p-6 space-y-4 md:col-span-2">
           <div>
             <h2 className="text-xl font-bold">Cotizaciones</h2>
             <p className="text-sm text-muted-foreground">Última actualización: hace 5 minutos</p>
