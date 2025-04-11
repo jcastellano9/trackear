@@ -300,23 +300,25 @@ export function CedearsExplorer() {
     });
   };
   
-  // Get all unique sectors
+  // Get all unique sectors - Fix for unknown type error
   const sectors = cedears 
-    ? [...new Set(cedears.map(cedear => cedear.sector))]
+    ? [...new Set((cedears as Cedear[]).map(cedear => cedear.sector))]
     : [];
   
-  // Apply filters and sorting
-  const processedCedears = cedears?.filter(cedear => {
-    // Apply search filter (symbol or name)
-    const matchesSearch = 
-      cedear.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cedear.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Apply sector filter
-    const matchesSector = sectorFilter === "all" || cedear.sector === sectorFilter;
-    
-    return matchesSearch && matchesSector;
-  }) || [];
+  // Apply filters and sorting - Fix for unknown type error
+  const processedCedears = cedears
+    ? (cedears as Cedear[]).filter(cedear => {
+        // Apply search filter (symbol or name)
+        const matchesSearch = 
+          cedear.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          cedear.name.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Apply sector filter
+        const matchesSector = sectorFilter === "all" || cedear.sector === sectorFilter;
+        
+        return matchesSearch && matchesSector;
+      })
+    : [];
   
   // Apply sorting
   const sortedCedears = [...processedCedears].sort((a, b) => {
@@ -336,14 +338,18 @@ export function CedearsExplorer() {
       : bVal.localeCompare(aVal);
   });
   
-  // Get top gainers and losers
-  const topGainers = [...(cedears || [])]
-    .sort((a, b) => b.changePercent - a.changePercent)
-    .slice(0, 3);
+  // Get top gainers and losers - Fix for unknown type error
+  const topGainers = cedears
+    ? [...(cedears as Cedear[])]
+        .sort((a, b) => b.changePercent - a.changePercent)
+        .slice(0, 3)
+    : [];
     
-  const topLosers = [...(cedears || [])]
-    .sort((a, b) => a.changePercent - b.changePercent)
-    .slice(0, 3);
+  const topLosers = cedears
+    ? [...(cedears as Cedear[])]
+        .sort((a, b) => a.changePercent - b.changePercent)
+        .slice(0, 3)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -385,7 +391,7 @@ export function CedearsExplorer() {
         >
           Todos los sectores
         </Badge>
-        {sectors.map(sector => (
+        {sectors.map((sector) => (
           <Badge 
             key={sector}
             variant={sectorFilter === sector ? "default" : "outline"} 
@@ -694,7 +700,7 @@ export function CedearsExplorer() {
           Datos obtenidos de <a href="https://cedears.ar" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 inline-flex items-center gap-1">cedears.ar <ExternalLink className="h-3 w-3" /></a>
         </div>
         <div>
-          Última actualización: {cedears?.length ? formatTime(cedears[0].lastUpdated) : "..."}
+          Última actualización: {cedears?.length ? formatTime((cedears as Cedear[])[0].lastUpdated) : "..."}
         </div>
       </div>
     </div>
