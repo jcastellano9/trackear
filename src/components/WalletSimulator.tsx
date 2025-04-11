@@ -1,23 +1,70 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { walletsOptions } from "@/utils/investmentOptions";
-import { Slider } from "@/components/ui/slider";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+
+interface Wallet {
+  name: string;
+  logo: string;
+  rate: number;
+}
+
+// Esta función simula la llamada a la API para obtener tasas actualizadas
+const fetchWallets = async (): Promise<Wallet[]> => {
+  try {
+    // En un ambiente real, esta sería la llamada a la API
+    // const response = await axios.get('https://comparatasas-gateway.ferminrp.com/v1/finanzas/billeteras');
+    // return response.data.wallets;
+
+    // Datos de ejemplo
+    return [
+      { name: "Mercado Pago", logo: "https://www.mercadopago.com/org-img/MP3/logo/logomp3.svg", rate: 97.5 },
+      { name: "Ualá", logo: "https://play-lh.googleusercontent.com/Czh-ajGR5uP2vwAW9mGqhg1CMUj2H8EQkJFAUW3ZB5SZ9axbM5YGxavoyWQjBzxGZA", rate: 96 },
+      { name: "Naranja X", logo: "https://appstore.naranjax.com/static/media/icon192.c3cf0cef.png", rate: 95 },
+      { name: "Lemon Cash", logo: "https://lemoncash.com.ar/wp-content/uploads/2022/02/favicon-4-2-256x256.png", rate: 94 },
+      { name: "Belo", logo: "https://play-lh.googleusercontent.com/MNkfK6CncL8wRwHWcXm-Z6RwgaivA6hOG2taiQH0ZEpDskXN6LIVaSZBZ0sDrq4C3TUN", rate: 93 },
+    ];
+  } catch (error) {
+    console.error("Error fetching wallet rates:", error);
+    throw error;
+  }
+};
+
+const TERM_OPTIONS = [
+  { value: 1, label: "1 mes" },
+  { value: 3, label: "3 meses" },
+  { value: 6, label: "6 meses" },
+  { value: 12, label: "12 meses" },
+  { value: 24, label: "24 meses" },
+];
 
 export function WalletSimulator() {
   const [amount, setAmount] = useState<number>(100000);
   const [months, setMonths] = useState<number>(12);
   const [results, setResults] = useState<any[]>([]);
 
-  // Calculate results whenever inputs change
+  // Consulta para obtener las billeteras y sus tasas
+  const { data: wallets = [], isLoading, error } = useQuery({
+    queryKey: ['walletRates'],
+    queryFn: fetchWallets,
+  });
+
   useEffect(() => {
-    calculateReturns();
-  }, [amount, months]);
+    if (error) {
+      toast.error("No se pudieron cargar las tasas de las billeteras virtuales");
+    }
+    
+    if (wallets.length > 0 && amount > 0) {
+      calculateReturns();
+    }
+  }, [wallets, amount, months]);
 
   const calculateReturns = () => {
     if (!amount || amount <= 0) {
@@ -25,7 +72,7 @@ export function WalletSimulator() {
       return;
     }
 
-    const calculatedResults = walletsOptions.map(wallet => {
+    const calculatedResults = wallets.map(wallet => {
       const monthlyRate = wallet.rate / 100 / 12;
       let finalAmount = amount;
       
@@ -55,7 +102,7 @@ export function WalletSimulator() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle>Simulador de Rendimiento de Billeteras Virtuales</CardTitle>
           <CardDescription>
@@ -73,6 +120,7 @@ export function WalletSimulator() {
                 onChange={(e) => setAmount(Number(e.target.value))}
                 min="1000"
                 step="1000"
+                className="bg-background/40 border-white/10"
               />
               <p className="text-xs text-muted-foreground">
                 Monto mínimo recomendado: $1.000
@@ -80,26 +128,20 @@ export function WalletSimulator() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="months">Plazo (meses): {months}</Label>
-              <Slider
-                id="months"
-                min={1}
-                max={36}
-                step={1}
-                value={[months]}
-                onValueChange={(value) => setMonths(value[0])}
-              />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>1 mes</span>
-                <span>12 meses</span>
-                <span>36 meses</span>
-              </div>
+              <Label>Plazo</Label>
+              <ToggleGroup type="single" value={months.toString()} onValueChange={(value) => setMonths(Number(value))} className="flex flex-wrap justify-between">
+                {TERM_OPTIONS.map((option) => (
+                  <ToggleGroupItem key={option.value} value={option.value.toString()} className="flex-1 min-w-[80px] my-1">
+                    {option.label}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="glass-card">
         <CardHeader>
           <CardTitle>Resultados de la simulación</CardTitle>
           <CardDescription>
@@ -107,46 +149,52 @@ export function WalletSimulator() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Billetera</TableHead>
-                <TableHead>TNA</TableHead>
-                <TableHead>Rendimiento</TableHead>
-                <TableHead className="text-right">Monto final</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {results.map((result, index) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <img 
-                        src={result.logo} 
-                        alt={result.name} 
-                        className="h-6 w-6 object-contain"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = "https://via.placeholder.com/24?text=?";
-                        }}
-                      />
-                      <div className="font-medium">{result.name}</div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{result.effectiveRate.toFixed(1)}%</TableCell>
-                  <TableCell className="font-medium text-finance-positive">
-                    +${result.profit.toLocaleString('es-AR', {maximumFractionDigits: 0})}
-                    <div className="text-xs text-muted-foreground">
-                      (+{(result.profit / result.initialAmount * 100).toFixed(2)}%)
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    ${result.finalAmount.toLocaleString('es-AR', {maximumFractionDigits: 0})}
-                  </TableCell>
+          {isLoading ? (
+            <div className="flex justify-center items-center h-[200px]">
+              <p>Cargando datos de billeteras...</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[180px]">Billetera</TableHead>
+                  <TableHead>TNA</TableHead>
+                  <TableHead>Rendimiento</TableHead>
+                  <TableHead className="text-right">Monto final</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {results.map((result, index) => (
+                  <TableRow key={index} className={index === 0 ? "bg-blue-900/20" : ""}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src={result.logo} 
+                          alt={result.name} 
+                          className="h-6 w-6 object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "https://via.placeholder.com/24?text=?";
+                          }}
+                        />
+                        <div className="font-medium">{result.name}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell>{result.effectiveRate.toFixed(1)}%</TableCell>
+                    <TableCell className="font-medium text-finance-positive">
+                      +${result.profit.toLocaleString('es-AR', {maximumFractionDigits: 0})}
+                      <div className="text-xs text-muted-foreground">
+                        (+{(result.profit / result.initialAmount * 100).toFixed(2)}%)
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      ${result.finalAmount.toLocaleString('es-AR', {maximumFractionDigits: 0})}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
 
           <div className="mt-4 text-xs text-muted-foreground">
             <p>* Los cálculos son estimativos y pueden variar según las políticas de cada billetera.</p>
