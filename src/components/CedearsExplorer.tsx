@@ -19,6 +19,14 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Define types for CEDEARS data
 type Cedear = {
@@ -305,11 +313,17 @@ export function CedearsExplorer() {
     ? [...new Set((cedears as Cedear[]).map(cedear => cedear.sector))]
     : [];
   
-  // Apply filters and sorting - Fix for unknown type error
+  // Apply filters and sorting - Fix the bug with null checks
   const processedCedears = cedears
     ? (cedears as Cedear[]).filter(cedear => {
+        // Guard against undefined or null cedear properties
+        if (!cedear || !cedear.symbol || !cedear.name) {
+          console.warn("Found invalid cedear data:", cedear);
+          return false;
+        }
+        
         // Apply search filter (symbol or name)
-        const matchesSearch = 
+        const matchesSearch = searchTerm === "" || 
           cedear.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
           cedear.name.toLowerCase().includes(searchTerm.toLowerCase());
         
@@ -330,8 +344,8 @@ export function CedearsExplorer() {
     }
     
     // Handle string fields
-    const aVal = String(a[sortField]).toLowerCase();
-    const bVal = String(b[sortField]).toLowerCase();
+    const aVal = String(a[sortField] || '').toLowerCase();
+    const bVal = String(b[sortField] || '').toLowerCase();
     
     return sortDirection === "asc"
       ? aVal.localeCompare(bVal)
@@ -341,12 +355,14 @@ export function CedearsExplorer() {
   // Get top gainers and losers - Fix for unknown type error
   const topGainers = cedears
     ? [...(cedears as Cedear[])]
+        .filter(cedear => cedear && typeof cedear.changePercent === 'number')
         .sort((a, b) => b.changePercent - a.changePercent)
         .slice(0, 3)
     : [];
     
   const topLosers = cedears
     ? [...(cedears as Cedear[])]
+        .filter(cedear => cedear && typeof cedear.changePercent === 'number')
         .sort((a, b) => a.changePercent - b.changePercent)
         .slice(0, 3)
     : [];
@@ -393,10 +409,10 @@ export function CedearsExplorer() {
         </Badge>
         {sectors.map((sector) => (
           <Badge 
-            key={sector}
+            key={sector as string}
             variant={sectorFilter === sector ? "default" : "outline"} 
             className="cursor-pointer"
-            onClick={() => setSectorFilter(sector)}
+            onClick={() => setSectorFilter(sector as string)}
           >
             {sector}
           </Badge>
@@ -545,11 +561,11 @@ export function CedearsExplorer() {
             </div>
           ) : (
             <div className="min-w-[800px]">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th 
-                      className="text-left py-3 font-medium cursor-pointer hover:bg-muted/50"
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-muted/50"
                       onClick={() => handleSort("symbol")}
                     >
                       <div className="flex items-center gap-1">
@@ -558,9 +574,9 @@ export function CedearsExplorer() {
                           <ArrowDownUp className="h-3 w-3" />
                         )}
                       </div>
-                    </th>
-                    <th 
-                      className="text-left py-3 font-medium cursor-pointer hover:bg-muted/50"
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-muted/50"
                       onClick={() => handleSort("name")}
                     >
                       <div className="flex items-center gap-1">
@@ -569,9 +585,9 @@ export function CedearsExplorer() {
                           <ArrowDownUp className="h-3 w-3" />
                         )}
                       </div>
-                    </th>
-                    <th 
-                      className="text-left py-3 font-medium cursor-pointer hover:bg-muted/50"
+                    </TableHead>
+                    <TableHead 
+                      className="cursor-pointer hover:bg-muted/50"
                       onClick={() => handleSort("sector")}
                     >
                       <div className="flex items-center gap-1">
@@ -580,9 +596,9 @@ export function CedearsExplorer() {
                           <ArrowDownUp className="h-3 w-3" />
                         )}
                       </div>
-                    </th>
-                    <th 
-                      className="text-right py-3 font-medium cursor-pointer hover:bg-muted/50"
+                    </TableHead>
+                    <TableHead 
+                      className="text-right cursor-pointer hover:bg-muted/50"
                       onClick={() => handleSort("price")}
                     >
                       <div className="flex items-center gap-1 justify-end">
@@ -591,9 +607,9 @@ export function CedearsExplorer() {
                           <ArrowDownUp className="h-3 w-3" />
                         )}
                       </div>
-                    </th>
-                    <th 
-                      className="text-right py-3 font-medium cursor-pointer hover:bg-muted/50"
+                    </TableHead>
+                    <TableHead 
+                      className="text-right cursor-pointer hover:bg-muted/50"
                       onClick={() => handleSort("changePercent")}
                     >
                       <div className="flex items-center gap-1 justify-end">
@@ -602,9 +618,9 @@ export function CedearsExplorer() {
                           <ArrowDownUp className="h-3 w-3" />
                         )}
                       </div>
-                    </th>
-                    <th 
-                      className="text-center py-3 font-medium cursor-pointer hover:bg-muted/50"
+                    </TableHead>
+                    <TableHead 
+                      className="text-center cursor-pointer hover:bg-muted/50"
                       onClick={() => handleSort("ratio")}
                     >
                       <div className="flex items-center gap-1 justify-center">
@@ -613,9 +629,9 @@ export function CedearsExplorer() {
                           <ArrowDownUp className="h-3 w-3" />
                         )}
                       </div>
-                    </th>
-                    <th 
-                      className="text-right py-3 font-medium cursor-pointer hover:bg-muted/50"
+                    </TableHead>
+                    <TableHead 
+                      className="text-right cursor-pointer hover:bg-muted/50"
                       onClick={() => handleSort("volume")}
                     >
                       <div className="flex items-center gap-1 justify-end">
@@ -624,13 +640,13 @@ export function CedearsExplorer() {
                           <ArrowDownUp className="h-3 w-3" />
                         )}
                       </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {sortedCedears.map((cedear) => (
-                    <tr key={cedear.symbol} className="border-b hover:bg-muted/50">
-                      <td className="py-4 font-medium">
+                    <TableRow key={cedear.symbol}>
+                      <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           <img 
                             src={cedear.logo || `https://ui-avatars.com/api/?name=${cedear.symbol}&background=random`} 
@@ -643,18 +659,18 @@ export function CedearsExplorer() {
                           />
                           {cedear.symbol}
                         </div>
-                      </td>
-                      <td className="py-4">
+                      </TableCell>
+                      <TableCell>
                         <div>{cedear.name}</div>
                         <div className="text-xs text-muted-foreground">
                           {cedear.market}
                         </div>
-                      </td>
-                      <td className="py-4">{cedear.sector}</td>
-                      <td className="py-4 text-right font-medium">
+                      </TableCell>
+                      <TableCell>{cedear.sector}</TableCell>
+                      <TableCell className="text-right font-medium">
                         {formatCurrency(cedear.price, cedear.currency)}
-                      </td>
-                      <td className="py-4 text-right">
+                      </TableCell>
+                      <TableCell className="text-right">
                         <div className={`flex items-center justify-end gap-1 ${
                           cedear.change > 0 
                             ? "text-green-500" 
@@ -673,23 +689,23 @@ export function CedearsExplorer() {
                           {cedear.change > 0 ? "+" : ""}
                           {formatCurrency(cedear.change, cedear.currency)}
                         </div>
-                      </td>
-                      <td className="py-4 text-center">
+                      </TableCell>
+                      <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-1">
                           <Layers className="h-3.5 w-3.5 text-muted-foreground" />
                           <Badge variant="outline">{cedear.ratio}:1</Badge>
                         </div>
-                      </td>
-                      <td className="py-4 text-right">
+                      </TableCell>
+                      <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
                           {formatNumber(cedear.volume)}
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>
