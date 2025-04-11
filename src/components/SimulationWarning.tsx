@@ -10,7 +10,7 @@ interface SimulationWarningProps {
 
 export function SimulationWarning({ onCancel, onContinue }: SimulationWarningProps) {
   return (
-    <Alert variant="destructive" className="mb-4 border border-destructive/20 bg-destructive/10">
+    <Alert variant="destructive" className="mb-4 fixed bottom-4 left-4 right-4 z-50 max-w-4xl mx-auto border border-destructive/20 bg-destructive/10">
       <AlertCircle className="h-4 w-4" />
       <AlertTitle>Atención</AlertTitle>
       <AlertDescription className="mt-2">

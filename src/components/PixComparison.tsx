@@ -6,6 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RefreshCw, Search, ExternalLink } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 // Define types for PIX wallets
 type PixWallet = {
@@ -13,7 +21,7 @@ type PixWallet = {
   logo?: string;
   exchangeRate: number;
   fee: number;
-  processingTime: string;
+  processingTime: string; // We'll keep this in the data but not display it
   minimumAmount: number;
   maximumAmount?: number;
   features: string[];
@@ -187,7 +195,7 @@ export function PixComparison() {
             <Input
               type="search"
               placeholder="Buscar proveedor..."
-              className="pl-8 w-full"
+              className="pl-8 w-full dark:bg-zinc-900"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -203,7 +211,7 @@ export function PixComparison() {
         </div>
       </div>
       
-      <Card>
+      <Card className="dark:bg-zinc-900 border-zinc-800">
         <CardHeader className="pb-2">
           <CardTitle>Simulador de Envío</CardTitle>
           <CardDescription>
@@ -221,7 +229,7 @@ export function PixComparison() {
                 max="500000"
                 value={amount}
                 onChange={(e) => setAmount(parseFloat(e.target.value) || 0)}
-                className="mt-1"
+                className="mt-1 dark:bg-zinc-950"
               />
             </div>
             
@@ -232,7 +240,7 @@ export function PixComparison() {
                 Error al cargar datos. Intente nuevamente.
               </div>
             ) : getBestWallet(amount) ? (
-              <div className="bg-muted/50 p-4 rounded-lg">
+              <div className="bg-zinc-800/50 p-4 rounded-lg">
                 <div className="text-sm text-muted-foreground mb-1">
                   Mejor opción para {formatCurrency(amount, "ARS")}
                 </div>
@@ -247,10 +255,10 @@ export function PixComparison() {
                     )}
                     <div className="text-xl font-semibold">{getBestWallet(amount)?.name}</div>
                   </div>
-                  <Badge variant="success">Recomendado</Badge>
+                  <Badge className="bg-green-600 hover:bg-green-700">Recomendado</Badge>
                 </div>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <div className="text-sm text-muted-foreground">Tipo de cambio</div>
                     <div className="font-medium">1 ARS = {getBestWallet(amount)?.exchangeRate.toFixed(2)} BRL</div>
@@ -260,12 +268,8 @@ export function PixComparison() {
                     <div className="font-medium">{formatPercentage(getBestWallet(amount)?.fee || 0)}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-muted-foreground">Tiempo de procesamiento</div>
-                    <div className="font-medium">{getBestWallet(amount)?.processingTime}</div>
-                  </div>
-                  <div>
                     <div className="text-sm text-muted-foreground">Monto que recibirá</div>
-                    <div className="font-bold text-lg text-finance-positive">
+                    <div className="font-bold text-lg text-green-500">
                       {formatCurrency(calculateFinalAmount(getBestWallet(amount)!, amount), "BRL")}
                     </div>
                   </div>
@@ -280,14 +284,14 @@ export function PixComparison() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="dark:bg-zinc-900 border-zinc-800">
         <CardHeader className="pb-2">
           <CardTitle>Todos los Proveedores</CardTitle>
           <CardDescription>
             Comparativo completo de opciones para enviar dinero a Brasil
           </CardDescription>
         </CardHeader>
-        <CardContent className="overflow-x-auto">
+        <CardContent>
           {isLoading ? (
             <div className="space-y-6">
               {[1, 2, 3].map((i) => (
@@ -303,30 +307,29 @@ export function PixComparison() {
               No se encontraron proveedores que coincidan con la búsqueda.
             </div>
           ) : (
-            <div className="min-w-[800px]">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 font-medium">Proveedor</th>
-                    <th className="text-center py-3 font-medium">Tipo de Cambio</th>
-                    <th className="text-center py-3 font-medium">Comisión</th>
-                    <th className="text-center py-3 font-medium">Monto Mínimo</th>
-                    <th className="text-center py-3 font-medium">Monto Máximo</th>
-                    <th className="text-center py-3 font-medium">Tiempo</th>
-                    <th className="text-center py-3 font-medium">Ejemplo</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Proveedor</TableHead>
+                    <TableHead className="text-center">Tipo de Cambio</TableHead>
+                    <TableHead className="text-center">Comisión</TableHead>
+                    <TableHead className="text-center">Monto Mínimo</TableHead>
+                    <TableHead className="text-center">Monto Máximo</TableHead>
+                    <TableHead className="text-center">Ejemplo</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredWallets
                     .sort((a, b) => calculateFinalAmount(b, amount) - calculateFinalAmount(a, amount))
                     .map((wallet) => {
                       const isBest = getBestWallet(amount)?.name === wallet.name;
                       return (
-                        <tr 
+                        <TableRow 
                           key={wallet.name} 
-                          className={`border-b hover:bg-muted/50 ${isBest ? 'bg-muted/30' : ''}`}
+                          className={isBest ? 'bg-zinc-800/30' : ''}
                         >
-                          <td className="py-4">
+                          <TableCell>
                             <div className="flex items-center gap-2">
                               {wallet.logo && (
                                 <img 
@@ -338,32 +341,29 @@ export function PixComparison() {
                               <div>
                                 <div className="font-medium flex items-center gap-1">
                                   {wallet.name}
-                                  {isBest && <Badge variant="success" className="text-xs">Mejor</Badge>}
+                                  {isBest && <Badge className="text-xs bg-green-600 hover:bg-green-700">Mejor</Badge>}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
                                   actualizado {formatTime(wallet.lastUpdated)}
                                 </div>
                               </div>
                             </div>
-                          </td>
-                          <td className="text-center py-4 px-2">
+                          </TableCell>
+                          <TableCell className="text-center">
                             <div className="font-medium">1 ARS = {wallet.exchangeRate.toFixed(2)} BRL</div>
-                          </td>
-                          <td className="text-center py-4 px-2">
+                          </TableCell>
+                          <TableCell className="text-center">
                             {formatPercentage(wallet.fee)}
-                          </td>
-                          <td className="text-center py-4 px-2">
+                          </TableCell>
+                          <TableCell className="text-center">
                             {formatCurrency(wallet.minimumAmount, "ARS")}
-                          </td>
-                          <td className="text-center py-4 px-2">
+                          </TableCell>
+                          <TableCell className="text-center">
                             {wallet.maximumAmount 
                               ? formatCurrency(wallet.maximumAmount, "ARS") 
                               : "Sin límite"}
-                          </td>
-                          <td className="text-center py-4 px-2">
-                            {wallet.processingTime}
-                          </td>
-                          <td className="text-center py-4 px-2">
+                          </TableCell>
+                          <TableCell className="text-center">
                             <div className="font-semibold">
                               {amount >= wallet.minimumAmount && 
                                (!wallet.maximumAmount || amount <= wallet.maximumAmount)
@@ -373,12 +373,12 @@ export function PixComparison() {
                             <div className="text-xs text-muted-foreground">
                               para {formatCurrency(amount, "ARS")}
                             </div>
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       );
                     })}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
           )}
         </CardContent>

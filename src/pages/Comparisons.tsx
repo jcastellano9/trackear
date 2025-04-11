@@ -8,20 +8,20 @@ import { Logo } from "@/components/Logo";
 
 const Comparisons = () => {
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-black text-white">
       <Navbar />
       <main className="flex-grow">
         <div className="container px-4 py-6 mx-auto space-y-8">
-          <h1 className="text-3xl font-bold">Comparaciones</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Comparaciones</h1>
+          <p className="text-zinc-400">
             Compará cotizaciones, tasas y opciones de inversión en un solo lugar
           </p>
           
-          <Tabs defaultValue="exchange-rates">
-            <TabsList className="grid grid-cols-1 md:grid-cols-3 w-full">
-              <TabsTrigger value="exchange-rates">Cotizaciones</TabsTrigger>
-              <TabsTrigger value="interest-rates">Rendimientos</TabsTrigger>
-              <TabsTrigger value="pix">PIX</TabsTrigger>
+          <Tabs defaultValue="exchange-rates" className="w-full">
+            <TabsList className="grid grid-cols-1 md:grid-cols-3 w-full bg-zinc-900 p-1">
+              <TabsTrigger value="exchange-rates" className="data-[state=active]:bg-zinc-800">Cotizaciones</TabsTrigger>
+              <TabsTrigger value="interest-rates" className="data-[state=active]:bg-zinc-800">Rendimientos</TabsTrigger>
+              <TabsTrigger value="pix" className="data-[state=active]:bg-zinc-800">PIX</TabsTrigger>
             </TabsList>
             
             <TabsContent value="exchange-rates" className="mt-6">
@@ -38,8 +38,8 @@ const Comparisons = () => {
           </Tabs>
         </div>
       </main>
-      <footer className="py-6 border-t">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+      <footer className="py-6 border-t border-zinc-800">
+        <div className="container mx-auto px-4 text-center text-sm text-zinc-500">
           © 2025 <Logo size="sm" withText={true} className="inline-flex mx-1" /> - Universidad Siglo 21 - Trabajo Final de Grado en Ingeniería de Software
         </div>
       </footer>
