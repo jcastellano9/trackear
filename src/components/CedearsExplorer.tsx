@@ -1,11 +1,24 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RefreshCw, Search, ExternalLink, TrendingUp, TrendingDown } from "lucide-react";
+import { 
+  RefreshCw, 
+  Search, 
+  ExternalLink, 
+  TrendingUp, 
+  TrendingDown,
+  SlidersHorizontal,
+  Info,
+  ArrowDownUp,
+  Layers,
+  DollarSign
+} from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
 
 // Define types for CEDEARS data
 type Cedear = {
@@ -20,9 +33,51 @@ type Cedear = {
   currency: string;
   market: string;
   lastUpdated: string;
+  logo?: string;
 };
 
-// Mock data for CEDEARs
+// Function to fetch CEDEARs data
+const fetchCedears = async () => {
+  try {
+    // First try to fetch from an API
+    const response = await axios.get('https://api.cedears.ar/cedears');
+    if (response.status === 200 && response.data) {
+      return response.data;
+    }
+    
+    // If that fails, try another source
+    try {
+      const twelveDataResponse = await axios.get('https://api.twelvedata.com/time_series', {
+        params: {
+          symbol: 'AAPL,MSFT,AMZN,GOOGL,META,TSLA,JPM,WMT,DIS,KO,PFE,NFLX',
+          interval: '1day',
+          outputsize: '1',
+          format: 'json'
+        }
+      });
+      
+      if (twelveDataResponse.status === 200) {
+        // Process the data into our format
+        // Implementation would depend on response structure
+        return MOCK_CEDEARS; // For now default to mock
+      }
+    } catch (error) {
+      console.error("Error fetching from TwelveData:", error);
+    }
+    
+    throw new Error("Could not fetch CEDEARs data");
+  } catch (error) {
+    console.error("Error fetching CEDEARs data:", error);
+    
+    // Simulate API latency for the mock data
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Return mock data as fallback
+    return MOCK_CEDEARS;
+  }
+};
+
+// Add logos to mock data
 const MOCK_CEDEARS: Cedear[] = [
   {
     symbol: "AAPL",
@@ -36,6 +91,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:30:00Z",
+    logo: "https://companieslogo.com/img/orig/AAPL-bf1a4314.png?t=1632523695"
   },
   {
     symbol: "MSFT",
@@ -49,6 +105,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:31:00Z",
+    logo: "https://companieslogo.com/img/orig/MSFT-a203b22d.png?t=1633073277"
   },
   {
     symbol: "AMZN",
@@ -62,6 +119,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:32:00Z",
+    logo: "https://companieslogo.com/img/orig/AMZN-e9f942e4.png?t=1632523695"
   },
   {
     symbol: "GOOGL",
@@ -75,6 +133,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:33:00Z",
+    logo: "https://companieslogo.com/img/orig/GOOGL-22ab18aa.png?t=1633218227"
   },
   {
     symbol: "META",
@@ -88,6 +147,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:34:00Z",
+    logo: "https://companieslogo.com/img/orig/META-bcbd3214.png?t=1667327567"
   },
   {
     symbol: "TSLA",
@@ -101,6 +161,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:35:00Z",
+    logo: "https://companieslogo.com/img/orig/TSLA-6da75dd3.png?t=1633073585"
   },
   {
     symbol: "JPM",
@@ -114,6 +175,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:36:00Z",
+    logo: "https://companieslogo.com/img/orig/JPM-0f9c7fe0.png?t=1633218227"
   },
   {
     symbol: "WMT",
@@ -127,6 +189,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:37:00Z",
+    logo: "https://companieslogo.com/img/orig/WMT-2e614da9.png?t=1633218748"
   },
   {
     symbol: "DIS",
@@ -140,6 +203,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:38:00Z",
+    logo: "https://companieslogo.com/img/orig/DIS-3d909c22.png?t=1633072893"
   },
   {
     symbol: "KO",
@@ -153,6 +217,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:39:00Z",
+    logo: "https://companieslogo.com/img/orig/KO-348b231a.png?t=1633072949"
   },
   {
     symbol: "PFE",
@@ -166,6 +231,7 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:40:00Z",
+    logo: "https://companieslogo.com/img/orig/PFE-af8d728d.png?t=1633072951"
   },
   {
     symbol: "NFLX",
@@ -179,30 +245,32 @@ const MOCK_CEDEARS: Cedear[] = [
     currency: "ARS",
     market: "BYMA",
     lastUpdated: "2025-04-08T12:41:00Z",
+    logo: "https://companieslogo.com/img/orig/NFLX-c3dc7b83.png?t=1633072918"
   },
 ];
-
-// Function to fetch CEDEARs data
-const fetchCedears = async () => {
-  // In a real app, this would be an API call
-  // For example: return fetch('https://api.cedears.ar/cedears').then(res => res.json())
-  
-  // Simulate API latency
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  // Return mock data
-  return MOCK_CEDEARS;
-};
 
 export function CedearsExplorer() {
   const [searchTerm, setSearchTerm] = useState("");
   const [sectorFilter, setSectorFilter] = useState<string>("all");
+  const [sortField, setSortField] = useState<keyof Cedear>("symbol");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   
   // Use react-query to fetch data
   const { data: cedears, isLoading, isError, refetch } = useQuery({
     queryKey: ['cedears'],
     queryFn: fetchCedears,
   });
+  
+  const handleSort = (field: keyof Cedear) => {
+    if (sortField === field) {
+      // Toggle direction if already sorting by this field
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      // Set new field and default to ascending
+      setSortField(field);
+      setSortDirection("asc");
+    }
+  };
   
   // Format currency
   const formatCurrency = (value: number, currency: string) => {
@@ -237,8 +305,8 @@ export function CedearsExplorer() {
     ? [...new Set(cedears.map(cedear => cedear.sector))]
     : [];
   
-  // Apply filters
-  const filteredCedears = cedears?.filter(cedear => {
+  // Apply filters and sorting
+  const processedCedears = cedears?.filter(cedear => {
     // Apply search filter (symbol or name)
     const matchesSearch = 
       cedear.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -249,6 +317,24 @@ export function CedearsExplorer() {
     
     return matchesSearch && matchesSector;
   }) || [];
+  
+  // Apply sorting
+  const sortedCedears = [...processedCedears].sort((a, b) => {
+    // Handle numeric fields differently than string fields
+    if (typeof a[sortField] === 'number' && typeof b[sortField] === 'number') {
+      return sortDirection === "asc" 
+        ? (a[sortField] as number) - (b[sortField] as number)
+        : (b[sortField] as number) - (a[sortField] as number);
+    }
+    
+    // Handle string fields
+    const aVal = String(a[sortField]).toLowerCase();
+    const bVal = String(b[sortField]).toLowerCase();
+    
+    return sortDirection === "asc"
+      ? aVal.localeCompare(bVal)
+      : bVal.localeCompare(aVal);
+  });
   
   // Get top gainers and losers
   const topGainers = [...(cedears || [])]
@@ -315,7 +401,7 @@ export function CedearsExplorer() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-finance-positive" />
+              <TrendingUp className="h-5 w-5 text-green-500" />
               Mayores Subas
             </CardTitle>
             <CardDescription>
@@ -339,6 +425,15 @@ export function CedearsExplorer() {
                   <div key={cedear.symbol} className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50">
                     <div>
                       <div className="font-medium flex items-center gap-2">
+                        <img 
+                          src={cedear.logo || `https://ui-avatars.com/api/?name=${cedear.symbol}&background=random`} 
+                          alt={cedear.symbol}
+                          className="h-5 w-5 rounded-sm object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `https://ui-avatars.com/api/?name=${cedear.symbol}&background=random`;
+                          }}
+                        />
                         {cedear.symbol}
                         <Badge variant="outline" className="text-xs">{cedear.ratio}:1</Badge>
                       </div>
@@ -346,7 +441,7 @@ export function CedearsExplorer() {
                     </div>
                     <div className="text-right">
                       <div className="font-semibold">{formatCurrency(cedear.price, cedear.currency)}</div>
-                      <div className="text-sm text-finance-positive flex items-center justify-end gap-1">
+                      <div className="text-sm text-green-500 flex items-center justify-end gap-1">
                         <TrendingUp className="h-3 w-3" />
                         {formatPercentage(cedear.changePercent)}
                       </div>
@@ -361,7 +456,7 @@ export function CedearsExplorer() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-finance-negative" />
+              <TrendingDown className="h-5 w-5 text-red-500" />
               Mayores Bajas
             </CardTitle>
             <CardDescription>
@@ -385,6 +480,15 @@ export function CedearsExplorer() {
                   <div key={cedear.symbol} className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50">
                     <div>
                       <div className="font-medium flex items-center gap-2">
+                        <img 
+                          src={cedear.logo || `https://ui-avatars.com/api/?name=${cedear.symbol}&background=random`} 
+                          alt={cedear.symbol}
+                          className="h-5 w-5 rounded-sm object-contain"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = `https://ui-avatars.com/api/?name=${cedear.symbol}&background=random`;
+                          }}
+                        />
                         {cedear.symbol}
                         <Badge variant="outline" className="text-xs">{cedear.ratio}:1</Badge>
                       </div>
@@ -392,7 +496,7 @@ export function CedearsExplorer() {
                     </div>
                     <div className="text-right">
                       <div className="font-semibold">{formatCurrency(cedear.price, cedear.currency)}</div>
-                      <div className="text-sm text-finance-negative flex items-center justify-end gap-1">
+                      <div className="text-sm text-red-500 flex items-center justify-end gap-1">
                         <TrendingDown className="h-3 w-3" />
                         {formatPercentage(cedear.changePercent)}
                       </div>
@@ -407,9 +511,15 @@ export function CedearsExplorer() {
       
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle>Listado de CEDEARs</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Listado de CEDEARs</span>
+            <div className="flex items-center gap-2 text-sm font-normal">
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>Filtros</span>
+            </div>
+          </CardTitle>
           <CardDescription>
-            {filteredCedears.length} CEDEARs disponibles para invertir
+            {sortedCedears.length} CEDEARs disponibles para invertir
           </CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
@@ -423,7 +533,7 @@ export function CedearsExplorer() {
             <div className="text-center py-6 text-destructive">
               Error al cargar datos. Intente nuevamente.
             </div>
-          ) : filteredCedears.length === 0 ? (
+          ) : sortedCedears.length === 0 ? (
             <div className="text-center py-6 text-muted-foreground">
               No se encontraron CEDEARs que coincidan con la búsqueda.
             </div>
@@ -432,19 +542,102 @@ export function CedearsExplorer() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 font-medium">Símbolo</th>
-                    <th className="text-left py-3 font-medium">Nombre</th>
-                    <th className="text-left py-3 font-medium">Sector</th>
-                    <th className="text-right py-3 font-medium">Precio</th>
-                    <th className="text-right py-3 font-medium">Variación</th>
-                    <th className="text-center py-3 font-medium">Ratio</th>
-                    <th className="text-right py-3 font-medium">Volumen</th>
+                    <th 
+                      className="text-left py-3 font-medium cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleSort("symbol")}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>Símbolo</span>
+                        {sortField === "symbol" && (
+                          <ArrowDownUp className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-left py-3 font-medium cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleSort("name")}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>Nombre</span>
+                        {sortField === "name" && (
+                          <ArrowDownUp className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-left py-3 font-medium cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleSort("sector")}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span>Sector</span>
+                        {sortField === "sector" && (
+                          <ArrowDownUp className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-right py-3 font-medium cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleSort("price")}
+                    >
+                      <div className="flex items-center gap-1 justify-end">
+                        <span>Precio</span>
+                        {sortField === "price" && (
+                          <ArrowDownUp className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-right py-3 font-medium cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleSort("changePercent")}
+                    >
+                      <div className="flex items-center gap-1 justify-end">
+                        <span>Variación</span>
+                        {sortField === "changePercent" && (
+                          <ArrowDownUp className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-center py-3 font-medium cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleSort("ratio")}
+                    >
+                      <div className="flex items-center gap-1 justify-center">
+                        <span>Ratio</span>
+                        {sortField === "ratio" && (
+                          <ArrowDownUp className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th 
+                      className="text-right py-3 font-medium cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleSort("volume")}
+                    >
+                      <div className="flex items-center gap-1 justify-end">
+                        <span>Volumen</span>
+                        {sortField === "volume" && (
+                          <ArrowDownUp className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCedears.map((cedear) => (
+                  {sortedCedears.map((cedear) => (
                     <tr key={cedear.symbol} className="border-b hover:bg-muted/50">
-                      <td className="py-4 font-medium">{cedear.symbol}</td>
+                      <td className="py-4 font-medium">
+                        <div className="flex items-center gap-2">
+                          <img 
+                            src={cedear.logo || `https://ui-avatars.com/api/?name=${cedear.symbol}&background=random`} 
+                            alt={cedear.symbol}
+                            className="h-6 w-6 rounded-sm object-contain"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = `https://ui-avatars.com/api/?name=${cedear.symbol}&background=random`;
+                            }}
+                          />
+                          {cedear.symbol}
+                        </div>
+                      </td>
                       <td className="py-4">
                         <div>{cedear.name}</div>
                         <div className="text-xs text-muted-foreground">
@@ -458,9 +651,9 @@ export function CedearsExplorer() {
                       <td className="py-4 text-right">
                         <div className={`flex items-center justify-end gap-1 ${
                           cedear.change > 0 
-                            ? "text-finance-positive" 
+                            ? "text-green-500" 
                             : cedear.change < 0 
-                              ? "text-finance-negative" 
+                              ? "text-red-500" 
                               : ""
                         }`}>
                           {cedear.change > 0 ? (
@@ -476,10 +669,16 @@ export function CedearsExplorer() {
                         </div>
                       </td>
                       <td className="py-4 text-center">
-                        <Badge variant="outline">{cedear.ratio}:1</Badge>
+                        <div className="flex items-center justify-center gap-1">
+                          <Layers className="h-3.5 w-3.5 text-muted-foreground" />
+                          <Badge variant="outline">{cedear.ratio}:1</Badge>
+                        </div>
                       </td>
                       <td className="py-4 text-right">
-                        {formatNumber(cedear.volume)}
+                        <div className="flex items-center justify-end gap-1">
+                          <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                          {formatNumber(cedear.volume)}
+                        </div>
                       </td>
                     </tr>
                   ))}

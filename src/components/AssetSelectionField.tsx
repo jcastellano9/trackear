@@ -51,7 +51,15 @@ export function AssetSelectionField({ onAssetSelection }: AssetSelectionFieldPro
                 {getOptionsByType(investmentType).map((option) => (
                   <SelectItem key={option.value} value={option.name}>
                     <div className="flex items-center gap-2">
-                      <img src={option.logo} alt={option.name} className="h-4 w-4 object-contain" />
+                      <img 
+                        src={option.logo} 
+                        alt={option.name} 
+                        className="h-5 w-5 object-contain" 
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://ui-avatars.com/api/?name=${option.name.substring(0,2)}&background=random&size=32`;
+                        }}
+                      />
                       {option.name}
                     </div>
                   </SelectItem>
