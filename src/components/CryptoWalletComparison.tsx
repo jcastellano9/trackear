@@ -7,7 +7,7 @@ import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { fetchCryptoWalletRates } from "@/services/cryptoWalletService";
-import { CryptoWalletComparison } from "@/types/interestRate";
+import type { CryptoWalletComparison } from "@/types/interestRate";
 
 export function CryptoWalletComparison() {
   const [data, setData] = useState<CryptoWalletComparison[]>([]);
