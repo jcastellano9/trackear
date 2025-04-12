@@ -19,11 +19,10 @@ const Comparisons = () => {
           </p>
           
           <Tabs defaultValue="exchange-rates" className="w-full">
-            <TabsList className="grid grid-cols-1 md:grid-cols-5 w-full bg-zinc-900 p-1">
+            <TabsList className="grid grid-cols-1 md:grid-cols-4 w-full bg-zinc-900 p-1">
               <TabsTrigger value="exchange-rates" className="data-[state=active]:bg-zinc-800">Cotizaciones</TabsTrigger>
-              <TabsTrigger value="wallet-rates" className="data-[state=active]:bg-zinc-800">Wallets Crypto</TabsTrigger>
+              <TabsTrigger value="crypto-investments" className="data-[state=active]:bg-zinc-800">Crypto Inversiones</TabsTrigger>
               <TabsTrigger value="ars-rates" className="data-[state=active]:bg-zinc-800">Rendimientos ARS</TabsTrigger>
-              <TabsTrigger value="crypto-rates" className="data-[state=active]:bg-zinc-800">Rendimientos Crypto</TabsTrigger>
               <TabsTrigger value="pix" className="data-[state=active]:bg-zinc-800">PIX</TabsTrigger>
             </TabsList>
             
@@ -31,16 +30,15 @@ const Comparisons = () => {
               <ExchangeRatesComparison />
             </TabsContent>
             
-            <TabsContent value="wallet-rates" className="mt-6">
-              <CryptoWalletComparison />
+            <TabsContent value="crypto-investments" className="mt-6">
+              <div className="space-y-8">
+                <CryptoWalletComparison />
+                <InterestRatesComparison currencyFilter="CRYPTO" />
+              </div>
             </TabsContent>
             
             <TabsContent value="ars-rates" className="mt-6">
               <InterestRatesComparison currencyFilter="ARS" />
-            </TabsContent>
-            
-            <TabsContent value="crypto-rates" className="mt-6">
-              <InterestRatesComparison currencyFilter="CRYPTO" />
             </TabsContent>
             
             <TabsContent value="pix" className="mt-6">
