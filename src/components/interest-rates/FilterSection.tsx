@@ -9,8 +9,11 @@ type FilterSectionProps = {
   setSearchTerm: (value: string) => void;
   typeFilter: string;
   setTypeFilter: (value: string) => void;
+  currencySubFilter?: string;
+  setCurrencySubFilter?: (value: string) => void;
   isLoading: boolean;
   onRefresh: () => void;
+  availableCurrencies?: string[];
 };
 
 export function FilterSection({
@@ -19,8 +22,11 @@ export function FilterSection({
   setSearchTerm,
   typeFilter,
   setTypeFilter,
+  currencySubFilter = "all",
+  setCurrencySubFilter,
   isLoading,
-  onRefresh
+  onRefresh,
+  availableCurrencies = []
 }: FilterSectionProps) {
   return (
     <div className="space-y-4">
@@ -60,32 +66,25 @@ export function FilterSection({
         </div>
       </div>
       
-      {currencyFilter === "CRYPTO" && (
+      {currencyFilter === "CRYPTO" && setCurrencySubFilter && (
         <div className="flex flex-wrap gap-2">
           <Badge 
-            variant={"default"}
+            variant={currencySubFilter === "all" ? "default" : "outline"}
             className="cursor-pointer"
+            onClick={() => setCurrencySubFilter("all")}
           >
             Todas las crypto
           </Badge>
-          <Badge 
-            variant={"outline"}
-            className="cursor-pointer"
-          >
-            USDT
-          </Badge>
-          <Badge 
-            variant={"outline"}
-            className="cursor-pointer"
-          >
-            DAI
-          </Badge>
-          <Badge 
-            variant={"outline"}
-            className="cursor-pointer"
-          >
-            USDC
-          </Badge>
+          {availableCurrencies.map(currency => (
+            <Badge 
+              key={currency}
+              variant={currencySubFilter === currency ? "default" : "outline"}
+              className="cursor-pointer"
+              onClick={() => setCurrencySubFilter(currency)}
+            >
+              {currency}
+            </Badge>
+          ))}
         </div>
       )}
       

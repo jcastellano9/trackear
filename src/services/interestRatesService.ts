@@ -23,3 +23,31 @@ export const getBestRateByCurrency = (rates: InterestRate[], currency: string): 
     return current.annualRate > best.annualRate ? current : best;
   }, currencyRates[0]);
 };
+
+// Get all available currencies
+export const getAvailableCurrencies = (rates: InterestRate[]): string[] => {
+  if (!rates || rates.length === 0) return [];
+  
+  const currencies = new Set<string>();
+  rates.forEach(rate => currencies.add(rate.currency));
+  
+  return Array.from(currencies);
+};
+
+// Filter rates by currency type (ARS, USD or CRYPTO)
+export const filterRatesByCurrencyType = (rates: InterestRate[], currencyType: "ARS" | "CRYPTO"): InterestRate[] => {
+  if (!rates) return [];
+  
+  return rates.filter(rate => {
+    if (currencyType === "ARS") {
+      return rate.currency === "ARS";
+    } else {
+      return rate.currency !== "ARS"; // All crypto currencies and USD
+    }
+  });
+};
+
+// Get notable cryptocurrencies for displaying separately
+export const getNotableCryptocurrencies = (): string[] => {
+  return ["BTC", "ETH", "USDT", "USDC", "DAI", "SOL", "BNB", "DOT", "ADA", "TRX", "AVAX"];
+};

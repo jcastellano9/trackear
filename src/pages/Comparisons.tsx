@@ -3,6 +3,7 @@ import { Navbar } from "@/components/Navbar";
 import { ExchangeRatesComparison } from "@/components/ExchangeRatesComparison";
 import { InterestRatesComparison } from "@/components/InterestRatesComparison";
 import { PixComparison } from "@/components/PixComparison";
+import { CryptoWalletComparison } from "@/components/CryptoWalletComparison";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 
@@ -18,8 +19,9 @@ const Comparisons = () => {
           </p>
           
           <Tabs defaultValue="exchange-rates" className="w-full">
-            <TabsList className="grid grid-cols-1 md:grid-cols-4 w-full bg-zinc-900 p-1">
+            <TabsList className="grid grid-cols-1 md:grid-cols-5 w-full bg-zinc-900 p-1">
               <TabsTrigger value="exchange-rates" className="data-[state=active]:bg-zinc-800">Cotizaciones</TabsTrigger>
+              <TabsTrigger value="wallet-rates" className="data-[state=active]:bg-zinc-800">Wallets Crypto</TabsTrigger>
               <TabsTrigger value="ars-rates" className="data-[state=active]:bg-zinc-800">Rendimientos ARS</TabsTrigger>
               <TabsTrigger value="crypto-rates" className="data-[state=active]:bg-zinc-800">Rendimientos Crypto</TabsTrigger>
               <TabsTrigger value="pix" className="data-[state=active]:bg-zinc-800">PIX</TabsTrigger>
@@ -27,6 +29,10 @@ const Comparisons = () => {
             
             <TabsContent value="exchange-rates" className="mt-6">
               <ExchangeRatesComparison />
+            </TabsContent>
+            
+            <TabsContent value="wallet-rates" className="mt-6">
+              <CryptoWalletComparison />
             </TabsContent>
             
             <TabsContent value="ars-rates" className="mt-6">
@@ -50,6 +56,6 @@ const Comparisons = () => {
       </footer>
     </div>
   );
-};
+}
 
 export default Comparisons;

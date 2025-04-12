@@ -3,7 +3,12 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink } from "lucide-react";
 import { InterestRate } from "@/types/interestRate";
-import { fetchInterestRates, getBestRateByCurrency } from "@/services/interestRatesService";
+import { 
+  fetchInterestRates, 
+  getBestRateByCurrency, 
+  filterRatesByCurrencyType, 
+  getNotableCryptocurrencies 
+} from "@/services/interestRatesService";
 import { formatTime } from "@/utils/formatUtils";
 import { FilterSection } from "./interest-rates/FilterSection";
 import { BestRatesSection } from "./interest-rates/BestRatesSection";
@@ -17,6 +22,7 @@ type InterestRatesComparisonProps = {
 export function InterestRatesComparison({ currencyFilter = "ARS" }: InterestRatesComparisonProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [currencySubFilter, setCurrencySubFilter] = useState<string>("all");
   
   // Use react-query to fetch data
   const { data: rates, isLoading, isError, refetch } = useQuery({
@@ -25,15 +31,9 @@ export function InterestRatesComparison({ currencyFilter = "ARS" }: InterestRate
   });
   
   // Filter rates based on currency type (ARS or CRYPTO)
-  const filteredByCurrencyType = rates?.filter(rate => {
-    if (currencyFilter === "ARS") {
-      return rate.currency === "ARS";
-    } else {
-      return rate.currency !== "ARS"; // All crypto currencies
-    }
-  }) || [];
+  const filteredByCurrencyType = filterRatesByCurrencyType(rates || [], currencyFilter);
   
-  // Apply additional filters (search and type)
+  // Apply additional filters (search, type, and currency)
   const filteredRates = filteredByCurrencyType.filter(rate => {
     // Apply search filter
     const matchesSearch = rate.provider.toLowerCase().includes(searchTerm.toLowerCase());
@@ -41,7 +41,12 @@ export function InterestRatesComparison({ currencyFilter = "ARS" }: InterestRate
     // Apply type filter
     const matchesType = typeFilter === "all" || rate.type === typeFilter;
     
-    return matchesSearch && matchesType;
+    // Apply currency subfilter (only for CRYPTO)
+    const matchesCurrency = currencyFilter === "ARS" || 
+                           currencySubFilter === "all" || 
+                           rate.currency === currencySubFilter;
+    
+    return matchesSearch && matchesType && matchesCurrency;
   });
   
   // Group rates by currency (only relevant for CRYPTO filter)
@@ -58,6 +63,9 @@ export function InterestRatesComparison({ currencyFilter = "ARS" }: InterestRate
     return getBestRateByCurrency(rates || [], currency);
   };
 
+  // Get notable cryptocurrencies for displaying
+  const notableCryptocurrencies = getNotableCryptocurrencies();
+
   // Handle refresh
   const handleRefresh = () => {
     refetch();
@@ -71,8 +79,11 @@ export function InterestRatesComparison({ currencyFilter = "ARS" }: InterestRate
         setSearchTerm={setSearchTerm}
         typeFilter={typeFilter}
         setTypeFilter={setTypeFilter}
+        currencySubFilter={currencySubFilter}
+        setCurrencySubFilter={setCurrencySubFilter}
         isLoading={isLoading}
         onRefresh={handleRefresh}
+        availableCurrencies={Object.keys(ratesByCurrency)}
       />
       
       <BestRatesSection 
@@ -81,6 +92,7 @@ export function InterestRatesComparison({ currencyFilter = "ARS" }: InterestRate
         isError={isError}
         currencyFilter={currencyFilter}
         getBestRateByCurrency={getBestRateForCurrency}
+        notableCryptocurrencies={currencyFilter === "CRYPTO" ? notableCryptocurrencies : ["ARS"]}
       />
       
       {currencyFilter === "ARS" ? (
@@ -88,7 +100,13 @@ export function InterestRatesComparison({ currencyFilter = "ARS" }: InterestRate
         <ARSRatesTable rates={filteredRates} />
       ) : (
         // CRYPTO View - Group by currency
-        <CryptoRatesTable currencyRates={Object.entries(ratesByCurrency)} />
+        <CryptoRatesTable 
+          currencyRates={
+            currencySubFilter === "all" 
+              ? Object.entries(ratesByCurrency) 
+              : Object.entries(ratesByCurrency).filter(([currency]) => currency === currencySubFilter)
+          } 
+        />
       )}
       
       <div className="text-sm text-zinc-500 flex items-center justify-between">
