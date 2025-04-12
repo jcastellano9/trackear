@@ -155,6 +155,10 @@ export function ExchangeRatesComparison() {
     }
   };
 
+  const formatPercentage = (value: number) => {
+    return `${Math.abs(value).toFixed(2)}%`;
+  };
+
   const refreshData = () => {
     setLoading(true);
     if (activeTab === 'dollar') {
@@ -213,14 +217,15 @@ export function ExchangeRatesComparison() {
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="grid grid-cols-3 text-sm font-medium border-b pb-2">
+            <div className="grid grid-cols-4 text-sm font-medium border-b pb-2">
               <div>Tipo</div>
               <div>Compra</div>
               <div>Venta</div>
+              <div className="text-right">Variación</div>
             </div>
             
             {data.map((rate, index) => (
-              <div key={index} className="grid grid-cols-3 py-4 border-b items-center">
+              <div key={index} className="grid grid-cols-4 py-4 border-b items-center">
                 <div className="flex items-center gap-2">
                   <img 
                     src={rate.logo || 'https://via.placeholder.com/24?text=?'} 
@@ -239,18 +244,20 @@ export function ExchangeRatesComparison() {
                 <div className="font-medium">
                   {formatCurrency(rate.buy)}
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{formatCurrency(rate.sell)}</span>
+                <div className="font-medium">
+                  {formatCurrency(rate.sell)}
+                </div>
+                <div className="flex justify-end">
                   {!rate.reference && (
                     <Badge 
                       variant={rate.change >= 0 ? "default" : "destructive"} 
-                      className="ml-auto inline-flex items-center"
+                      className="inline-flex items-center"
                     >
                       {rate.change >= 0 ? 
                         <ArrowUp className="h-3 w-3 mr-0.5" /> : 
                         <ArrowDown className="h-3 w-3 mr-0.5" />
                       }
-                      {Math.abs(rate.change)}%
+                      {formatPercentage(rate.change)}
                     </Badge>
                   )}
                 </div>
