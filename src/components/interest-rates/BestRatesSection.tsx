@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingUp } from "lucide-react";
 import { InterestRate } from "@/types/interestRate";
 import { formatPercentage, formatCurrency } from "@/utils/formatUtils";
+import { motion } from "framer-motion";
 
 type BestRatesSectionProps = {
   rates: InterestRate[] | undefined;
@@ -32,7 +33,7 @@ export function BestRatesSection({
       : ["USDT", "DAI", "USDC", "USD", "BTC", "ETH"];
 
   return (
-    <Card className="dark:bg-zinc-900 border-zinc-800">
+    <Card className="dark:bg-zinc-900/70 border-zinc-800/50 backdrop-blur-md">
       <CardHeader className="pb-2">
         <CardTitle>Mejores Rendimientos</CardTitle>
         <CardDescription>
@@ -54,7 +55,7 @@ export function BestRatesSection({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relevantCurrencies.map(currency => {
+            {relevantCurrencies.map((currency, index) => {
               const bestRate = getBestRateByCurrency(currency);
               if (!bestRate) return null;
               
@@ -90,20 +91,32 @@ export function BestRatesSection({
               else currencyName = currency;
               
               return (
-                <div key={currency} className="bg-zinc-800/50 p-4 rounded-lg">
+                <motion.div
+                  key={currency}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  whileHover={{ scale: 1.03, transition: { duration: 0.2 } }}
+                  className="glass-card p-4 rounded-lg hover:shadow-lg transition-all"
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <Badge variant="secondary">{currency}</Badge>
-                    <div className="text-2xl font-bold flex items-center gap-1">
+                    <Badge variant="secondary" className="bg-white/10 hover:bg-white/20">{currency}</Badge>
+                    <motion.div 
+                      initial={{ scale: 1 }}
+                      animate={{ scale: [1, 1.1, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatType: "loop" }}
+                      className="text-2xl font-bold flex items-center gap-1 text-green-400"
+                    >
                       {formatPercentage(bestRate.annualRate)}
                       <TrendingUp className="h-4 w-4 text-green-500" />
-                    </div>
+                    </motion.div>
                   </div>
                   <div className="flex items-center gap-2">
                     {logoUrl && (
                       <img 
                         src={logoUrl} 
                         alt={currencyName} 
-                        className="h-6 w-6 object-contain rounded-full" 
+                        className="h-6 w-6 object-contain rounded-full bg-white/10 p-1" 
                       />
                     )}
                     <div className="text-sm">{currencyName}</div>
@@ -113,7 +126,7 @@ export function BestRatesSection({
                       <img 
                         src={bestRate.logo} 
                         alt={bestRate.provider} 
-                        className="h-6 w-6 object-contain rounded-full" 
+                        className="h-6 w-6 object-contain rounded-full bg-white/10 p-1" 
                       />
                     )}
                     <div className="text-lg font-semibold">{bestRate.provider}</div>
@@ -134,7 +147,7 @@ export function BestRatesSection({
                       ? `Plazo: ${bestRate.term} días`
                       : "Disponibilidad inmediata"}
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>

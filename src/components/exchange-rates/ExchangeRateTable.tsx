@@ -5,6 +5,7 @@ import { ArrowUp, ArrowDown, DollarSign, CreditCard, Building, Briefcase, Users,
 import { ExchangeRate } from "@/types/exchangeRate";
 import { formatExchangeRateValue, formatPercentage } from "@/utils/exchangeRateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 interface ExchangeRateTableProps {
   data: ExchangeRate[];
@@ -57,6 +58,21 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
     );
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
+  };
+
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-4 text-sm font-medium border-b pb-2">
@@ -66,49 +82,62 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
         <div className="text-right">Variación</div>
       </div>
       
-      {data.map((rate, index) => (
-        <div key={index} className="grid grid-cols-4 py-4 border-b items-center">
-          <div className="flex items-center gap-2">
-            {rate.logo ? (
-              <img 
-                src={rate.logo} 
-                alt={rate.name}
-                className="h-6 w-6 object-contain"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = "https://via.placeholder.com/24?text=?";
-                }}
-              />
-            ) : (
-              getRateIcon(rate.name)
-            )}
-            <div>
-              <div className="font-medium">{rate.name}</div>
-              {rate.reference && <span className="text-xs text-muted-foreground">Referencia</span>}
+      <motion.div
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="space-y-1"
+      >
+        {data.map((rate, index) => (
+          <motion.div 
+            key={index} 
+            variants={item}
+            className="grid grid-cols-4 py-4 border-b items-center bg-white/5 rounded-lg hover:bg-white/10 transition-colors p-2"
+          >
+            <div className="flex items-center gap-2">
+              <div className="bg-white/10 p-2 rounded-full flex items-center justify-center">
+                {rate.logo ? (
+                  <img 
+                    src={rate.logo} 
+                    alt={rate.name}
+                    className="h-6 w-6 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://via.placeholder.com/24?text=?";
+                    }}
+                  />
+                ) : (
+                  getRateIcon(rate.name)
+                )}
+              </div>
+              <div>
+                <div className="font-medium">{rate.name}</div>
+                {rate.reference && <span className="text-xs text-muted-foreground">Referencia</span>}
+              </div>
             </div>
-          </div>
-          <div className="font-medium">
-            {formatExchangeRateValue(rate.buy)}
-          </div>
-          <div className="font-medium">
-            {formatExchangeRateValue(rate.sell)}
-          </div>
-          <div className="flex justify-end">
-            {!rate.reference && (
-              <Badge 
-                variant={rate.change >= 0 ? "default" : "destructive"} 
-                className="inline-flex items-center"
-              >
-                {rate.change >= 0 ? 
-                  <ArrowUp className="h-3 w-3 mr-0.5" /> : 
-                  <ArrowDown className="h-3 w-3 mr-0.5" />
-                }
-                {formatPercentage(rate.change)}
-              </Badge>
-            )}
-          </div>
-        </div>
-      ))}
+            <div className="font-medium">
+              {formatExchangeRateValue(rate.buy)}
+            </div>
+            <div className="font-medium">
+              {formatExchangeRateValue(rate.sell)}
+            </div>
+            <div className="flex justify-end">
+              {!rate.reference && (
+                <Badge 
+                  variant={rate.change >= 0 ? "default" : "destructive"} 
+                  className={`inline-flex items-center ${rate.change >= 0 ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
+                >
+                  {rate.change >= 0 ? 
+                    <ArrowUp className="h-3 w-3 mr-0.5" /> : 
+                    <ArrowDown className="h-3 w-3 mr-0.5" />
+                  }
+                  {formatPercentage(rate.change)}
+                </Badge>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
       
       <div className="text-xs text-muted-foreground text-right pt-2">
         Última actualización: {lastUpdated.toLocaleTimeString('es-AR')}

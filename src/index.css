@@ -46,11 +46,54 @@
   * {
     @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(30, 58, 138, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(120, 53, 15, 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(6, 78, 59, 0.1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(109, 40, 217, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
   }
 
   .glass-card {
     @apply bg-secondary/20 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg;
+  }
+  
+  .animated-gradient {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+  
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:bg-white/10;
+  }
+  
+  .pulse-animation {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.7;
+    }
   }
 }
