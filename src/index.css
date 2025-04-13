@@ -96,4 +96,60 @@
       opacity: 0.7;
     }
   }
+  
+  /* New animations */
+  .floating {
+    animation: floating 3s ease-in-out infinite;
+  }
+  
+  @keyframes floating {
+    0% { transform: translate(0, 0px); }
+    50% { transform: translate(0, 15px); }
+    100% { transform: translate(0, 0px); }
+  }
+  
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  .scale-in-center {
+    animation: scale-in-center 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+  }
+  
+  @keyframes scale-in-center {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-500 to-blue-400;
+  }
+  
+  .glow {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  }
+  
+  .glow-box {
+    box-shadow: 0 0 15px rgba(132, 90, 223, 0.5);
+  }
+  
+  .card-3d {
+    transition: transform 0.3s ease;
+  }
+  
+  .card-3d:hover {
+    transform: translateY(-5px) rotateX(2deg);
+  }
 }

@@ -24,6 +24,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff, UserCircle, Mail, Lock } from "lucide-react";
+import { motion } from "framer-motion";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -36,6 +38,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,56 +72,125 @@ export function LoginForm() {
     }, 1500);
   }
 
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Iniciar sesión</CardTitle>
-        <CardDescription>
+    <Card className="w-full max-w-md mx-auto glass-card border-white/10 backdrop-blur-xl shadow-xl">
+      <CardHeader className="space-y-2">
+        <div className="mx-auto rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mb-2">
+          <UserCircle className="h-10 w-10 text-primary" />
+        </div>
+        <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent">
+          Iniciar sesión
+        </CardTitle>
+        <CardDescription className="text-center">
           Ingresa tus credenciales para acceder a tu cuenta
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Correo electrónico</FormLabel>
-                  <FormControl>
-                    <Input placeholder="tu@email.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="******" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
-            </Button>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Correo electrónico</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          placeholder="tu@email.com" 
+                          className="pl-10 bg-white/5" 
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contraseña</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          type={showPassword ? "text" : "password"} 
+                          placeholder="******" 
+                          className="pl-10 bg-white/5" 
+                          {...field} 
+                        />
+                        <button 
+                          type="button"
+                          className="absolute right-3 top-3"
+                          onClick={togglePasswordVisibility}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </motion.div>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+              </Button>
+            </motion.div>
           </form>
         </Form>
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">
-        <div className="text-sm text-muted-foreground text-center">
+        <motion.div 
+          className="text-sm text-muted-foreground text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+        >
           ¿No tienes una cuenta? <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/register")}>Regístrate</Button>
-        </div>
-        <div className="text-sm text-muted-foreground text-center">
+        </motion.div>
+        <motion.div 
+          className="text-sm text-muted-foreground text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.5 }}
+        >
           <Button variant="link" className="p-0 h-auto">¿Olvidaste tu contraseña?</Button>
-        </div>
+        </motion.div>
       </CardFooter>
     </Card>
   );
