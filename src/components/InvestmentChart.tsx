@@ -124,21 +124,21 @@ export function InvestmentChart() {
       </div>
 
       {loading ? (
-        <div className="h-[200px] w-full flex items-center justify-center">
+        <div className="h-[250px] w-full flex items-center justify-center">
           <p className="text-muted-foreground">Cargando datos...</p>
         </div>
       ) : (
-        <div className="h-[200px] w-full">
+        <div className="h-[250px] w-full">
           <ChartContainer
             config={{
-              primary: { color: "#9b87f5" },
-              secondary: { color: "#ea384c" },
+              primary: { color: "#f87171" }, // Red line for invested amount
+              secondary: { color: "#818cf8" }, // Blue line for current value
             }}
           >
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={chartData}
-                margin={{ top: 5, right: 20, left: 0, bottom: 5 }}
+                margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
               >
                 <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                 <XAxis 
@@ -152,6 +152,8 @@ export function InvestmentChart() {
                 <YAxis 
                   tick={{ fontSize: 10 }}
                   tickFormatter={(value) => `$${(value).toLocaleString('es-AR')}`}
+                  domain={['dataMin - 100', 'dataMax + 100']}
+                  width={60}
                 />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ fontSize: '10px' }} />

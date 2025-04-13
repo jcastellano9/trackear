@@ -57,13 +57,13 @@ export function Dashboard() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="border rounded-lg p-6 space-y-4">
           <div>
             <h2 className="text-xl font-bold">Rendimiento de inversiones</h2>
             <p className="text-sm text-muted-foreground">Evolución del capital invertido vs. valor actual</p>
           </div>
-          <div className="h-[250px] mt-6">
+          <div className="h-[300px] mt-6">
             <InvestmentChart />
           </div>
         </div>

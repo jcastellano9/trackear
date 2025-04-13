@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, DollarSign, CreditCard, Building, Briefcase, Users, Bitcoin } from "lucide-react";
 import { ExchangeRate } from "@/types/exchangeRate";
 import { formatExchangeRateValue, formatPercentage } from "@/utils/exchangeRateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +11,30 @@ interface ExchangeRateTableProps {
   loading: boolean;
   lastUpdated: Date;
 }
+
+// Helper function to get the appropriate icon for each rate type
+const getRateIcon = (rateName: string) => {
+  const iconClassName = "h-5 w-5 text-muted-foreground";
+  
+  switch(rateName.toLowerCase()) {
+    case "oficial":
+      return <DollarSign className={iconClassName} />;
+    case "blue":
+      return <DollarSign className={`${iconClassName} text-blue-500`} />;
+    case "bolsa":
+      return <Briefcase className={iconClassName} />;
+    case "contado con liquidación":
+      return <Building className={iconClassName} />;
+    case "mayorista":
+      return <Users className={iconClassName} />;
+    case "cripto":
+      return <Bitcoin className={iconClassName} />;
+    case "tarjeta":
+      return <CreditCard className={iconClassName} />;
+    default:
+      return <DollarSign className={iconClassName} />;
+  }
+};
 
 export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({ 
   data, 
@@ -45,15 +69,19 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
       {data.map((rate, index) => (
         <div key={index} className="grid grid-cols-4 py-4 border-b items-center">
           <div className="flex items-center gap-2">
-            <img 
-              src={rate.logo || 'https://via.placeholder.com/24?text=?'} 
-              alt={rate.name}
-              className="h-6 w-6 object-contain"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "https://via.placeholder.com/24?text=?";
-              }}
-            />
+            {rate.logo ? (
+              <img 
+                src={rate.logo} 
+                alt={rate.name}
+                className="h-6 w-6 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = "https://via.placeholder.com/24?text=?";
+                }}
+              />
+            ) : (
+              getRateIcon(rate.name)
+            )}
             <div>
               <div className="font-medium">{rate.name}</div>
               {rate.reference && <span className="text-xs text-muted-foreground">Referencia</span>}
