@@ -47,3 +47,14 @@ npm install
 
 # 4. Iniciar el servidor de desarrollo
 npm run dev
+
+📁 src/                      # Código fuente principal
+├── components/             # Componentes de UI y simuladores (WalletSimulator, SimulationTool, etc.)
+├── pages/                  # Vistas principales: Simulación, Inversiones, Comparación, Perfil, etc.
+├── services/               # Acceso a APIs externas (DolarAPI, Comparatasas, etc.)
+├── hooks/                  # Hooks personalizados (ej: uso de tasas, detección de móvil)
+├── utils/                  # Funciones auxiliares (formateo, validaciones, cálculos)
+├── types/                  # Definiciones de tipos TypeScript (wallets, tasas, exchange rates)
+├── data/                   # Datos mockeados para pruebas (tasas, billeteras)
+├── App.tsx / main.tsx      # Componente raíz y punto de entrada de la app
+└── estilos y configuración # CSS base, tipado Vite, etc.
