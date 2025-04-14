@@ -1,58 +1,60 @@
-Bienvenido a mi proyecto TrackeArBit
+# 📊 TrackeArBit – Sistema Web para la Gestión Personal de Inversiones Financieras
 
-Información del proyecto
+**TrackeArBit** es una aplicación web desarrollada para centralizar, visualizar y analizar distintas alternativas de inversión disponibles en Argentina. Permite registrar operaciones con criptomonedas y CEDEARs, simular rendimientos de plazos fijos y billeteras virtuales, y tomar decisiones financieras informadas dentro de un entorno unificado y adaptado al contexto económico local.
 
-URL: https://lovable.dev/projects/48eedabe-7c46-49b0-8576-3b4a1cac248f
+---
 
-¿Cómo puedo editar el código?
+## 🧠 ¿Para qué sirve?
 
-Hay varias formas de editar esta aplicación.
+- 💹 Registrar inversiones en criptomonedas y CEDEARs.
+- 📈 Visualizar la evolución de tu cartera con gráficos dinámicos.
+- 🏦 Simular rendimientos de plazos fijos y cuentas digitales.
+- 🔄 Comparar cotizaciones de activos en tiempo real.
+- 🛍️ Evaluar decisiones de consumo: cuotas vs. contado.
+- 🌎 Explorar alternativas como pagos vía PIX en plataformas externas.
 
-💻 Usando el editor de código preferido
+---
 
-Si prefiero trabajar localmente desde mi propio editor, puedo clonar el repositorio y luego subir los cambios. Todo lo que suba también se verá reflejado en Lovable.
+## ⚙️ Tecnologías utilizadas
 
-Requisitos: tener instalado Node.js y npm — instalación recomendada con nvm
+- **Vite** — Entorno de desarrollo rápido.
+- **React + TypeScript** — Desarrollo moderno y tipado seguro.
+- **Tailwind CSS** — Estilado visual con clases utilitarias.
+- **shadcn/ui** — Componentes accesibles y reutilizables.
+- **Chart.js / Recharts** — Visualización de datos.
+- **React Query** — Manejo eficiente de datos remotos.
+- **Axios** — Consultas a APIs externas (DolarAPI, Comparatasas, etc.).
+- **SQLite** — Base de datos embebida, ideal para prototipos.
+- **Node.js + Express** — Lógica backend y APIs REST.
 
-Pasos:
+---
 
-# Paso 1: Clonar el repositorio con la URL del proyecto.
-git clone <TU_URL_GIT>
+## 🚀 Instalación local
 
-# Paso 2: Ingresar a la carpeta del proyecto.
-cd <NOMBRE_DEL_PROYECTO>
+> 📌 Asegurate de tener **Node.js** y **npm** instalados.
 
-# Paso 3: Instalar las dependencias necesarias.
-npm i
+### 🔧 Pasos
 
-# Paso 4: Iniciar el servidor de desarrollo con recarga automática.
+```bash
+# 1. Clonar el repositorio
+git clone <TU_URL_DEL_REPO>
+
+# 2. Ingresar a la carpeta del proyecto
+cd trackearbit-finanzas-argentinas
+
+# 3. Instalar dependencias
+npm install
+
+# 4. Iniciar el servidor de desarrollo
 npm run dev
 
-✏️ Editando archivos desde GitHub
-	•	Navegá hasta el archivo que querés modificar.
-	•	Hacé clic en el ícono de lápiz (“Edit”) arriba a la derecha.
-	•	Realizá tus cambios y confirmalos con un commit.
-
-⚙️ Usando GitHub Codespaces
-	•	Ingresá a la página principal del repositorio.
-	•	Hacé clic en el botón verde “Code”.
-	•	Seleccioná la pestaña “Codespaces”.
-	•	Hacé clic en “New codespace” para lanzar un entorno nuevo.
-	•	Editá archivos directamente desde allí y confirmá los cambios cuando termines.
-
-¿Qué tecnologías estoy usando?
-
-Este proyecto está desarrollado con:
-	•	Vite como empaquetador.
-	•	TypeScript como lenguaje tipado.
-	•	React para la construcción de interfaces.
-	•	shadcn-ui como librería de componentes.
-	•	Tailwind CSS para el diseño visual.
-
-¿Se puede conectar un dominio personalizado?
-
-Sí,
-
-Para conectar un dominio propio, tengo que ir a Proyecto > Configuración > Dominios y hacer clic en Conectar dominio.
-
-Podés ver el paso a paso acá: Guía para conectar un dominio personalizado
+📁 src/                      # Código fuente principal
+├── components/             # Componentes de UI y simuladores (WalletSimulator, SimulationTool, etc.)
+├── pages/                  # Vistas principales: Simulación, Inversiones, Comparación, Perfil, etc.
+├── services/               # Acceso a APIs externas (DolarAPI, Comparatasas, etc.)
+├── hooks/                  # Hooks personalizados (ej: uso de tasas, detección de móvil)
+├── utils/                  # Funciones auxiliares (formateo, validaciones, cálculos)
+├── types/                  # Definiciones de tipos TypeScript (wallets, tasas, exchange rates)
+├── data/                   # Datos mockeados para pruebas (tasas, billeteras)
+├── App.tsx / main.tsx      # Componente raíz y punto de entrada de la app
+└── estilos y configuración # CSS base, tipado Vite, etc.
