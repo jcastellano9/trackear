@@ -1,6 +1,6 @@
-# 📊 TrackeArBit – Sistema Web para la Gestión Personal de Inversiones Financieras
+# 📊 TrackeAr – Sistema Web para la Gestión Personal de Inversiones Financieras
 
-**TrackeArBit** es una aplicación web desarrollada para centralizar, visualizar y analizar distintas alternativas de inversión disponibles en Argentina. Permite registrar operaciones con criptomonedas y CEDEARs, simular rendimientos de plazos fijos y billeteras virtuales, y tomar decisiones financieras informadas dentro de un entorno unificado y adaptado al contexto económico local.
+**TrackeAr** es una aplicación web desarrollada para centralizar, visualizar y analizar distintas alternativas de inversión disponibles en Argentina. Permite registrar operaciones con criptomonedas y CEDEARs, simular rendimientos de plazos fijos y billeteras virtuales, y tomar decisiones financieras informadas dentro de un entorno unificado y adaptado al contexto económico local.
 
 ---
 
@@ -40,7 +40,7 @@
 git clone <TU_URL_DEL_REPO>
 
 # 2. Ingresar a la carpeta del proyecto
-cd trackearbit-finanzas-argentinas
+cd trackear
 
 # 3. Instalar dependencias
 npm install
