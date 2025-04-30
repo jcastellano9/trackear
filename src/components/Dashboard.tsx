@@ -52,7 +52,7 @@ export function Dashboard() {
         className="text-center md:text-left"
       >
         <h1 className="text-4xl font-bold text-gradient glow">
-          Bienvenido a TrackeAr
+          Bienvenido a TrackeArBit
         </h1>
         <p className="text-muted-foreground mt-2">
           Centraliza y gestiona todas tus inversiones en un solo lugar
