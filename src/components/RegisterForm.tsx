@@ -85,7 +85,7 @@ export function RegisterForm() {
       <CardHeader>
         <CardTitle>Crear cuenta</CardTitle>
         <CardDescription>
-          Completa el formulario para registrarte en TrackeArBit
+          Completa el formulario para registrarte en TrackeAr
         </CardDescription>
       </CardHeader>
       <CardContent>
