@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { createClient } from '@supabase/supabase-js';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from "./lib/supabase";
 import Index from "./pages/Index";
 import Investments from "./pages/Investments";
 import Comparisons from "./pages/Comparisons";
@@ -22,15 +22,9 @@ import PrivateRoute from "./components/PrivateRoute";
 const App = () => {
   // Create a new QueryClient instance within the component
   const [queryClient] = useState(() => new QueryClient());
-  
-  // Supabase client
-  const [supabaseClient] = useState(() => createClient(
-    import.meta.env.VITE_SUPABASE_URL || '',
-    import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-  ));
 
   return (
-    <SessionContextProvider supabaseClient={supabaseClient}>
+    <SessionContextProvider supabaseClient={supabase}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />

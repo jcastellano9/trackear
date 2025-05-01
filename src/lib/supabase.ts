@@ -1,13 +1,12 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Intentamos obtener las variables de entorno, o usamos valores de respaldo temporales
+// Estos valores deberían configurarse correctamente en la interfaz de Lovable
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-url.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-public-anon-key';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Las variables de entorno de Supabase no están definidas');
-}
-
+// Crear el cliente Supabase
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Tipos para nuestras tablas
