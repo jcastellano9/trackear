@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,45 +13,22 @@ import {
 } from "@/components/ui/card";
 import {
   Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { motion } from "framer-motion";
 import { UserPlus, Mail, Lock, User } from "lucide-react";
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "El nombre debe tener al menos 2 caracteres.",
-  }),
-  email: z.string().email({
-    message: "Por favor, ingresa un correo electrónico válido.",
-  }),
-  password: z.string().min(6, {
-    message: "La contraseña debe tener al menos 6 caracteres.",
-  }),
-  confirmPassword: z.string().min(6, {
-    message: "La contraseña debe tener al menos 6 caracteres.",
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Las contraseñas no coinciden",
-  path: ["confirmPassword"],
-});
+import { FormFieldWithIcon } from "./form/FormFieldWithIcon";
+import { registerFormSchema, type RegisterFormValues } from "@/lib/schemas/registerSchema";
 
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const supabase = useSupabaseClient();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: {
       name: "",
       email: "",
@@ -61,7 +37,7 @@ export function RegisterForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: RegisterFormValues) {
     setIsLoading(true);
     
     try {
@@ -110,140 +86,126 @@ export function RegisterForm() {
   return (
     <Card className="w-full max-w-md mx-auto glass-card border-white/10 backdrop-blur-xl shadow-xl">
       <CardHeader className="space-y-2">
-        <motion.div 
-          className="mx-auto rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mb-2"
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        >
-          <UserPlus className="h-10 w-10 text-primary" />
-        </motion.div>
-        <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent">
-          Crear cuenta
-        </CardTitle>
-        <CardDescription className="text-center">
-          Completa el formulario para registrarte en TrackeArBit
-        </CardDescription>
+        <FormHeader />
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre completo</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Juan Pérez" className="pl-10 bg-white/5" {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Correo electrónico</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="tu@email.com" className="pl-10 bg-white/5" {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Contraseña</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input type="password" placeholder="******" className="pl-10 bg-white/5" {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </motion.div>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.3 }}
-            >
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirmar contraseña</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input type="password" placeholder="******" className="pl-10 bg-white/5" {...field} />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </motion.div>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.3, delay: 0.4 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300" disabled={isLoading}>
-                {isLoading ? "Creando cuenta..." : "Crear cuenta"}
-              </Button>
-            </motion.div>
+            <FormFields control={form.control} />
+            <SubmitButton isLoading={isLoading} />
           </form>
         </Form>
       </CardContent>
       <CardFooter>
-        <motion.div 
-          className="text-sm text-muted-foreground text-center w-full"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.5 }}
-        >
-          ¿Ya tienes una cuenta? <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/login")}>Inicia sesión</Button>
-        </motion.div>
+        <LoginLink navigate={navigate} />
       </CardFooter>
     </Card>
   );
 }
+
+// Componentes auxiliares
+const FormHeader = () => (
+  <>
+    <motion.div 
+      className="mx-auto rounded-full bg-primary/10 w-16 h-16 flex items-center justify-center mb-2"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 260, damping: 20 }}
+    >
+      <UserPlus className="h-10 w-10 text-primary" />
+    </motion.div>
+    <CardTitle className="text-2xl font-bold text-center bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent">
+      Crear cuenta
+    </CardTitle>
+    <CardDescription className="text-center">
+      Completa el formulario para registrarte en TrackeArBit
+    </CardDescription>
+  </>
+);
+
+const FormFields = ({ control }: { control: any }) => (
+  <>
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <FormFieldWithIcon
+        name="name"
+        label="Nombre completo"
+        placeholder="Juan Pérez"
+        control={control}
+        icon={User}
+      />
+    </motion.div>
+    
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.1 }}
+    >
+      <FormFieldWithIcon
+        name="email"
+        label="Correo electrónico"
+        placeholder="tu@email.com"
+        control={control}
+        icon={Mail}
+      />
+    </motion.div>
+    
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.2 }}
+    >
+      <FormFieldWithIcon
+        name="password"
+        label="Contraseña"
+        placeholder="******"
+        type="password"
+        control={control}
+        icon={Lock}
+      />
+    </motion.div>
+    
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.3 }}
+    >
+      <FormFieldWithIcon
+        name="confirmPassword"
+        label="Confirmar contraseña"
+        placeholder="******"
+        type="password"
+        control={control}
+        icon={Lock}
+      />
+    </motion.div>
+  </>
+);
+
+const SubmitButton = ({ isLoading }: { isLoading: boolean }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ duration: 0.3, delay: 0.4 }}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+  >
+    <Button type="submit" className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all duration-300" disabled={isLoading}>
+      {isLoading ? "Creando cuenta..." : "Crear cuenta"}
+    </Button>
+  </motion.div>
+);
+
+const LoginLink = ({ navigate }: { navigate: (path: string) => void }) => (
+  <motion.div 
+    className="text-sm text-muted-foreground text-center w-full"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.3, delay: 0.5 }}
+  >
+    ¿Ya tienes una cuenta? <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/login")}>Inicia sesión</Button>
+  </motion.div>
+);
