@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CircleDollarSign, Menu, X, LogIn, UserPlus, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -20,27 +20,60 @@ import {
   AvatarImage,
 } from "@/components/ui/avatar";
 import { toast } from "sonner";
+import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { supabase } from "@/lib/supabase";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const location = useLocation();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  
+  // Usar Supabase para la sesión
+  const session = useSession();
+  const supabaseClient = useSupabaseClient();
+  
   const [user, setUser] = useState<{name: string, email: string} | null>(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setIsLoggedIn(true);
-      setUser(JSON.parse(storedUser));
+    const loadUserProfile = async () => {
+      if (session?.user) {
+        // Obtener perfil de usuario desde Supabase
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .single();
+          
+        if (data) {
+          setUser({
+            name: data.full_name,
+            email: session.user.email || '',
+          });
+        } else {
+          // Si no hay perfil, usar datos básicos de la sesión
+          setUser({
+            name: session.user.email?.split('@')[0] || 'Usuario',
+            email: session.user.email || '',
+          });
+        }
+      }
+    };
+    
+    if (session) {
+      loadUserProfile();
     }
-  }, []);
+  }, [session]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setUser(null);
-    toast.success("Sesión cerrada correctamente");
+  const handleLogout = async () => {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      console.error('Error al cerrar sesión:', error);
+      toast.error("Error al cerrar sesión");
+    } else {
+      toast.success("Sesión cerrada correctamente");
+      navigate('/login');
+    }
   };
 
   const closeMenu = () => {
@@ -54,6 +87,7 @@ export function Navbar() {
     return name.split(" ").map(n => n[0]).join("").toUpperCase();
   };
 
+  // El resto del componente Navbar permanece igual
   return (
     <nav className="bg-background border-b">
       <div className="container mx-auto px-4">
@@ -112,12 +146,12 @@ export function Navbar() {
           <div className="flex items-center space-x-2">
             <ThemeSwitcher />
             
-            {isLoggedIn ? (
+            {session ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
                     <Avatar>
-                      <AvatarImage src="/placeholder.svg" alt={user?.name || "Usuario"} />
+                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'anonymous'}`} alt={user?.name || "Usuario"} />
                       <AvatarFallback>{user ? getInitials(user.name) : "U"}</AvatarFallback>
                     </Avatar>
                   </Button>
@@ -223,7 +257,7 @@ export function Navbar() {
               Simulación
             </Link>
             
-            {!isLoggedIn && (
+            {!session && (
               <>
                 <Link
                   to="/login"
@@ -242,7 +276,7 @@ export function Navbar() {
               </>
             )}
             
-            {isLoggedIn && (
+            {session && (
               <>
                 <Link
                   to="/profile"

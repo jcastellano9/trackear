@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,11 +14,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { getOptionsByType } from "@/utils/investmentOptions";
-import { investmentFormSchema, type InvestmentFormValues } from "@/utils/investmentValidation";
-import { SimulationWarning } from "@/components/SimulationWarning";
-import { AssetSelectionField } from "@/components/AssetSelectionField";
 import {
   Select,
   SelectContent,
@@ -25,192 +21,231 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { supabase } from "@/lib/supabase";
 
-type AddInvestmentFormProps = {
+// Schema para validar los datos del formulario
+const investmentSchema = z.object({
+  tipo: z.enum(["cripto", "cedear"], {
+    required_error: "Debes seleccionar el tipo de inversión",
+  }),
+  activo: z.string().min(1, {
+    message: "Debes ingresar el nombre del activo",
+  }),
+  cantidad: z.coerce.number().positive({
+    message: "La cantidad debe ser un número positivo",
+  }),
+  precio_compra: z.coerce.number().positive({
+    message: "El precio debe ser un número positivo",
+  }),
+  moneda: z.string().min(1, {
+    message: "Debes seleccionar una moneda",
+  }),
+  fecha_compra: z.string().min(1, {
+    message: "Debes seleccionar una fecha",
+  }),
+});
+
+interface AddInvestmentFormProps {
   onSuccess?: () => void;
-};
+}
 
 export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSimulationWarning, setShowSimulationWarning] = useState(false);
-  const [selectedLogo, setSelectedLogo] = useState<string>();
+  const session = useSession();
 
-  // Initialize form with default values
-  const form = useForm<InvestmentFormValues>({
-    resolver: zodResolver(investmentFormSchema),
+  // Configuración del formulario con React Hook Form
+  const form = useForm<z.infer<typeof investmentSchema>>({
+    resolver: zodResolver(investmentSchema),
     defaultValues: {
-      type: "",
-      name: "",
-      symbol: "",
-      quantity: "",
-      purchasePrice: "",
-      purchaseDate: new Date().toISOString().split("T")[0],
+      tipo: "cripto",
+      activo: "",
+      cantidad: 0,
+      precio_compra: 0,
+      moneda: "USD",
+      fecha_compra: new Date().toISOString().split("T")[0],
     },
   });
 
-  // Handle form submission
-  const onSubmit = (data: InvestmentFormValues) => {
-    if (data.type === "fixed" || data.type === "wallets") {
-      setShowSimulationWarning(true);
+  async function onSubmit(values: z.infer<typeof investmentSchema>) {
+    if (!session?.user) {
+      toast.error("Debes iniciar sesión para agregar inversiones");
       return;
     }
-
+    
     setIsSubmitting(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Datos de la inversión:", {...data, logo: selectedLogo});
-      toast.success("Inversión agregada correctamente");
-      setIsSubmitting(false);
-      form.reset();
-      setSelectedLogo(undefined);
+    try {
+      const newInvestment = {
+        ...values,
+        user_id: session.user.id,
+        created_at: new Date().toISOString(),
+      };
       
-      if (onSuccess) {
-        onSuccess();
-      }
-    }, 1000);
-  };
-
-  // Update symbol and logo when an asset is selected
-  const handleAssetSelection = (name: string, type: string) => {
-    const options = getOptionsByType(type);
-    const selected = options.find(option => option.name === name);
-    
-    if (selected) {
-      form.setValue("symbol", selected.value);
-      setSelectedLogo(selected.logo);
+      const { error } = await supabase
+        .from('investments')
+        .insert([newInvestment]);
+        
+      if (error) throw error;
+      
+      toast.success("Inversión agregada correctamente");
+      form.reset();
+      onSuccess?.();
+    } catch (error: any) {
+      console.error("Error al guardar la inversión:", error);
+      toast.error(error.message || "Error al guardar la inversión");
+    } finally {
+      setIsSubmitting(false);
     }
-  };
-
-  // Handle simulation warning actions
-  const handleSimulationContinue = () => {
-    setShowSimulationWarning(false);
-    if (onSuccess) {
-      onSuccess();
-    }
-    toast.success("Simulación guardada correctamente");
-  };
+  }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {showSimulationWarning && (
-          <SimulationWarning 
-            onCancel={() => setShowSimulationWarning(false)} 
-            onContinue={handleSimulationContinue} 
-          />
-        )}
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField
             control={form.control}
-            name="type"
+            name="tipo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tipo de inversión</FormLabel>
                 <Select 
-                  onValueChange={(value) => {
-                    field.onChange(value);
-                    form.setValue("name", "");
-                    form.setValue("symbol", "");
-                    setSelectedLogo(undefined);
-                  }} 
+                  onValueChange={field.onChange} 
                   defaultValue={field.value}
+                  disabled={isSubmitting}
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Selecciona un tipo" />
+                      <SelectValue placeholder="Selecciona el tipo" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="crypto">Criptomoneda</SelectItem>
-                    <SelectItem value="cedears">CEDEAR</SelectItem>
-                    <SelectItem value="fixed">Plazo Fijo</SelectItem>
-                    <SelectItem value="wallets">Billetera Virtual</SelectItem>
+                    <SelectItem value="cripto">Criptomoneda</SelectItem>
+                    <SelectItem value="cedear">CEDEAR</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Categoría de tu inversión
+                  Selecciona el tipo de activo que estás registrando
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <AssetSelectionField onAssetSelection={handleAssetSelection} />
-
+          
           <FormField
             control={form.control}
-            name="symbol"
+            name="activo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Símbolo</FormLabel>
+                <FormLabel>Activo</FormLabel>
                 <FormControl>
-                  <Input readOnly={form.getValues("type") !== "fixed"} {...field} />
+                  <Input placeholder="Ej: Bitcoin, Apple, etc." {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormDescription>
-                  Símbolo o ticker del activo
+                  Nombre del activo que has comprado
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          
           <FormField
             control={form.control}
-            name="quantity"
+            name="cantidad"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Cantidad</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" placeholder="Ej: 0.5, 10" {...field} />
+                  <Input type="number" step="any" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormDescription>
-                  Cantidad adquirida
+                  Cantidad de unidades compradas
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          
           <FormField
             control={form.control}
-            name="purchasePrice"
+            name="precio_compra"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{form.getValues("type") === "fixed" || form.getValues("type") === "wallets" ? "Monto" : "Precio de compra"}</FormLabel>
+                <FormLabel>Precio de compra</FormLabel>
                 <FormControl>
-                  <Input type="number" step="any" placeholder="Ej: 30000, 180.5" {...field} />
+                  <Input type="number" step="any" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormDescription>
-                  {form.getValues("type") === "fixed" || form.getValues("type") === "wallets" ? "Monto en ARS" : "Precio unitario en USD"}
+                  Precio unitario de compra
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          
           <FormField
             control={form.control}
-            name="purchaseDate"
+            name="moneda"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moneda</FormLabel>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  disabled={isSubmitting}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona la moneda" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="ARS">Peso argentino (ARS)</SelectItem>
+                    <SelectItem value="USD">Dólar (USD)</SelectItem>
+                    <SelectItem value="EUR">Euro (EUR)</SelectItem>
+                    <SelectItem value="BRL">Real brasileño (BRL)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Moneda en la que realizaste la compra
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="fecha_compra"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Fecha de compra</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input type="date" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormDescription>
-                  Fecha de adquisición
+                  Fecha en que realizaste la compra
                 </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Guardando..." : "Guardar inversión"}
-        </Button>
+        
+        <div className="flex justify-end pt-4">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Guardando...
+              </>
+            ) : (
+              "Guardar inversión"
+            )}
+          </Button>
+        </div>
       </form>
     </Form>
   );

@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, UserCircle, Mail, Lock } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -40,6 +41,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const supabase = useSupabaseClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,28 +51,56 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    // Simular inicio de sesión
-    setTimeout(() => {
-      // En un caso real, esto sería una llamada a la API
-      console.log("Inicio de sesión:", values);
-      
-      // Guardar sesión en localStorage
-      localStorage.setItem("user", JSON.stringify({ 
-        id: "user1", 
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
-        name: "Usuario Demo",
-        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=demo",
-        createdAt: new Date().toISOString()
-      }));
+        password: values.password,
+      });
       
-      setIsLoading(false);
+      if (error) {
+        throw error;
+      }
+      
       toast.success("Inicio de sesión exitoso");
       navigate("/");
-    }, 1500);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Error al iniciar sesión");
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  const handleForgotPassword = async () => {
+    const email = form.getValues("email");
+    
+    if (!email) {
+      toast.error("Por favor ingresa tu correo electrónico para recuperar tu contraseña");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/update-password",
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      toast.success("Se ha enviado un enlace de recuperación a tu correo electrónico");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Error al solicitar la recuperación de contraseña");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const togglePasswordVisibility = () => setShowPassword(!showPassword);
 
@@ -189,7 +219,7 @@ export function LoginForm() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.5 }}
         >
-          <Button variant="link" className="p-0 h-auto">¿Olvidaste tu contraseña?</Button>
+          <Button variant="link" className="p-0 h-auto" onClick={handleForgotPassword}>¿Olvidaste tu contraseña?</Button>
         </motion.div>
       </CardFooter>
     </Card>

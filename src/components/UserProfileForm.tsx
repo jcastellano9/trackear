@@ -26,6 +26,8 @@ import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSession, useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
+import { supabase } from "@/lib/supabase";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, {
@@ -36,85 +38,126 @@ const profileFormSchema = z.object({
   }),
 });
 
-type User = {
+type Profile = {
   id: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  createdAt: string;
+  user_id: string;
+  full_name: string;
+  avatar_url?: string;
+  created_at: string;
 };
 
 export function UserProfileForm() {
-  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const supabaseClient = useSupabaseClient();
+  const session = useSession();
+  const user = useUser();
   
   useEffect(() => {
-    // Obtener el usuario del localStorage
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      // Si no hay usuario, redirigir al login
-      navigate("/login");
+    async function loadProfile() {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+          
+        if (error) {
+          console.error('Error loading profile:', error);
+          return;
+        }
+        
+        if (data) {
+          setProfile(data);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
-  }, [navigate]);
+    
+    loadProfile();
+  }, [user]);
   
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: user?.name || "",
-      email: user?.email || "",
+      name: "",
+      email: "",
     },
     values: {
-      name: user?.name || "",
+      name: profile?.full_name || "",
       email: user?.email || "",
     },
   });
   
-  // Actualizar valores del formulario cuando el usuario cambia
+  // Actualizar valores del formulario cuando el perfil cambia
   useEffect(() => {
-    if (user) {
+    if (profile && user) {
       form.reset({
-        name: user.name,
-        email: user.email,
+        name: profile.full_name,
+        email: user.email || "",
       });
     }
-  }, [user, form]);
+  }, [profile, user, form]);
   
-  function onSubmit(values: z.infer<typeof profileFormSchema>) {
+  async function onSubmit(values: z.infer<typeof profileFormSchema>) {
+    if (!user) return;
+    
     setIsLoading(true);
     
-    // Simular actualización
-    setTimeout(() => {
-      // En un caso real, esto sería una llamada a la API
-      console.log("Actualización de perfil:", values);
-      
-      // Actualizar usuario en localStorage
-      if (user) {
-        const updatedUser = { 
-          ...user, 
-          name: values.name, 
-          email: values.email,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${values.name}`,
-        };
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-        setUser(updatedUser);
+    try {
+      // Actualizar perfil en Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          full_name: values.name,
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${values.name}`,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
+        
+      if (error) {
+        throw error;
       }
       
-      setIsLoading(false);
+      // Actualizar datos en el estado local
+      setProfile(prev => prev ? {
+        ...prev,
+        full_name: values.name,
+        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${values.name}`,
+      } : null);
+      
       toast.success("Perfil actualizado correctamente");
-    }, 1000);
+    } catch (error: any) {
+      console.error('Error al actualizar el perfil:', error);
+      toast.error(error.message || "Error al actualizar el perfil");
+    } finally {
+      setIsLoading(false);
+    }
   }
   
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    toast.success("Sesión cerrada correctamente");
-    navigate("/login");
+  const handleLogout = async () => {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) {
+      console.error('Error al cerrar sesión:', error);
+      toast.error("Error al cerrar sesión");
+    } else {
+      toast.success("Sesión cerrada correctamente");
+      navigate('/login');
+    }
   };
   
-  if (!user) {
-    return null;
+  if (!user || !session) {
+    return (
+      <Card>
+        <CardContent className="p-6 text-center">
+          <p>Cargando perfil...</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -129,14 +172,14 @@ export function UserProfileForm() {
         <CardContent>
           <div className="flex flex-col items-center space-y-4 mb-6">
             <Avatar className="w-24 h-24">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={profile?.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile?.full_name || 'user'}`} alt={profile?.full_name || user.email || ''} />
+              <AvatarFallback>{profile?.full_name?.slice(0, 2).toUpperCase() || user.email?.slice(0, 2).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="text-center">
-              <h3 className="text-lg font-medium">{user.name}</h3>
+              <h3 className="text-lg font-medium">{profile?.full_name || 'Usuario'}</h3>
               <p className="text-sm text-muted-foreground">{user.email}</p>
               <p className="text-xs text-muted-foreground">
-                Miembro desde {new Date(user.createdAt).toLocaleDateString()}
+                Miembro desde {new Date(user.created_at || Date.now()).toLocaleDateString()}
               </p>
             </div>
           </div>
@@ -168,10 +211,10 @@ export function UserProfileForm() {
                   <FormItem>
                     <FormLabel>Correo electrónico</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} disabled />
                     </FormControl>
                     <FormDescription>
-                      Tu correo electrónico será utilizado para iniciar sesión
+                      Tu correo electrónico es utilizado para iniciar sesión
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
