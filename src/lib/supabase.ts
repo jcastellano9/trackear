@@ -1,13 +1,35 @@
 
 import { createClient } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
-// Intentamos obtener las variables de entorno, o usamos valores de respaldo temporales
-// Estos valores deberían configurarse correctamente en la interfaz de Lovable
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-url.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-public-anon-key';
+// Check if Supabase environment variables are properly configured
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Crear el cliente Supabase
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Verify if the environment variables are properly set
+if (!supabaseUrl || supabaseUrl === 'https://your-supabase-url.supabase.co' || 
+    !supabaseAnonKey || supabaseAnonKey === 'your-public-anon-key') {
+  console.error('⚠️ Las variables de entorno de Supabase no están configuradas correctamente');
+  
+  // We'll create the client anyway with placeholder values to prevent application crashes,
+  // but authentication operations will fail
+}
+
+// Create the Supabase client
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder-url.supabase.co', 
+  supabaseAnonKey || 'placeholder-key'
+);
+
+// Show a warning for missing configuration on initial load
+if (!supabaseUrl || supabaseUrl === 'https://your-supabase-url.supabase.co' || 
+    !supabaseAnonKey || supabaseAnonKey === 'your-public-anon-key') {
+  setTimeout(() => {
+    toast.error("Configuración de Supabase incompleta. Consulta la documentación para configurar las variables de entorno.", {
+      duration: 10000,
+    });
+  }, 1000);
+}
 
 // Tipos para nuestras tablas
 export type InvestmentType = {
