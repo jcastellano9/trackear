@@ -3,12 +3,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Download, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Edit, Trash2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/utils/formatUtils";
 import { EditInvestmentModal } from "./EditInvestmentModal";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase, InvestmentType } from "@/lib/supabase";
+import { findAssetByValue } from "@/utils/investmentOptions";
 
 interface InvestmentsListProps {
   filter: "all" | "crypto" | "cedears";
@@ -40,8 +41,7 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
         
       if (error) throw error;
       
-      // Fix: Add type assertion to ensure the correct type
-      setInvestments(data as unknown as InvestmentType[] || []);
+      setInvestments(data as InvestmentType[] || []);
     } catch (error: any) {
       console.error('Error al cargar inversiones:', error);
       toast.error("Error al cargar tus inversiones");
@@ -115,6 +115,7 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
     <div className="space-y-4">
       {investments.map((investment) => {
         const isProfitable = Math.random() > 0.5; // En un caso real esto sería calculado
+        const assetInfo = investment.symbol || investment.activo;
         
         return (
           <Card key={investment.id} className="overflow-hidden transition-all hover:shadow-md">
@@ -127,6 +128,14 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
                         {investment.tipo === "cripto" ? "Cripto" : "CEDEAR"}
                       </Badge>
                       <h3 className="font-semibold">{investment.activo}</h3>
+                      {investment.symbol && (
+                        <Badge variant="secondary">{investment.symbol}</Badge>
+                      )}
+                      {investment.ratio && (
+                        <span className="text-xs text-muted-foreground">
+                          Ratio: {investment.ratio}:1
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center space-x-2">
                       {isProfitable ? (

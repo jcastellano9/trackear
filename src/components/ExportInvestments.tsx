@@ -1,137 +1,97 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
+import { DownloadCloud } from "lucide-react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { supabase, InvestmentType } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 export function ExportInvestments() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const session = useSession();
 
-  const fetchInvestments = async () => {
-    if (!session?.user.id) {
+  const exportToCSV = async () => {
+    if (!session?.user) {
       toast.error("Debes iniciar sesión para exportar tus inversiones");
-      return null;
+      return;
     }
-
+    
+    setIsExporting(true);
+    
     try {
+      // Fetch user's investments
       const { data, error } = await supabase
-        .from("investments")
-        .select("*")
-        .eq("user_id", session.user.id);
-
+        .from('investments')
+        .select('*')
+        .eq('user_id', session.user.id);
+        
       if (error) throw error;
-      return data as InvestmentType[];
-    } catch (error) {
-      console.error("Error al obtener inversiones:", error);
-      toast.error("No se pudieron cargar tus inversiones");
-      return null;
-    }
-  };
-
-  const exportAsCSV = async () => {
-    setIsLoading(true);
-    try {
-      const investments = await fetchInvestments();
-      if (!investments || investments.length === 0) {
-        toast.warning("No hay inversiones para exportar");
+      
+      if (!data || data.length === 0) {
+        toast.info("No tienes inversiones para exportar");
         return;
       }
-
-      // Preparar los encabezados
+      
+      // Convert data to CSV
       const headers = [
-        "Activo",
-        "Tipo",
-        "Cantidad",
-        "Precio de compra",
-        "Moneda",
-        "Fecha de compra",
+        'Tipo',
+        'Activo',
+        'Símbolo',
+        'Cantidad',
+        'Precio de compra',
+        'Moneda',
+        'Fecha de compra',
+        'Ratio (CEDEARs)',
+        'Valor total'
       ];
       
-      // Preparar las filas
-      const rows = investments.map((inv) => [
-        inv.activo,
-        inv.tipo,
-        inv.cantidad.toString(),
-        inv.precio_compra.toString(),
-        inv.moneda,
-        new Date(inv.fecha_compra).toLocaleDateString(),
-      ]);
-
-      // Construir el contenido CSV
-      const csvContent = [
-        headers.join(","),
-        ...rows.map((row) => row.join(",")),
-      ].join("\n");
-
-      // Crear un blob y descargar el archivo
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const csvRows = [
+        headers.join(','),
+        ...data.map(item => [
+          item.tipo === 'cripto' ? 'Criptomoneda' : 'CEDEAR',
+          `"${item.activo}"`, // Wrap in quotes to handle commas in names
+          item.symbol || '',
+          item.cantidad,
+          item.precio_compra,
+          item.moneda,
+          new Date(item.fecha_compra).toLocaleDateString(),
+          item.ratio || '',
+          item.cantidad * item.precio_compra
+        ].join(','))
+      ];
+      
+      const csvContent = csvRows.join('\n');
+      
+      // Create a blob and download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", `inversiones_${new Date().toISOString().slice(0, 10)}.csv`);
-      link.style.display = "none";
+      const link = document.createElement('a');
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `inversiones_trackear_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       
-      toast.success("Inversiones exportadas en formato CSV");
-    } catch (error) {
+      toast.success("Inversiones exportadas correctamente");
+    } catch (error: any) {
       console.error("Error al exportar inversiones:", error);
-      toast.error("No se pudieron exportar tus inversiones");
+      toast.error(error.message || "Error al exportar inversiones");
     } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const exportAsXLSX = async () => {
-    setIsLoading(true);
-    try {
-      toast.info("Preparando archivo Excel...");
-      
-      // Para exportar como XLSX, necesitaríamos una biblioteca como xlsx.js
-      // Por ahora mostraremos un mensaje informando que esta función está en desarrollo
-      setTimeout(() => {
-        toast.info("La exportación a Excel estará disponible próximamente");
-        setIsLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error("Error al exportar inversiones:", error);
-      toast.error("No se pudieron exportar tus inversiones");
-      setIsLoading(false);
+      setIsExporting(false);
     }
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="mr-2 h-4 w-4" />
-          )}
-          Exportar
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={exportAsCSV}>
-          <FileText className="mr-2 h-4 w-4" /> 
-          Exportar como CSV
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={exportAsXLSX}>
-          <FileSpreadsheet className="mr-2 h-4 w-4" /> 
-          Exportar como Excel
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button 
+      variant="outline" 
+      onClick={exportToCSV} 
+      disabled={isExporting}
+    >
+      <DownloadCloud className="mr-2 h-4 w-4" />
+      {isExporting ? "Exportando..." : "Exportar cartera"}
+    </Button>
   );
 }

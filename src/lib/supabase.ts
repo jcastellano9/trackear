@@ -10,10 +10,12 @@ export type InvestmentType = {
   activo: string;
   cantidad: number;
   precio_compra: number;
-  moneda: string; // Updated to allow more currency types
+  moneda: "USD" | "ARS"; // Restrict to only USD or ARS
   fecha_compra: string;
   created_at: string;
   updated_at?: string | null;
+  symbol?: string; // Symbol for the asset (BTC, AAPL, etc.)
+  ratio?: number; // Ratio for CEDEARs (example: 20:1)
 };
 
 export type UserProfile = {
