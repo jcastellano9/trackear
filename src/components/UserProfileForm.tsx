@@ -1,28 +1,20 @@
 
-import { useEffect, useState } from 'react';
-import { ProfileCard } from '@/components/profile/ProfileCard';
-import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/lib/supabase';
-import { Card, CardContent, CardHeader } from './ui/card';
-import { Skeleton } from './ui/skeleton';
-import { UserProfile } from '@/lib/supabase';
-import { useSession } from '@supabase/auth-helpers-react';
+import { useState, useEffect } from "react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { supabase, UserProfile } from "@/lib/supabase";
+import { ProfileCard } from "./profile/ProfileCard";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
-export const UserProfileForm = () => {
+export function UserProfileForm() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const session = useSession();
+  const navigate = useNavigate();
   
   useEffect(() => {
-    if (!session?.user) {
-      navigate('/login');
-      return;
-    }
-    
-    const getProfile = async () => {
-      setIsLoading(true);
+    async function fetchProfile() {
+      if (!session?.user.id) return;
       
       try {
         const { data, error } = await supabase
@@ -31,58 +23,67 @@ export const UserProfileForm = () => {
           .eq('id', session.user.id)
           .single();
           
-        if (error) {
-          throw error;
-        }
+        if (error) throw error;
         
         if (data) {
           setProfile(data as UserProfile);
+        } else {
+          // Create a new profile if one doesn't exist
+          const newProfile = {
+            id: session.user.id,
+            full_name: session.user.email?.split('@')[0] || 'Usuario',
+          };
+          
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert(newProfile);
+          
+          if (insertError) throw insertError;
+          
+          setProfile(newProfile as UserProfile);
         }
       } catch (error) {
         console.error('Error loading profile:', error);
-        toast.error('Error al cargar el perfil');
+        toast.error('No se pudo cargar tu perfil de usuario');
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
-    };
+    }
     
-    getProfile();
-  }, [session, navigate]);
+    fetchProfile();
+  }, [session]);
   
-  const updateProfile = async (name: string) => {
+  const handleUpdateProfile = async (name: string) => {
+    if (!session?.user.id) return;
+    
     try {
-      if (!session?.user) return;
+      const updates = {
+        id: session.user.id,
+        full_name: name,
+        updated_at: new Date().toISOString(),
+      };
       
       const { error } = await supabase
         .from('profiles')
-        .update({ full_name: name })
+        .update(updates)
         .eq('id', session.user.id);
         
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       
-      // Update profile in local state
-      if (profile) {
-        setProfile({...profile, full_name: name});
-      }
-      
-      toast.success('Perfil actualizado con éxito');
+      setProfile(prev => prev ? { ...prev, full_name: name } : null);
+      toast.success('Perfil actualizado correctamente');
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Error al actualizar el perfil');
+      toast.error('No se pudo actualizar tu perfil');
     }
   };
   
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       
-      if (error) {
-        throw error;
-      }
-      
-      toast.success('Sesión cerrada con éxito');
+      toast.info('Sesión cerrada correctamente');
       navigate('/login');
     } catch (error) {
       console.error('Error signing out:', error);
@@ -90,44 +91,23 @@ export const UserProfileForm = () => {
     }
   };
   
-  if (isLoading) {
+  if (loading) {
     return (
-      <Card>
-        <CardHeader className="flex-row items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent>
-      </Card>
+      <div className="text-center py-12">
+        <div className="h-20 w-20 mx-auto rounded-full bg-muted animate-pulse"></div>
+        <div className="h-8 w-48 mx-auto mt-4 bg-muted animate-pulse rounded"></div>
+      </div>
     );
   }
   
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <ProfileCard 
+    <div className="max-w-md mx-auto">
+      <ProfileCard
         profile={profile}
         user={session?.user}
-        onUpdateProfile={updateProfile}
+        onUpdateProfile={handleUpdateProfile}
         onLogout={handleLogout}
       />
-      
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Preferencias de la aplicación</h3>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            En desarrollo. Pronto podrás personalizar tu experiencia.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
-};
+}

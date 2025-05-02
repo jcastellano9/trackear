@@ -6,11 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 export type InvestmentType = {
   id: string;
   user_id: string;
-  tipo: string; // Changed from 'cripto' | 'cedear' to match Database schema
+  tipo: "cripto" | "cedear"; // Ensure strict type to match database constraints
   activo: string;
   cantidad: number;
   precio_compra: number;
-  moneda: string;
+  moneda: "USD" | "ARS"; // Ensure strict type to match database constraints
   fecha_compra: string;
   created_at: string;
   updated_at?: string | null;

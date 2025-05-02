@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, LineChart, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Edit, Trash2, Download, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { toast } from "sonner";
 import { formatCurrency } from "@/utils/formatUtils";
 import { EditInvestmentModal } from "./EditInvestmentModal";

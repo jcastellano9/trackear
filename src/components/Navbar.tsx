@@ -1,308 +1,152 @@
-import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { CircleDollarSign, Menu, X, LogIn, UserPlus, User, LogOut, Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { useMediaQuery } from "@/hooks/use-mobile";
-import { Logo } from "@/components/Logo";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
-import { toast } from "sonner";
-import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { supabase } from "@/lib/supabase";
 
-type UserData = {
-  name: string;
-  email: string;
-};
+import { useSession } from "@supabase/auth-helpers-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Logo } from "./Logo";
+import { ThemeSwitcher } from "./ThemeSwitcher";
+import { 
+  Home, 
+  Briefcase, 
+  LineChart, 
+  Lightbulb, 
+  Calculator, 
+  User,
+  Menu,
+  X
+} from "lucide-react";
+import { Button } from "./ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false);
-  const isMobile = useMediaQuery("(max-width: 768px)");
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // Usar Supabase para la sesión
   const session = useSession();
-  const supabaseClient = useSupabaseClient();
+  const [open, setOpen] = useState(false);
   
-  const [user, setUser] = useState<UserData | null>(null);
-
-  useEffect(() => {
-    const loadUserProfile = async () => {
-      if (session?.user) {
-        // Avoid using the hook inside and use supabase directly
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-          
-        if (data) {
-          setUser({
-            name: data.full_name,
-            email: session.user.email || '',
-          });
-        } else {
-          // Si no hay perfil, usar datos básicos de la sesión
-          setUser({
-            name: session.user.email?.split('@')[0] || 'Usuario',
-            email: session.user.email || '',
-          });
-        }
-      }
-    };
-    
-    if (session) {
-      loadUserProfile();
-    }
-  }, [session]);
-
+  const isActive = (path: string) => location.pathname === path;
+  
+  const navItems = [
+    { path: "/", label: "Inicio", icon: <Home className="mr-2 h-4 w-4" /> },
+    { path: "/investments", label: "Mi Cartera", icon: <Briefcase className="mr-2 h-4 w-4" /> },
+    { path: "/analysis", label: "Análisis", icon: <LineChart className="mr-2 h-4 w-4" /> },
+    { path: "/opportunities", label: "Oportunidades", icon: <Lightbulb className="mr-2 h-4 w-4" /> },
+    { path: "/simulation", label: "Simulador", icon: <Calculator className="mr-2 h-4 w-4" /> },
+  ];
+  
   const handleLogout = async () => {
-    const { error } = await supabaseClient.auth.signOut();
-    if (error) {
-      console.error('Error al cerrar sesión:', error);
-      toast.error("Error al cerrar sesión");
-    } else {
-      toast.success("Sesión cerrada correctamente");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       navigate('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
     }
   };
 
-  const closeMenu = () => {
-    if (isMobile) {
-      setIsOpen(false);
-    }
-  };
-
-  const getInitials = (name: string) => {
-    if (!name) return "U";
-    return name.split(" ").map(n => n[0]).join("").toUpperCase();
-  };
-
-  // El resto del componente Navbar permanece igual
-  return (
-    <nav className="bg-background border-b">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <Logo size="md" withText={true} />
-            </Link>
-          </div>
-
-          <div className="hidden md:block">
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/investments"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/investments" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                Inversiones
-              </Link>
-              <Link
-                to="/comparisons"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/comparisons" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                Comparaciones
-              </Link>
-              <Link
-                to="/cedears"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/cedears" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                CEDEARs
-              </Link>
-              <Link
-                to="/simulation"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
-                  location.pathname === "/simulation" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                Simulación
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
+  if (!session) {
+    return (
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex items-center justify-between h-16 py-4">
+          <Logo size="md" withText={true} />
+          <div className="flex items-center gap-2">
             <ThemeSwitcher />
-            
-            {session ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative rounded-full h-8 w-8 p-0">
-                    <Avatar>
-                      <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name || 'anonymous'}`} alt={user?.name || "Usuario"} />
-                      <AvatarFallback>{user ? getInitials(user.name) : "U"}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer flex items-center">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Perfil</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/investments" className="cursor-pointer flex items-center">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Mis inversiones</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-500">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar sesión</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Button asChild variant="ghost" size="sm">
-                  <Link to="/login" className="flex items-center">
-                    <LogIn className="h-4 w-4 mr-1" />
-                    Iniciar sesión
-                  </Link>
-                </Button>
-                <Button asChild size="sm">
-                  <Link to="/register" className="flex items-center">
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Registrarse
-                  </Link>
-                </Button>
-              </div>
-            )}
-            
-            <Button
-              className="md:hidden"
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsOpen(!isOpen)}
-            >
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
+            <Link to="/login">
+              <Button variant="outline" size="sm">Iniciar sesión</Button>
+            </Link>
+            <Link to="/register">
+              <Button size="sm">Registro</Button>
+            </Link>
           </div>
         </div>
-      </div>
-
-      {/* Mobile menu */}
-      {isOpen && (
-        <div className="md:hidden bg-background border-t">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
-              to="/"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-              onClick={closeMenu}
-            >
-              Dashboard
-            </Link>
-            <Link
-              to="/investments"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/investments" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-              onClick={closeMenu}
-            >
-              Inversiones
-            </Link>
-            <Link
-              to="/comparisons"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/comparisons" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-              onClick={closeMenu}
-            >
-              Comparaciones
-            </Link>
-            <Link
-              to="/cedears"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/cedears" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-              onClick={closeMenu}
-            >
-              CEDEARs
-            </Link>
-            <Link
-              to="/simulation"
-              className={`block px-3 py-2 rounded-md text-base font-medium ${
-                location.pathname === "/simulation" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-              onClick={closeMenu}
-            >
-              Simulación
-            </Link>
-            
-            {!session && (
-              <>
-                <Link
-                  to="/login"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
-                  onClick={closeMenu}
-                >
-                  Iniciar sesión
-                </Link>
-                <Link
-                  to="/register"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
-                  onClick={closeMenu}
-                >
-                  Registrarse
-                </Link>
-              </>
-            )}
-            
-            {session && (
-              <>
+      </header>
+    );
+  }
+  
+  return (
+    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex items-center justify-between h-16 py-4">
+        <Logo size="md" withText={true} />
+        
+        {/* Mobile Navigation */}
+        <div className="flex md:hidden">
+          <ThemeSwitcher />
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="ml-2">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right">
+              <div className="flex flex-col space-y-6 mt-8">
+                {navItems.map(item => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={cn(
+                      "flex items-center text-muted-foreground hover:text-foreground",
+                      isActive(item.path) && "text-foreground font-medium"
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </Link>
+                ))}
+                <hr className="my-2" />
                 <Link
                   to="/profile"
-                  className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
-                  onClick={closeMenu}
+                  className={cn(
+                    "flex items-center text-muted-foreground hover:text-foreground",
+                    isActive("/profile") && "text-foreground font-medium"
+                  )}
+                  onClick={() => setOpen(false)}
                 >
-                  Mi perfil
+                  <User className="mr-2 h-4 w-4" />
+                  Mi Perfil
                 </Link>
-                <button
-                  className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-500 hover:bg-accent"
-                  onClick={() => {
-                    handleLogout();
-                    closeMenu();
-                  }}
-                >
+                <Button variant="destructive" size="sm" onClick={handleLogout}>
                   Cerrar sesión
-                </button>
-              </>
-            )}
-          </div>
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
-      )}
-    </nav>
+        
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex md:items-center md:space-x-4">
+          {navItems.map(item => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "flex items-center px-3 py-1.5 rounded-md text-sm transition-colors",
+                isActive(item.path)
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              )}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          ))}
+        </div>
+        
+        <div className="hidden md:flex md:items-center md:space-x-2">
+          <ThemeSwitcher />
+          <Link to="/profile">
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Button variant="outline" size="sm" onClick={handleLogout}>
+            Cerrar sesión
+          </Button>
+        </div>
+      </div>
+    </header>
   );
 }
+
+// Import needed at the end to avoid circular dependency
+import { supabase } from "@/lib/supabase";
