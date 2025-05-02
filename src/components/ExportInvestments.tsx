@@ -50,12 +50,12 @@ export function ExportInvestments() {
         ...data.map(item => [
           item.tipo === 'cripto' ? 'Criptomoneda' : 'CEDEAR',
           `"${item.activo}"`, // Wrap in quotes to handle commas in names
-          item.symbol || '',
+          item.symbol || '', // Use empty string if symbol is undefined
           item.cantidad,
           item.precio_compra,
           item.moneda,
           new Date(item.fecha_compra).toLocaleDateString(),
-          item.ratio || '',
+          item.ratio || '', // Use empty string if ratio is undefined
           item.cantidad * item.precio_compra
         ].join(','))
       ];

@@ -1,16 +1,15 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvestmentsList } from "./InvestmentsList";
 import { AddInvestmentForm } from "./AddInvestmentForm";
 import { InvestmentSummaryTable } from "./InvestmentSummaryTable";
-import { PlusCircle, X, Bitcoin, DollarSign, DownloadCloud, Filter } from "lucide-react";
+import { PlusCircle, X, Bitcoin, DollarSign, Filter } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { ExportInvestments } from "./ExportInvestments";
 import { useSession } from "@supabase/auth-helpers-react";
-import { useEffect, useState as useStateBis } from "react";
 import { supabase, InvestmentType } from "@/lib/supabase";
 
 export function InvestmentsOverview() {
