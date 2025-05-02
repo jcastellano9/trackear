@@ -16,6 +16,10 @@ export type InvestmentType = {
   updated_at?: string | null;
   symbol?: string; // Symbol for the asset (BTC, AAPL, etc.)
   ratio?: number; // Ratio for CEDEARs (example: 20:1)
+  // Extended properties for UI functionality
+  current_price?: number; 
+  price_change_percent?: number;
+  total_value?: number;
 };
 
 export type UserProfile = {

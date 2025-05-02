@@ -39,7 +39,7 @@ import { toast } from "sonner";
 import { Loader2, Check, ChevronsUpDown } from "lucide-react";
 import { useSession } from "@supabase/auth-helpers-react";
 import { supabase, InvestmentType } from "@/lib/supabase";
-import { getOptionsByType, findAssetByValue } from "@/utils/investmentOptions";
+import { getOptionsByType } from "@/utils/investmentOptions";
 import { cn } from "@/lib/utils";
 
 // Schema para validar los datos del formulario
@@ -94,12 +94,17 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
   // Update asset options when investment type changes
   const investmentType = form.watch("tipo");
   useEffect(() => {
-    // Always initialize with an empty array to prevent undefined errors
-    const options = getOptionsByType(investmentType) || [];
-    setAssetOptions(options);
-    form.setValue("activo", ""); // Reset asset when type changes
-    form.setValue("symbol", ""); // Reset symbol when type changes
-    form.setValue("ratio", null); // Reset ratio when type changes
+    try {
+      // Always initialize with an empty array to prevent undefined errors
+      const options = getOptionsByType(investmentType) || [];
+      setAssetOptions(options);
+      form.setValue("activo", ""); // Reset asset when type changes
+      form.setValue("symbol", ""); // Reset symbol when type changes
+      form.setValue("ratio", null); // Reset ratio when type changes
+    } catch (error) {
+      console.error("Error loading asset options:", error);
+      setAssetOptions([]);
+    }
   }, [investmentType, form]);
 
   // Handle asset selection
@@ -116,6 +121,12 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
       } else {
         form.setValue("ratio", null);
       }
+      
+      // Automatically set precio_compra with current market price
+      // This would come from an API in a real application
+      // For demonstration, we're using a mock price based on the asset
+      const mockMarketPrice = selectedAsset.value.length * 100 + Math.random() * 1000;
+      form.setValue("precio_compra", mockMarketPrice);
     }
     
     setOpen(false);
@@ -131,7 +142,6 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
     
     try {
       // Create a new investment object with proper typing
-      // We need to ensure all required fields are explicitly included and not optional
       const newInvestment = {
         tipo: values.tipo,
         activo: values.activo,
@@ -255,7 +265,9 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
                                     alt={asset.name} 
                                     className="w-5 h-5 mr-2"
                                   />
-                                ) : null}
+                                ) : (
+                                  <div className="w-5 h-5 mr-2 rounded-sm bg-muted"></div>
+                                )}
                                 {asset.name}
                                 {asset.symbol ? (
                                   <Badge variant="outline" className="ml-2">
@@ -322,7 +334,7 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
                   <Input type="number" step="any" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormDescription>
-                  Precio unitario de compra
+                  Precio unitario sugerido del mercado (editable)
                 </FormDescription>
                 <FormMessage />
               </FormItem>

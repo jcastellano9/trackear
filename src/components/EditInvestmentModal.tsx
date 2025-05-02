@@ -93,8 +93,8 @@ export function EditInvestmentModal({
       precio_compra: investment.precio_compra,
       moneda: investment.moneda as "USD" | "ARS",
       fecha_compra: investment.fecha_compra.split('T')[0],
-      symbol: (investment as any).symbol || "",
-      ratio: (investment as any).ratio || null,
+      symbol: investment.symbol || "",
+      ratio: investment.ratio || null,
     },
   });
   
@@ -114,8 +114,8 @@ export function EditInvestmentModal({
       precio_compra: investment.precio_compra,
       moneda: investment.moneda as "USD" | "ARS",
       fecha_compra: investment.fecha_compra.split('T')[0],
-      symbol: (investment as any).symbol || "",
-      ratio: (investment as any).ratio || null,
+      symbol: investment.symbol || "",
+      ratio: investment.ratio || null,
     });
   }, [investment, form]);
   
@@ -133,6 +133,12 @@ export function EditInvestmentModal({
       } else {
         form.setValue("ratio", null);
       }
+      
+      // Optionally update precio_compra with current market price
+      // This would come from an API in a real application
+      // For demonstration, we're using a mock price based on the asset
+      const mockMarketPrice = selectedAsset.value.length * 100 + Math.random() * 1000;
+      form.setValue("precio_compra", mockMarketPrice);
     }
     
     setAssetSelectOpen(false);
@@ -244,7 +250,9 @@ export function EditInvestmentModal({
                                       alt={asset.name} 
                                       className="w-5 h-5 mr-2"
                                     />
-                                  ) : null}
+                                  ) : (
+                                    <div className="w-5 h-5 mr-2 rounded-sm bg-muted"></div>
+                                  )}
                                   {asset.name}
                                   {asset.symbol ? (
                                     <Badge variant="outline" className="ml-2">

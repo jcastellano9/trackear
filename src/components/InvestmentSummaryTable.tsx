@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/formatUtils";
 import { InvestmentType } from "@/lib/supabase";
+import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 
 interface InvestmentSummaryTableProps {
   investments: InvestmentType[];
@@ -52,9 +53,9 @@ export function InvestmentSummaryTable({ investments }: InvestmentSummaryTablePr
           <TableRow>
             <TableHead>Tipo de Activo</TableHead>
             <TableHead>Cantidad de Activos</TableHead>
-            <TableHead>Valor Inicial</TableHead>
-            <TableHead>Valor Actual</TableHead>
-            <TableHead>Rendimiento</TableHead>
+            <TableHead className="text-right">Valor Inicial</TableHead>
+            <TableHead className="text-right">Valor Actual</TableHead>
+            <TableHead className="text-right">Rendimiento</TableHead>
             <TableHead className="text-right">%</TableHead>
           </TableRow>
         </TableHeader>
@@ -65,10 +66,17 @@ export function InvestmentSummaryTable({ investments }: InvestmentSummaryTablePr
                 {item.type === "cripto" ? "Criptomonedas" : "CEDEARs"}
               </TableCell>
               <TableCell>{item.count} ({item.totalQuantity.toFixed(2)})</TableCell>
-              <TableCell>{formatCurrency(item.initialValue, item.mainCurrency)}</TableCell>
-              <TableCell>{formatCurrency(item.currentValue, item.mainCurrency)}</TableCell>
-              <TableCell className={item.netReturn >= 0 ? "text-green-500" : "text-red-500"}>
-                {formatCurrency(item.netReturn, item.mainCurrency)}
+              <TableCell className="text-right">{formatCurrency(item.initialValue, item.mainCurrency)}</TableCell>
+              <TableCell className="text-right">{formatCurrency(item.currentValue, item.mainCurrency)}</TableCell>
+              <TableCell className="text-right">
+                <div className={`flex items-center justify-end ${item.netReturn >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {item.netReturn >= 0 ? (
+                    <ArrowUpRight className="h-4 w-4 mr-1" />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4 mr-1" />
+                  )}
+                  {formatCurrency(item.netReturn, item.mainCurrency)}
+                </div>
               </TableCell>
               <TableCell className={`text-right ${item.netReturn >= 0 ? "text-green-500" : "text-red-500"}`}>
                 {item.percentReturn.toFixed(2)}%
@@ -79,27 +87,34 @@ export function InvestmentSummaryTable({ investments }: InvestmentSummaryTablePr
             <TableRow className="font-bold bg-muted/50">
               <TableCell>Total</TableCell>
               <TableCell>{investments.length}</TableCell>
-              <TableCell>
+              <TableCell className="text-right">
                 {formatCurrency(
                   summary.reduce((sum, item) => sum + item.initialValue, 0),
                   "USD"
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="text-right">
                 {formatCurrency(
                   summary.reduce((sum, item) => sum + item.currentValue, 0),
                   "USD"
                 )}
               </TableCell>
-              <TableCell className={
-                summary.reduce((sum, item) => sum + item.netReturn, 0) >= 0 
-                ? "text-green-500" 
-                : "text-red-500"
-              }>
-                {formatCurrency(
-                  summary.reduce((sum, item) => sum + item.netReturn, 0),
-                  "USD"
-                )}
+              <TableCell className="text-right">
+                <div className={`flex items-center justify-end ${
+                  summary.reduce((sum, item) => sum + item.netReturn, 0) >= 0 
+                  ? "text-green-500" 
+                  : "text-red-500"
+                }`}>
+                  {summary.reduce((sum, item) => sum + item.netReturn, 0) >= 0 ? (
+                    <ArrowUpRight className="h-4 w-4 mr-1" />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4 mr-1" />
+                  )}
+                  {formatCurrency(
+                    summary.reduce((sum, item) => sum + item.netReturn, 0),
+                    "USD"
+                  )}
+                </div>
               </TableCell>
               <TableCell className={`text-right ${
                 summary.reduce((sum, item) => sum + item.netReturn, 0) >= 0 
