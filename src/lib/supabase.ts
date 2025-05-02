@@ -10,7 +10,7 @@ export type InvestmentType = {
   activo: string;
   cantidad: number;
   precio_compra: number;
-  moneda: "USD" | "ARS"; // Ensure strict type to match database constraints
+  moneda: string; // Updated to allow more currency types
   fecha_compra: string;
   created_at: string;
   updated_at?: string | null;

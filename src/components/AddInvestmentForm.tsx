@@ -24,7 +24,7 @@ import {
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, InvestmentType } from "@/lib/supabase";
 
 // Schema para validar los datos del formulario
 const investmentSchema = z.object({
@@ -78,15 +78,17 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
     setIsSubmitting(true);
     
     try {
+      // Create a new investment object with proper typing
       const newInvestment = {
         ...values,
         user_id: session.user.id,
         created_at: new Date().toISOString(),
       };
       
+      // Fix: Pass a properly typed object to Supabase, not an array
       const { error } = await supabase
         .from('investments')
-        .insert([newInvestment]);
+        .insert(newInvestment); // Fixed: Removed array brackets here
         
       if (error) throw error;
       

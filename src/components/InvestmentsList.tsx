@@ -40,7 +40,8 @@ export function InvestmentsList({ filter }: InvestmentsListProps) {
         
       if (error) throw error;
       
-      setInvestments(data || []);
+      // Fix: Add type assertion to ensure the correct type
+      setInvestments(data as unknown as InvestmentType[] || []);
     } catch (error: any) {
       console.error('Error al cargar inversiones:', error);
       toast.error("Error al cargar tus inversiones");
