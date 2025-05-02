@@ -47,17 +47,20 @@ export function ExportInvestments() {
       
       const csvRows = [
         headers.join(','),
-        ...data.map(item => [
-          item.tipo === 'cripto' ? 'Criptomoneda' : 'CEDEAR',
-          `"${item.activo}"`, // Wrap in quotes to handle commas in names
-          item.symbol || '', // Use empty string if symbol is undefined
-          item.cantidad,
-          item.precio_compra,
-          item.moneda,
-          new Date(item.fecha_compra).toLocaleDateString(),
-          item.ratio || '', // Use empty string if ratio is undefined
-          item.cantidad * item.precio_compra
-        ].join(','))
+        ...data.map(item => {
+          // Create an array for each row with proper handling of optional properties
+          return [
+            item.tipo === 'cripto' ? 'Criptomoneda' : 'CEDEAR',
+            `"${item.activo}"`, // Wrap in quotes to handle commas in names
+            item.symbol || '', // Use empty string if symbol is undefined
+            item.cantidad,
+            item.precio_compra,
+            item.moneda,
+            new Date(item.fecha_compra).toLocaleDateString(),
+            item.ratio || '', // Use empty string if ratio is undefined
+            item.cantidad * item.precio_compra
+          ].join(',');
+        })
       ];
       
       const csvContent = csvRows.join('\n');
