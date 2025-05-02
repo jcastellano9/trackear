@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -14,7 +15,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -54,15 +54,6 @@ export function LoginForm() {
     setIsLoading(true);
     
     try {
-      // Verificar si las variables de entorno de Supabase están configuradas
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (!supabaseUrl || supabaseUrl === 'https://your-supabase-url.supabase.co' || 
-          !supabaseAnonKey || supabaseAnonKey === 'your-public-anon-key') {
-        throw new Error("La configuración de Supabase no está completa. Por favor configure las variables de entorno.");
-      }
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
@@ -230,19 +221,6 @@ export function LoginForm() {
           <Button variant="link" className="p-0 h-auto" onClick={handleForgotPassword}>¿Olvidaste tu contraseña?</Button>
         </motion.div>
       </CardFooter>
-      
-      {/* Show warning if Supabase is not properly configured */}
-      {(import.meta.env.VITE_SUPABASE_URL === 'https://your-supabase-url.supabase.co' || 
-        !import.meta.env.VITE_SUPABASE_URL ||
-        import.meta.env.VITE_SUPABASE_ANON_KEY === 'your-public-anon-key' ||
-        !import.meta.env.VITE_SUPABASE_ANON_KEY) && (
-        <div className="mt-4 p-4 bg-yellow-500/20 rounded-md">
-          <p className="text-yellow-200 text-sm">
-            <strong>⚠️ Configuración incompleta:</strong> Las credenciales de Supabase no están configuradas. 
-            Por favor configure las variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.
-          </p>
-        </div>
-      )}
     </Card>
   );
 }

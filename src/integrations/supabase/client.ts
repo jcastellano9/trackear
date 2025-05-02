@@ -3,6 +3,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+// Use our actual values instead of relying on environment variables
+// that might not be loaded properly 
 const SUPABASE_URL = "https://redztnyylovhwpucweng.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlZHp0bnl5bG92aHdwdWN3ZW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwMjYwNTQsImV4cCI6MjA2MTYwMjA1NH0.ovJNudVWvMOKlUGUKpCBRv-m-Z6H0YQ1tJ0qsSRKkqo";
 

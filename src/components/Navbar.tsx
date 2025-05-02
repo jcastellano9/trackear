@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CircleDollarSign, Menu, X, LogIn, UserPlus, User, LogOut, Settings } from "lucide-react";
@@ -23,6 +22,11 @@ import { toast } from "sonner";
 import { useSession, useSupabaseClient } from "@supabase/auth-helpers-react";
 import { supabase } from "@/lib/supabase";
 
+type UserData = {
+  name: string;
+  email: string;
+};
+
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
@@ -33,16 +37,16 @@ export function Navbar() {
   const session = useSession();
   const supabaseClient = useSupabaseClient();
   
-  const [user, setUser] = useState<{name: string, email: string} | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
     const loadUserProfile = async () => {
       if (session?.user) {
-        // Obtener perfil de usuario desde Supabase
+        // Avoid using the hook inside and use supabase directly
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', session.user.id)
+          .eq('id', session.user.id)
           .single();
           
         if (data) {

@@ -1,20 +1,20 @@
 
 import { Navbar } from "@/components/Navbar";
 import { UserProfileForm } from "@/components/UserProfileForm";
+import { useSession } from "@supabase/auth-helpers-react";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const session = useSession();
   
   useEffect(() => {
-    // Check if user is logged in
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) {
+    if (!session) {
       navigate("/login");
     }
-  }, [navigate]);
+  }, [session, navigate]);
   
   return (
     <div className="min-h-screen flex flex-col bg-background">

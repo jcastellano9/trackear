@@ -10,17 +10,10 @@ import { Separator } from "@/components/ui/separator";
 import { ProfileHeader } from "./ProfileHeader";
 import { ProfileForm } from "./ProfileForm";
 import { useState } from "react";
-
-type Profile = {
-  id: string;
-  user_id: string;
-  full_name: string;
-  avatar_url?: string;
-  created_at: string;
-};
+import { UserProfile } from "@/lib/supabase";
 
 interface ProfileCardProps {
-  profile: Profile | null;
+  profile: UserProfile | null;
   user: any;
   onUpdateProfile: (name: string) => Promise<void>;
   onLogout: () => Promise<void>;

@@ -41,15 +41,6 @@ export function RegisterForm() {
     setIsLoading(true);
     
     try {
-      // Verificar si las variables de entorno de Supabase están configuradas
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-      
-      if (!supabaseUrl || supabaseUrl === 'https://your-supabase-url.supabase.co' || 
-          !supabaseAnonKey || supabaseAnonKey === 'your-public-anon-key') {
-        throw new Error("La configuración de Supabase no está completa. Por favor configure las variables de entorno.");
-      }
-      
       // 1. Registrar usuario con email y contraseña
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
@@ -71,7 +62,7 @@ export function RegisterForm() {
           .from('profiles')
           .insert([
             { 
-              user_id: authData.user.id, 
+              id: authData.user.id, 
               full_name: values.name,
               avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${values.name}`,
             }
@@ -108,19 +99,6 @@ export function RegisterForm() {
       <CardFooter>
         <LoginLink navigate={navigate} />
       </CardFooter>
-      
-      {/* Show warning if Supabase is not properly configured */}
-      {(import.meta.env.VITE_SUPABASE_URL === 'https://your-supabase-url.supabase.co' || 
-        !import.meta.env.VITE_SUPABASE_URL ||
-        import.meta.env.VITE_SUPABASE_ANON_KEY === 'your-public-anon-key' ||
-        !import.meta.env.VITE_SUPABASE_ANON_KEY) && (
-        <div className="mt-4 p-4 bg-yellow-500/20 rounded-md">
-          <p className="text-yellow-200 text-sm">
-            <strong>⚠️ Configuración incompleta:</strong> Las credenciales de Supabase no están configuradas. 
-            Por favor configure las variables de entorno VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.
-          </p>
-        </div>
-      )}
     </Card>
   );
 }
