@@ -29,6 +29,7 @@ export function ExportInvestments() {
       
       if (!data || data.length === 0) {
         toast.info("No tienes inversiones para exportar");
+        setIsExporting(false);
         return;
       }
       
@@ -48,16 +49,20 @@ export function ExportInvestments() {
       const csvRows = [
         headers.join(','),
         ...data.map(item => {
+          // Safely access potentially undefined properties with fallbacks
+          const symbol = item.symbol || '';
+          const ratio = item.ratio || '';
+          
           // Create an array for each row with proper handling of optional properties
           return [
             item.tipo === 'cripto' ? 'Criptomoneda' : 'CEDEAR',
             `"${item.activo}"`, // Wrap in quotes to handle commas in names
-            (item as any).symbol || '', // Use empty string if symbol is undefined
+            symbol, 
             item.cantidad,
             item.precio_compra,
             item.moneda,
             new Date(item.fecha_compra).toLocaleDateString(),
-            (item as any).ratio || '', // Use empty string if ratio is undefined
+            ratio,
             item.cantidad * item.precio_compra
           ].join(',');
         })
