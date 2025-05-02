@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -93,7 +92,8 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
   // Update asset options when investment type changes
   const investmentType = form.watch("tipo");
   useEffect(() => {
-    setAssetOptions(getOptionsByType(investmentType));
+    const options = getOptionsByType(investmentType) || [];
+    setAssetOptions(options);
     form.setValue("activo", ""); // Reset asset when type changes
     form.setValue("symbol", ""); // Reset symbol when type changes
     form.setValue("ratio", null); // Reset ratio when type changes
@@ -232,38 +232,42 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
                       <CommandInput placeholder="Buscar activo..." />
                       <CommandEmpty>No se encontraron activos</CommandEmpty>
                       <CommandGroup className="max-h-[300px] overflow-y-auto">
-                        {assetOptions.map((asset) => (
-                          <CommandItem
-                            key={asset.value}
-                            value={asset.value}
-                            onSelect={onAssetSelect}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                asset.value === field.value ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {asset.logo ? (
-                              <img 
-                                src={asset.logo} 
-                                alt={asset.name} 
-                                className="w-5 h-5 mr-2"
+                        {assetOptions && assetOptions.length > 0 ? (
+                          assetOptions.map((asset) => (
+                            <CommandItem
+                              key={asset.value}
+                              value={asset.value}
+                              onSelect={onAssetSelect}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  asset.value === field.value ? "opacity-100" : "opacity-0"
+                                )}
                               />
-                            ) : null}
-                            {asset.name}
-                            {asset.symbol ? (
-                              <Badge variant="outline" className="ml-2">
-                                {asset.symbol}
-                              </Badge>
-                            ) : null}
-                            {asset.ratio ? (
-                              <span className="ml-auto text-xs text-muted-foreground">
-                                Ratio: {asset.ratio}:1
-                              </span>
-                            ) : null}
-                          </CommandItem>
-                        ))}
+                              {asset.logo ? (
+                                <img 
+                                  src={asset.logo} 
+                                  alt={asset.name} 
+                                  className="w-5 h-5 mr-2"
+                                />
+                              ) : null}
+                              {asset.name}
+                              {asset.symbol ? (
+                                <Badge variant="outline" className="ml-2">
+                                  {asset.symbol}
+                                </Badge>
+                              ) : null}
+                              {asset.ratio ? (
+                                <span className="ml-auto text-xs text-muted-foreground">
+                                  Ratio: {asset.ratio}:1
+                                </span>
+                              ) : null}
+                            </CommandItem>
+                          ))
+                        ) : (
+                          <div className="py-6 text-center text-sm">No hay opciones disponibles</div>
+                        )}
                       </CommandGroup>
                     </Command>
                   </PopoverContent>
