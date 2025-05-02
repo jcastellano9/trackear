@@ -79,16 +79,22 @@ export function AddInvestmentForm({ onSuccess }: AddInvestmentFormProps) {
     
     try {
       // Create a new investment object with proper typing
+      // We need to ensure all required fields are explicitly included and not optional
       const newInvestment = {
-        ...values,
+        tipo: values.tipo,
+        activo: values.activo,
+        cantidad: values.cantidad,
+        precio_compra: values.precio_compra,
+        moneda: values.moneda,
+        fecha_compra: values.fecha_compra,
         user_id: session.user.id,
         created_at: new Date().toISOString(),
       };
       
-      // Fix: Pass a properly typed object to Supabase, not an array
+      // Pass a properly typed object to Supabase
       const { error } = await supabase
         .from('investments')
-        .insert(newInvestment); // Fixed: Removed array brackets here
+        .insert(newInvestment);
         
       if (error) throw error;
       
