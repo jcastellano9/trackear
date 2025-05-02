@@ -92,13 +92,14 @@ export function EditInvestmentModal({
       precio_compra: investment.precio_compra,
       moneda: investment.moneda as "USD" | "ARS",
       fecha_compra: investment.fecha_compra.split('T')[0],
-      symbol: investment.symbol || "",
-      ratio: investment.ratio || null,
+      symbol: (investment as any).symbol || "",
+      ratio: (investment as any).ratio || null,
     },
   });
   
   // Load asset options when the modal opens
   useEffect(() => {
+    // Initialize with an empty array to prevent undefined errors
     const options = getOptionsByType(investment.tipo) || [];
     setAssetOptions(options);
   }, [investment.tipo]);
@@ -112,8 +113,8 @@ export function EditInvestmentModal({
       precio_compra: investment.precio_compra,
       moneda: investment.moneda as "USD" | "ARS",
       fecha_compra: investment.fecha_compra.split('T')[0],
-      symbol: investment.symbol || "",
-      ratio: investment.ratio || null,
+      symbol: (investment as any).symbol || "",
+      ratio: (investment as any).ratio || null,
     });
   }, [investment, form]);
   

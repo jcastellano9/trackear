@@ -49,9 +49,12 @@ export function ExportInvestments() {
       const csvRows = [
         headers.join(','),
         ...data.map(item => {
+          // Cast item to any to safely access potentially undefined properties
+          const investment = item as any;
+          
           // Safely access potentially undefined properties with fallbacks
-          const symbol = item.symbol || '';
-          const ratio = item.ratio || '';
+          const symbol = investment.symbol || '';
+          const ratio = investment.ratio || '';
           
           // Create an array for each row with proper handling of optional properties
           return [
