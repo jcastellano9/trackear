@@ -1,41 +1,13 @@
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
-import { useLocalStorage } from "./hooks/useLocalStorage";
-
-// Custom hook for local storage
-function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        const item = window.localStorage.getItem(key);
-        return item ? JSON.parse(item) : initialValue;
-      }
-      return initialValue;
-    } catch (error) {
-      console.error("Error reading from localStorage:", error);
-      return initialValue;
-    }
-  });
-
-  const setValue = (value: T) => {
-    try {
-      if (typeof window !== "undefined") {
-        setStoredValue(value);
-        window.localStorage.setItem(key, JSON.stringify(value));
-      }
-    } catch (error) {
-      console.error("Error writing to localStorage:", error);
-    }
-  };
-
-  return [storedValue, setValue];
-}
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export function ThemeSwitcher() {
   // Use the custom useLocalStorage hook
-  const [theme, setTheme] = useLocalStorage<"light" | "dark">("theme", 
+  const [theme, setTheme] = useLocalStorage<"light" | "dark">(
+    "theme", 
     typeof window !== "undefined"
       ? window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
       : "dark"
