@@ -93,7 +93,7 @@ export function InvestmentsOverview() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold">Mi Cartera de inversiones</h2>
+          <h2 className="text-2xl font-semibold text-foreground">Mi Cartera de inversiones</h2>
           <p className="text-muted-foreground">Visualiza y gestiona todas tus inversiones</p>
         </div>
         
@@ -169,7 +169,7 @@ export function InvestmentsOverview() {
       {showAddForm && (
         <Card>
           <CardHeader>
-            <CardTitle>Nueva inversión</CardTitle>
+            <CardTitle className="text-foreground">Nueva inversión</CardTitle>
             <CardDescription>Ingresa los detalles de tu nueva inversión</CardDescription>
           </CardHeader>
           <CardContent>

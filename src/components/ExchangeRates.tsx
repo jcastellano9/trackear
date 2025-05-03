@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, RefreshCw } from "lucide-react";
+import { ArrowUp, ArrowDown, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 interface ExchangeRate {
@@ -28,14 +29,23 @@ export function ExchangeRates() {
       const response = await fetch('https://dolarapi.com/v1/dolares');
       if (response.ok) {
         const dollarData = await response.json();
-        const formattedData = dollarData.map((item: any) => ({
-          name: item.nombre,
-          buy: item.compra,
-          sell: item.venta,
-          change: calculateChange(item.venta, 975), // Calculate change from official
-          reference: item.nombre === "Oficial",
-          logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png"
-        }));
+        const formattedData = dollarData
+          .filter((item: any) => {
+            // Filter out Dólar Bolsa and Dólar Mayorista
+            return item.nombre !== "Bolsa" && item.nombre !== "Mayorista";
+          })
+          .map((item: any) => ({
+            name: item.nombre === "Contado con liquidación" ? "CCL" : item.nombre,
+            buy: item.compra,
+            sell: item.venta,
+            change: calculateChange(item.venta, 975), // Calculate change from official
+            reference: item.nombre === "Oficial",
+            logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png"
+          }));
+        
+        // Sort by exchange rate
+        formattedData.sort((a, b) => a.sell - b.sell);
+        
         setData(formattedData);
         setLastUpdated(new Date());
         return;
@@ -43,13 +53,11 @@ export function ExchangeRates() {
       throw new Error("Unable to fetch from dolarapi");
     } catch (error) {
       console.error("Error fetching dollar data:", error);
-      // Fallback to mock data
+      // Fallback to mock data - already filtered and renamed
       const dollarData: ExchangeRate[] = [
         { name: "Oficial", buy: 1036.5, sell: 1096.5, change: 0, reference: true, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
         { name: "Blue", buy: 1335, sell: 1355, change: 23.6, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
-        { name: "MEP", buy: 1364.1, sell: 1363.8, change: 24.4, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
-        { name: "Contado con liquidación", buy: 1357.2, sell: 1359.6, change: 24.0, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
-        { name: "Mayorista", buy: 1074.5, sell: 1077.5, change: -1.7, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
+        { name: "CCL", buy: 1357.2, sell: 1359.6, change: 24.0, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
       ];
       setData(dollarData);
       setLastUpdated(new Date());
@@ -176,6 +184,10 @@ export function ExchangeRates() {
     }
   };
 
+  const formatPercentage = (value: number) => {
+    return value.toFixed(2);
+  };
+
   return (
     <div>
       <div className="mb-4 flex justify-between items-center">
@@ -190,12 +202,17 @@ export function ExchangeRates() {
           </TabsList>
         </Tabs>
         
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{lastUpdated.toLocaleTimeString('es-AR')}</span>
-          <RefreshCw 
-            className={`h-3.5 w-3.5 cursor-pointer ${loading ? "animate-spin" : ""}`} 
-            onClick={refreshData}
-          />
+        <div className="flex items-center gap-4">
+          <Link to="/analysis" className="flex items-center text-xs text-primary hover:underline">
+            Ver más <ExternalLink className="h-3.5 w-3.5 ml-1" />
+          </Link>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{lastUpdated.toLocaleTimeString('es-AR')}</span>
+            <RefreshCw 
+              className={`h-3.5 w-3.5 cursor-pointer ${loading ? "animate-spin" : ""}`} 
+              onClick={refreshData}
+            />
+          </div>
         </div>
       </div>
       
@@ -219,6 +236,10 @@ export function ExchangeRates() {
             <div>Compra</div>
             <div>Venta</div>
           </div>
+          
+          {activeTab === 'crypto' && (
+            <div className="text-sm font-medium pt-2 pb-1">Criptomonedas</div>
+          )}
           
           {data.map((rate, index) => (
             <div key={index} className="grid grid-cols-3 py-3 border-b text-sm items-center">
@@ -246,7 +267,7 @@ export function ExchangeRates() {
                       <ArrowUp className="h-3 w-3 mr-0.5" /> : 
                       <ArrowDown className="h-3 w-3 mr-0.5" />
                     }
-                    {Math.abs(rate.change)}%
+                    {formatPercentage(Math.abs(rate.change))}%
                   </Badge>
                 )}
               </div>

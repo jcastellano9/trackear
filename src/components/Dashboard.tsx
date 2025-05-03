@@ -4,8 +4,77 @@ import { ExchangeRates } from "./ExchangeRates";
 import { InvestmentChart } from "./InvestmentChart";
 import { motion } from "framer-motion";
 import { TrendingUp, DollarSign, PieChart, BarChart4 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export function Dashboard() {
+  const session = useSession();
+  const [hasInvestments, setHasInvestments] = useState(false);
+  const [investmentStats, setInvestmentStats] = useState({
+    totalInvested: 0,
+    currentValue: 0,
+    profit: 0,
+    profitPercentage: 0
+  });
+
+  // Check if user has investments
+  useEffect(() => {
+    const checkInvestments = async () => {
+      if (!session?.user?.id) return;
+      
+      try {
+        const { data, error, count } = await supabase
+          .from('investments')
+          .select('*', { count: 'exact' })
+          .eq('user_id', session.user.id)
+          .limit(1);
+          
+        if (error) throw error;
+        
+        if (count && count > 0) {
+          setHasInvestments(true);
+          
+          // Get investment stats
+          const { data: statsData, error: statsError } = await supabase
+            .from('investments')
+            .select('*')
+            .eq('user_id', session.user.id);
+            
+          if (statsError) throw statsError;
+          
+          // Calculate stats (this is a simplified calculation)
+          let totalInvested = 0;
+          let currentValue = 0;
+          
+          statsData?.forEach(investment => {
+            const investmentAmount = investment.precio_compra * investment.cantidad;
+            totalInvested += investmentAmount;
+            
+            // Mock current value with a random change
+            const randomChange = 1 + (Math.random() * 0.5 - 0.25); // -25% to +25%
+            const currentInvestmentValue = investmentAmount * randomChange;
+            currentValue += currentInvestmentValue;
+          });
+          
+          const profit = currentValue - totalInvested;
+          const profitPercentage = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
+          
+          setInvestmentStats({
+            totalInvested,
+            currentValue,
+            profit,
+            profitPercentage
+          });
+        }
+      } catch (error) {
+        console.error("Error checking investments:", error);
+      }
+    };
+    
+    checkInvestments();
+  }, [session]);
+  
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: (i: number) => ({
@@ -43,6 +112,10 @@ export function Dashboard() {
     }
   };
 
+  const formatCurrency = (amount: number) => {
+    return `US$ ${amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+  };
+
   return (
     <div className="container px-4 py-6 mx-auto space-y-8">
       <motion.div
@@ -52,7 +125,7 @@ export function Dashboard() {
         className="text-center md:text-left"
       >
         <h1 className="text-4xl font-bold text-gradient glow">
-          Bienvenido a TrackeArBit
+          Bienvenido a TrackeAr
         </h1>
         <p className="text-muted-foreground mt-2">
           Centraliza y gestiona todas tus inversiones en un solo lugar
@@ -68,7 +141,7 @@ export function Dashboard() {
         <motion.div 
           variants={item}
           whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          className="glass-card rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 glow-box card-3d"
+          className="rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 bg-card text-card-foreground"
         >
           <div className="flex justify-between items-center">
             <div>
@@ -79,13 +152,15 @@ export function Dashboard() {
               <DollarSign className="text-white" />
             </span>
           </div>
-          <h2 className="text-2xl font-bold">US$ 5.000,00</h2>
+          <h2 className="text-2xl font-bold">
+            {hasInvestments ? formatCurrency(investmentStats.totalInvested) : "US$ 0.00"}
+          </h2>
         </motion.div>
         
         <motion.div 
           variants={item}
           whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          className="glass-card rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 glow-box card-3d"
+          className="rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 bg-card text-card-foreground"
         >
           <div className="flex justify-between items-center">
             <div>
@@ -96,41 +171,47 @@ export function Dashboard() {
               <BarChart4 className="text-white" />
             </span>
           </div>
-          <h2 className="text-2xl font-bold">US$ 6.250,00</h2>
+          <h2 className="text-2xl font-bold">
+            {hasInvestments ? formatCurrency(investmentStats.currentValue) : "US$ 0.00"}
+          </h2>
         </motion.div>
         
         <motion.div 
           variants={item}
           whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          className="glass-card rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 glow-box card-3d"
+          className="rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 bg-card text-card-foreground"
         >
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-muted-foreground">Ganancia/Pérdida</p>
               <p className="text-xs text-muted-foreground">Resultado neto acumulado</p>
             </div>
-            <span className="text-xl text-white bg-green-500/70 p-2 rounded-full flex items-center justify-center">
+            <span className={`text-xl text-white ${investmentStats.profit >= 0 ? 'bg-green-500/70' : 'bg-red-500/70'} p-2 rounded-full flex items-center justify-center`}>
               <TrendingUp />
             </span>
           </div>
-          <h2 className="text-2xl font-bold text-green-500">US$ 1.250,00</h2>
+          <h2 className={`text-2xl font-bold ${investmentStats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {hasInvestments ? formatCurrency(investmentStats.profit) : "US$ 0.00"}
+          </h2>
         </motion.div>
         
         <motion.div 
           variants={item}
           whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-          className="glass-card rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 glow-box card-3d"
+          className="rounded-lg p-6 space-y-2 hover:shadow-lg transition-all duration-300 bg-card text-card-foreground"
         >
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-muted-foreground">Rendimiento</p>
               <p className="text-xs text-muted-foreground">Porcentaje de retorno</p>
             </div>
-            <span className="text-xl text-white bg-green-500/70 p-2 rounded-full flex items-center justify-center">
+            <span className={`text-xl text-white ${investmentStats.profitPercentage >= 0 ? 'bg-green-500/70' : 'bg-red-500/70'} p-2 rounded-full flex items-center justify-center`}>
               <PieChart />
             </span>
           </div>
-          <h2 className="text-2xl font-bold text-green-500">+25%</h2>
+          <h2 className={`text-2xl font-bold ${investmentStats.profitPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {hasInvestments ? `${investmentStats.profitPercentage.toFixed(2)}%` : "0.00%"}
+          </h2>
         </motion.div>
       </motion.div>
       
@@ -140,7 +221,7 @@ export function Dashboard() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-          className="glass-card rounded-lg p-6 space-y-4 hover:shadow-xl transition-all duration-300 glow-box"
+          className="rounded-lg p-6 space-y-4 hover:shadow-xl transition-all duration-300 bg-card text-card-foreground"
         >
           <div>
             <h2 className="text-xl font-bold text-gradient">Rendimiento de inversiones</h2>
@@ -156,7 +237,7 @@ export function Dashboard() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
           whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-          className="glass-card rounded-lg p-6 space-y-4 hover:shadow-xl transition-all duration-300 glow-box"
+          className="rounded-lg p-6 space-y-4 hover:shadow-xl transition-all duration-300 bg-card text-card-foreground"
         >
           <div>
             <h2 className="text-xl font-bold text-gradient">Distribución de Activos</h2>
@@ -171,7 +252,7 @@ export function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.6 }}
         whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-        className="glass-card rounded-lg p-6 space-y-4 w-full hover:shadow-xl transition-all duration-300 glow-box"
+        className="rounded-lg p-6 space-y-4 w-full hover:shadow-xl transition-all duration-300 bg-card text-card-foreground"
       >
         <div>
           <h2 className="text-xl font-bold text-gradient">Cotizaciones</h2>
