@@ -10,7 +10,6 @@ import { supabase } from "./lib/supabase";
 import Index from "./pages/Index";
 import Investments from "./pages/Investments";
 import Analysis from "./pages/Analysis";
-import Opportunities from "./pages/Opportunities";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
@@ -40,7 +39,6 @@ const App = () => {
               <Route path="/" element={<PrivateRoute element={<Index />} />} />
               <Route path="/investments" element={<PrivateRoute element={<Investments />} />} />
               <Route path="/analysis" element={<PrivateRoute element={<Analysis />} />} />
-              <Route path="/opportunities" element={<PrivateRoute element={<Opportunities />} />} />
               <Route path="/simulation" element={<PrivateRoute element={<Simulation />} />} />
               <Route path="/profile" element={<PrivateRoute element={<Profile />} />} />
               

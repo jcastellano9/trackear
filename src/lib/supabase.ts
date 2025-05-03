@@ -20,6 +20,7 @@ export type InvestmentType = {
   current_price?: number; 
   price_change_percent?: number;
   total_value?: number;
+  ppc?: number; // Precio Promedio de Compra
 };
 
 export type UserProfile = {

@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExchangeRates } from "@/components/ExchangeRates";
 import { CryptoPrices } from "@/components/CryptoPrices";
 import { CryptoWalletComparison } from "@/components/CryptoWalletComparison";
-import { CedearsExplorer } from "@/components/CedearsExplorer";
+import { PixComparison } from "@/components/PixComparison";
+import { InterestRatesComparison } from "@/components/InterestRatesComparison";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Analysis = () => {
@@ -16,10 +17,11 @@ const Analysis = () => {
       <Tabs defaultValue="exchange-rates">
         <ScrollArea className="w-full whitespace-nowrap">
           <TabsList className="mb-4 w-max">
-            <TabsTrigger value="exchange-rates">Cotizaciones</TabsTrigger>
-            <TabsTrigger value="crypto-performance">Rendimiento Cripto</TabsTrigger>
-            <TabsTrigger value="wallet-comparison">Comparador de Wallets</TabsTrigger>
-            <TabsTrigger value="cedears">CEDEARs</TabsTrigger>
+            <TabsTrigger value="exchange-rates">Dólar</TabsTrigger>
+            <TabsTrigger value="crypto-performance">Cripto</TabsTrigger>
+            <TabsTrigger value="crypto-yield">Rendimientos Cripto</TabsTrigger>
+            <TabsTrigger value="interest-rates">Comparador de Tasas</TabsTrigger>
+            <TabsTrigger value="pix">PIX</TabsTrigger>
           </TabsList>
         </ScrollArea>
         
@@ -31,12 +33,16 @@ const Analysis = () => {
           <CryptoPrices />
         </TabsContent>
         
-        <TabsContent value="wallet-comparison" className="space-y-6">
+        <TabsContent value="crypto-yield" className="space-y-6">
           <CryptoWalletComparison />
         </TabsContent>
         
-        <TabsContent value="cedears" className="space-y-6">
-          <CedearsExplorer />
+        <TabsContent value="interest-rates" className="space-y-6">
+          <InterestRatesComparison />
+        </TabsContent>
+        
+        <TabsContent value="pix" className="space-y-6">
+          <PixComparison />
         </TabsContent>
       </Tabs>
     </AppLayout>
