@@ -4,26 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 
 export function ThemeSwitcher() {
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
-
-  // Initialize theme from localStorage on component mount
-  useEffect(() => {
+  // Start with system preference
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    // Check localStorage first
     const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
     
     if (storedTheme) {
-      setTheme(storedTheme);
-      document.documentElement.classList.toggle("dark", storedTheme === "dark");
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-      document.documentElement.classList.add("dark");
+      return storedTheme;
     }
-  }, []);
+    
+    // Fall back to system preference
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+
+  // Apply theme on component mount and when theme changes
+  useEffect(() => {
+    // Update the document class
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    
+    // Update localStorage
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    setTheme(theme === "light" ? "dark" : "light");
   };
 
   return (
