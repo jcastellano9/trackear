@@ -48,6 +48,15 @@ const Login = () => {
           transition={{ duration: 0.7, delay: 0.2 }}
         >
           <LoginForm />
+          
+          <div className="mt-4 text-center">
+            <Link 
+              to="/reset-password" 
+              className="text-sm text-white/80 hover:text-white underline transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </motion.div>
       </main>
 

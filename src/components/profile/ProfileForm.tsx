@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Lock } from "lucide-react";
 
 const profileFormSchema = z.object({
   name: z.string().min(2, {
@@ -29,11 +29,18 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>;
 interface ProfileFormProps {
   initialValues: ProfileFormValues;
   onSubmit: (values: ProfileFormValues) => Promise<void>;
+  onChangePassword: () => void;
   onLogout: () => Promise<void>;
   isLoading: boolean;
 }
 
-export const ProfileForm = ({ initialValues, onSubmit, onLogout, isLoading }: ProfileFormProps) => {
+export const ProfileForm = ({ 
+  initialValues, 
+  onSubmit, 
+  onChangePassword,
+  onLogout, 
+  isLoading 
+}: ProfileFormProps) => {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: initialValues,
@@ -75,15 +82,25 @@ export const ProfileForm = ({ initialValues, onSubmit, onLogout, isLoading }: Pr
             </FormItem>
           )}
         />
-        <div className="flex justify-between">
-          <Button 
-            type="button" 
-            variant="destructive" 
-            onClick={onLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Cerrar sesión
-          </Button>
+        <div className="flex flex-col space-y-2 sm:flex-row sm:justify-between sm:space-y-0">
+          <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+            <Button 
+              type="button" 
+              variant="destructive" 
+              onClick={onLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Cerrar sesión
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onChangePassword}
+            >
+              <Lock className="mr-2 h-4 w-4" />
+              Cambiar contraseña
+            </Button>
+          </div>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Guardando..." : "Guardar cambios"}
           </Button>

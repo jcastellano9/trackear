@@ -7,27 +7,37 @@ export function ThemeSwitcher() {
   // Start with system preference
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     // Check localStorage first
-    const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    
-    if (storedTheme) {
-      return storedTheme;
+    if (typeof window !== "undefined") {
+      const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+      
+      if (storedTheme) {
+        return storedTheme;
+      }
+      
+      // Fall back to system preference
+      return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
     
-    // Fall back to system preference
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return "dark"; // Default fallback
   });
 
   // Apply theme on component mount and when theme changes
   useEffect(() => {
-    // Update the document class
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+    if (typeof window !== "undefined") {
+      // Update the document class
+      const root = document.documentElement;
+      
+      if (theme === "dark") {
+        root.classList.add("dark");
+        root.classList.remove("light");
+      } else {
+        root.classList.add("light");
+        root.classList.remove("dark");
+      }
+      
+      // Update localStorage
+      localStorage.setItem("theme", theme);
     }
-    
-    // Update localStorage
-    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {

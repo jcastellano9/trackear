@@ -9,6 +9,11 @@ import { toast } from "sonner";
 export function UserProfileForm() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [investmentStats, setInvestmentStats] = useState({
+    totalInvestmentsUSD: 0,
+    totalInvestmentsARS: 0,
+    activeInvestmentsCount: 0,
+  });
   const session = useSession();
   const navigate = useNavigate();
   
@@ -42,6 +47,9 @@ export function UserProfileForm() {
           
           setProfile(newProfile as UserProfile);
         }
+        
+        // Fetch investment statistics
+        await fetchInvestmentStats(session.user.id);
       } catch (error) {
         console.error('Error loading profile:', error);
         toast.error('No se pudo cargar tu perfil de usuario');
@@ -52,14 +60,59 @@ export function UserProfileForm() {
     
     fetchProfile();
   }, [session]);
+
+  const fetchInvestmentStats = async (userId: string) => {
+    try {
+      // Get count of active investments
+      const { count, error: countError } = await supabase
+        .from('investments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+        
+      if (countError) throw countError;
+      
+      // Get total investments in USD and ARS
+      const { data: investments, error: investmentsError } = await supabase
+        .from('investments')
+        .select('moneda, precio_compra, cantidad')
+        .eq('user_id', userId);
+        
+      if (investmentsError) throw investmentsError;
+      
+      // Calculate totals
+      let totalUSD = 0;
+      let totalARS = 0;
+      
+      if (investments) {
+        investments.forEach(investment => {
+          const totalValue = investment.precio_compra * investment.cantidad;
+          if (investment.moneda === "USD") {
+            totalUSD += totalValue;
+          } else if (investment.moneda === "ARS") {
+            totalARS += totalValue;
+          }
+        });
+      }
+      
+      setInvestmentStats({
+        totalInvestmentsUSD: totalUSD,
+        totalInvestmentsARS: totalARS,
+        activeInvestmentsCount: count || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching investment stats:', error);
+      // Silently fail for stats - not critical
+    }
+  };
   
-  const handleUpdateProfile = async (name: string) => {
+  const handleUpdateProfile = async (name: string, avatarUrl?: string) => {
     if (!session?.user.id) return;
     
     try {
       const updates = {
         id: session.user.id,
         full_name: name,
+        avatar_url: avatarUrl || profile?.avatar_url,
         updated_at: new Date().toISOString(),
       };
       
@@ -70,7 +123,7 @@ export function UserProfileForm() {
         
       if (error) throw error;
       
-      setProfile(prev => prev ? { ...prev, full_name: name } : null);
+      setProfile(prev => prev ? { ...prev, full_name: name, avatar_url: avatarUrl || prev.avatar_url } : null);
       toast.success('Perfil actualizado correctamente');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -107,6 +160,7 @@ export function UserProfileForm() {
         user={session?.user}
         onUpdateProfile={handleUpdateProfile}
         onLogout={handleLogout}
+        investmentStats={investmentStats}
       />
     </div>
   );
