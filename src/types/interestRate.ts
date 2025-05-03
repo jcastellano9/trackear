@@ -4,6 +4,7 @@ export type InterestRateCurrency = "ARS" | "USD" | "USDT" | "DAI" | "USDC" | "BT
 
 export type InterestRate = {
   provider: string;
+  name?: string; // Add name property
   logo?: string;
   type: InterestRateType;
   annualRate: number;

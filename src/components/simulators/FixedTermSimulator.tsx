@@ -22,7 +22,7 @@ export function FixedTermSimulator() {
   
   // Filter to only get fixed term rates in ARS
   const banks = allBanks.filter(
-    (item: InterestRate) => item.type === "FIXED_TERM" && item.currency === "ARS"
+    (item: InterestRate) => item.type === "fixed" && item.currency === "ARS"
   );
   
   // Get rate based on selected bank

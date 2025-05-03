@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -365,7 +364,7 @@ export function InstallmentsVsCash() {
               </p>
             </div>
             
-            <Alert variant="warning" className="mt-4">
+            <Alert variant="default" className="mt-4 border-yellow-500/30 bg-yellow-500/10">
               <AlertDescription className="text-center">
                 Los valores estimados pueden variar dependiendo del contexto inflacionario argentino.
                 Tomar decisiones financieras siempre implica un margen de incertidumbre.

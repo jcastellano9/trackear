@@ -48,7 +48,9 @@ export function SimulationParameters({
   
   // Get selected bank name for display
   const selectedBankName = selectedBank 
-    ? banks.find(bank => bank.provider === selectedBank)?.name || selectedBank
+    ? banks.find(bank => bank.provider === selectedBank)?.name || 
+      banks.find(bank => bank.provider === selectedBank)?.provider || 
+      selectedBank
     : "Selecciona un banco";
 
   return (
@@ -89,7 +91,8 @@ export function SimulationParameters({
                         }}
                       >
                         <div className="flex items-center gap-2">
-                          {bank.name} ({bank.annualRate.toFixed(2)}% TNA)
+                          {/* Use name with fallback to provider */}
+                          {bank.name || bank.provider} ({bank.annualRate.toFixed(2)}% TNA)
                         </div>
                       </CommandItem>
                     ))}

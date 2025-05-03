@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -491,7 +490,7 @@ export function CryptoSimulator() {
                 </TableBody>
               </Table>
               
-              <Alert variant="warning">
+              <Alert variant="default" className="border-yellow-500/30 bg-yellow-500/10">
                 <AlertDescription>
                   Este cálculo no contempla variaciones del precio de mercado de la criptomoneda.
                   Los rendimientos se calculan únicamente en base al interés compuesto de la APY.
