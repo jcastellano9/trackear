@@ -101,7 +101,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
           fecha_compra: inv.fecha_compra,
           created_at: inv.created_at,
           updated_at: inv.updated_at,
-          symbol: inv.symbol || "", // Ensure symbol is always defined
+          symbol: inv.symbol || inv.activo || "", // Provide a fallback for symbol
           ratio: inv.ratio,
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
