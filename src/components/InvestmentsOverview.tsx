@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { InvestmentsList } from "./InvestmentsList";
+import { InvestmentsList } from "./investments/InvestmentsList";
 import { AddInvestmentForm } from "./AddInvestmentForm";
 import { InvestmentSummaryTable } from "./InvestmentSummaryTable";
 import { PlusCircle, X, Bitcoin, DollarSign, Filter, Database } from "lucide-react";
