@@ -88,16 +88,27 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         const totalValue = currentPrice * inv.cantidad;
         const priceDifference = currentPrice - inv.precio_compra;
         
-        // Cast the database result to our type with necessary defaults
-        const investment = {
+        // Create a correctly typed investment object
+        const investment: InvestmentType = {
           ...inv,
-          symbol: inv.symbol || "", // Default empty string for symbol
+          id: inv.id,
+          user_id: inv.user_id,
+          tipo: inv.tipo as "cripto" | "cedear",
+          activo: inv.activo,
+          cantidad: inv.cantidad,
+          precio_compra: inv.precio_compra,
+          moneda: inv.moneda as "USD" | "ARS",
+          fecha_compra: inv.fecha_compra,
+          created_at: inv.created_at,
+          updated_at: inv.updated_at,
+          symbol: inv.symbol || "", // Ensure symbol is always defined
+          ratio: inv.ratio,
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
           price_change_absolute: priceDifference,
           total_value: totalValue,
           ppc: inv.ppc || inv.precio_compra, // Use stored PPC or default to purchase price
-        } as InvestmentType; // Explicit type cast
+        };
         
         return investment;
       });
