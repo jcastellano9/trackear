@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -20,6 +19,7 @@ export function InvestmentsOverview() {
   const [investments, setInvestments] = useState<InvestmentType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [cclRate, setCclRate] = useState(1400); // Default CCL rate
   const [portfolioStats, setPortfolioStats] = useState({
     totalARS: 0,
     totalUSD: 0,
@@ -27,6 +27,26 @@ export function InvestmentsOverview() {
     changePercentage: 0
   });
   const session = useSession();
+  
+  // Fetch CCL rate
+  useEffect(() => {
+    const fetchCCLRate = async () => {
+      try {
+        const response = await fetch('https://dolarapi.com/v1/dolares/contadoconliqui');
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.venta) {
+            setCclRate(data.venta);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching CCL rate:', error);
+        // Keep default rate if fetch fails
+      }
+    };
+    
+    fetchCCLRate();
+  }, []);
   
   const fetchInvestments = async () => {
     if (!session?.user) return;
@@ -58,11 +78,13 @@ export function InvestmentsOverview() {
         const currentPrice = inv.precio_compra * (1 + priceChange);
         const totalValue = currentPrice * inv.cantidad;
         
-        // Add to appropriate currency total
+        // Add to appropriate currency total and convert as needed
         if (inv.moneda === "ARS") {
           totalARS += totalValue;
+          totalUSD += totalValue / cclRate;
         } else {
           totalUSD += totalValue;
+          totalARS += totalValue * cclRate;
         }
       });
       
@@ -82,7 +104,7 @@ export function InvestmentsOverview() {
   
   useEffect(() => {
     fetchInvestments();
-  }, [session]);
+  }, [session, cclRate]);
   
   const handleAddSuccess = () => {
     setShowAddForm(false);
@@ -162,8 +184,9 @@ export function InvestmentsOverview() {
         </Card>
       </div>
       
+      {/* Summary table moved here, right below the cards */}
       {!isLoading && investments.length > 0 && (
-        <InvestmentSummaryTable investments={investments} />
+        <InvestmentSummaryTable investments={investments} cclRate={cclRate} />
       )}
       
       {showAddForm && (
@@ -217,15 +240,15 @@ export function InvestmentsOverview() {
         </div>
         
         <TabsContent value="all">
-          <InvestmentsList filter="all" />
+          <InvestmentsList filter="all" searchTerm={searchTerm} />
         </TabsContent>
         
         <TabsContent value="crypto">
-          <InvestmentsList filter="crypto" />
+          <InvestmentsList filter="crypto" searchTerm={searchTerm} />
         </TabsContent>
         
         <TabsContent value="cedears">
-          <InvestmentsList filter="cedears" />
+          <InvestmentsList filter="cedears" searchTerm={searchTerm} />
         </TabsContent>
       </Tabs>
     </div>
