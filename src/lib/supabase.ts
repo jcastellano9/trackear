@@ -19,6 +19,7 @@ export type InvestmentType = {
   // Extended properties for UI functionality
   current_price?: number; 
   price_change_percent?: number;
+  price_change_absolute?: number; // Added missing property
   total_value?: number;
   ppc?: number; // Precio Promedio de Compra
 };

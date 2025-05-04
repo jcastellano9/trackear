@@ -90,6 +90,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         
         return {
           ...inv,
+          symbol: inv.symbol || "", // Ensure symbol is at least an empty string
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
           price_change_absolute: priceDifference,
@@ -111,7 +112,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
       setInvestments(filteredInvestments as InvestmentType[]);
       
       // Calculate portfolio total
-      const total = filteredInvestments.reduce((sum, inv) => sum + inv.total_value, 0);
+      const total = filteredInvestments.reduce((sum, inv) => sum + (inv.total_value || 0), 0);
       setPortfolioTotal(total);
       
     } catch (error: any) {
@@ -264,7 +265,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
           <TableBody>
             {investments.map((investment) => {
               // Calculate allocation percentage
-              const allocation = (investment.total_value / portfolioTotal) * 100;
+              const allocation = (investment.total_value || 0) / portfolioTotal * 100;
               
               return (
                 <TableRow key={investment.id} className="hover:bg-muted/30">
@@ -298,34 +299,34 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
                   </TableCell>
                   <TableCell>{investment.activo}</TableCell>
                   <TableCell className="text-right font-medium">
-                    {formatDisplayCurrency(investment.current_price, investment.moneda)}
+                    {formatDisplayCurrency(investment.current_price || 0, investment.moneda)}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className={`flex items-center justify-end gap-1 ${
-                      investment.price_change_absolute > 0 
+                      (investment.price_change_absolute || 0) > 0 
                         ? "text-green-500" 
-                        : investment.price_change_absolute < 0 
+                        : (investment.price_change_absolute || 0) < 0 
                           ? "text-red-500" 
                           : ""
                     }`}>
-                      {investment.price_change_absolute > 0 ? "+" : ""}
-                      {formatDisplayCurrency(investment.price_change_absolute, investment.moneda)}
+                      {(investment.price_change_absolute || 0) > 0 ? "+" : ""}
+                      {formatDisplayCurrency(investment.price_change_absolute || 0, investment.moneda)}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className={`flex items-center justify-end gap-1 ${
-                      investment.price_change_percent > 0 
+                      (investment.price_change_percent || 0) > 0 
                         ? "text-green-500" 
-                        : investment.price_change_percent < 0 
+                        : (investment.price_change_percent || 0) < 0 
                           ? "text-red-500" 
                           : ""
                     }`}>
-                      {investment.price_change_percent > 0 ? (
+                      {(investment.price_change_percent || 0) > 0 ? (
                         <ArrowUpRight className="h-4 w-4" />
-                      ) : investment.price_change_percent < 0 ? (
+                      ) : (investment.price_change_percent || 0) < 0 ? (
                         <ArrowDownRight className="h-4 w-4" />
                       ) : null}
-                      <span>{investment.price_change_percent.toFixed(2)}%</span>
+                      <span>{(investment.price_change_percent || 0).toFixed(2)}%</span>
                     </div>
                   </TableCell>
                   {filter === "cedears" && (
