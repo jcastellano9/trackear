@@ -88,16 +88,18 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         const totalValue = currentPrice * inv.cantidad;
         const priceDifference = currentPrice - inv.precio_compra;
         
-        // Ensure symbol is always defined to prevent TypeScript errors
-        return {
+        // Cast the database result to our type with necessary defaults
+        const investment = {
           ...inv,
-          symbol: inv.symbol || "", // Always provide a default empty string for symbol
+          symbol: inv.symbol || "", // Default empty string for symbol
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
           price_change_absolute: priceDifference,
           total_value: totalValue,
           ppc: inv.ppc || inv.precio_compra, // Use stored PPC or default to purchase price
-        };
+        } as InvestmentType; // Explicit type cast
+        
+        return investment;
       });
       
       // Filter by search term if provided
@@ -110,7 +112,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         );
       }
       
-      setInvestments(filteredInvestments as InvestmentType[]);
+      setInvestments(filteredInvestments);
       
       // Calculate portfolio total
       const total = filteredInvestments.reduce((sum, inv) => sum + (inv.total_value || 0), 0);
