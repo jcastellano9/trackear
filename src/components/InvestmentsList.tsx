@@ -101,7 +101,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
           fecha_compra: inv.fecha_compra,
           created_at: inv.created_at,
           updated_at: inv.updated_at,
-          symbol: inv.symbol || inv.activo || "", // Provide a fallback for symbol
+          symbol: inv.activo, // Use activo as the default for symbol
           ratio: inv.ratio,
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
@@ -118,8 +118,8 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
         filteredInvestments = investmentsWithPrice.filter(inv => 
-          (inv.activo && inv.activo.toLowerCase().includes(term)) || 
-          (inv.symbol && inv.symbol.toLowerCase().includes(term))
+          inv.activo.toLowerCase().includes(term) || 
+          inv.symbol.toLowerCase().includes(term)
         );
       }
       
