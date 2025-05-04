@@ -17,7 +17,9 @@ export type Database = {
           fecha_compra: string
           id: string
           moneda: string
+          ppc: number | null
           precio_compra: number
+          ratio: number | null
           tipo: string
           updated_at: string | null
           user_id: string
@@ -29,7 +31,9 @@ export type Database = {
           fecha_compra: string
           id?: string
           moneda: string
+          ppc?: number | null
           precio_compra: number
+          ratio?: number | null
           tipo: string
           updated_at?: string | null
           user_id: string
@@ -41,7 +45,9 @@ export type Database = {
           fecha_compra?: string
           id?: string
           moneda?: string
+          ppc?: number | null
           precio_compra?: number
+          ratio?: number | null
           tipo?: string
           updated_at?: string | null
           user_id?: string

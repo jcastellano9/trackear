@@ -11,7 +11,7 @@ interface CryptoTableRowProps {
 }
 
 export const CryptoTableRow = ({ crypto }: CryptoTableRowProps) => {
-  // Format price based on asset type (BTC and ETH in USD, others in local currency)
+  // Format price based on asset type (BTC and ETH in USD)
   const formatPrice = (price: number, symbol: string) => {
     if (symbol === "BTC" || symbol === "ETH") {
       return `US${formatCurrency(price)}`;

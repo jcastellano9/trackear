@@ -5,8 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 // Default data for when no investments are present
 const EMPTY_DATA = [
-  { name: "Cripto", value: 0, color: "#3b82f6" },
-  { name: "CEDEARs", value: 0, color: "#f97316" },
+  { name: "Sin inversiones", value: 1, color: "#e5e7eb" }
 ];
 
 export function AssetAllocation() {
@@ -33,7 +32,7 @@ export function AssetAllocation() {
   }, []);
 
   const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length && hasData) {
       return (
         <div className="bg-popover border rounded-md shadow-md p-3 text-sm">
           <p className="font-medium">{`${payload[0].name}: ${payload[0].value}%`}</p>
@@ -45,6 +44,14 @@ export function AssetAllocation() {
   };
 
   const renderLegend = (props: any) => {
+    if (!hasData) {
+      return (
+        <div className="flex justify-center mt-4">
+          <span className="text-sm text-muted-foreground">No hay datos de inversiones para mostrar</span>
+        </div>
+      );
+    }
+    
     const { payload } = props;
     
     return (
@@ -52,7 +59,7 @@ export function AssetAllocation() {
         {payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span className="text-sm">{entry.value === 0 ? `${entry.name}: 0%` : entry.value}</span>
+            <span className="text-sm">{entry.name}: {entry.value}%</span>
           </li>
         ))}
       </ul>
@@ -69,11 +76,6 @@ export function AssetAllocation() {
             <Skeleton className="h-4 w-1/2 mx-auto" />
           </div>
         </div>
-      ) : !hasData ? (
-        <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground">
-          <p className="text-center">No hay inversiones cargadas</p>
-          <p className="text-xs text-center mt-1">Agregue inversiones para visualizar la distribución</p>
-        </div>
       ) : (
         <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -86,18 +88,23 @@ export function AssetAllocation() {
                 outerRadius={90}
                 paddingAngle={4}
                 dataKey="value"
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                labelLine={false}
-                strokeWidth={2}
+                stroke="#f3f4f6"
+                strokeWidth={hasData ? 2 : 0}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip content={<CustomTooltip />} />
+              {hasData && <Tooltip content={<CustomTooltip />} />}
               <Legend content={renderLegend} />
             </PieChart>
           </ResponsiveContainer>
+          {!hasData && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center text-muted-foreground">
+              <p>No hay inversiones cargadas</p>
+              <p className="text-xs mt-1">Agregue inversiones para visualizar la distribución</p>
+            </div>
+          )}
         </div>
       )}
     </div>
