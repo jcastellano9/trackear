@@ -67,7 +67,7 @@ export function CryptoPrices() {
               <TableRow>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Precio</TableHead>
-                <TableHead>24h %</TableHead>
+                <TableHead>Variación 24h %</TableHead>
                 <TableHead className="hidden md:table-cell">Cap. de Mercado</TableHead>
                 <TableHead className="hidden lg:table-cell">Volumen (24h)</TableHead>
               </TableRow>

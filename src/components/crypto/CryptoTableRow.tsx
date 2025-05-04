@@ -11,6 +11,14 @@ interface CryptoTableRowProps {
 }
 
 export const CryptoTableRow = ({ crypto }: CryptoTableRowProps) => {
+  // Format price based on asset type (BTC and ETH in USD, others in local currency)
+  const formatPrice = (price: number, symbol: string) => {
+    if (symbol === "BTC" || symbol === "ETH") {
+      return `US${formatCurrency(price)}`;
+    }
+    return formatCurrency(price);
+  };
+
   return (
     <TableRow>
       <TableCell>
@@ -31,7 +39,7 @@ export const CryptoTableRow = ({ crypto }: CryptoTableRowProps) => {
         </div>
       </TableCell>
       <TableCell className="font-medium">
-        {formatCurrency(crypto.currentPrice)}
+        {formatPrice(crypto.currentPrice, crypto.symbol)}
       </TableCell>
       <TableCell>
         <Badge variant={crypto.priceChangePercentage24h >= 0 ? "default" : "destructive"}>

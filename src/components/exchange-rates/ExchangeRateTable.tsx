@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { ArrowUp, ArrowDown, DollarSign, CreditCard, Building, Briefcase, Users, Bitcoin } from "lucide-react";
@@ -79,7 +78,7 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
         <div>Tipo</div>
         <div>Compra</div>
         <div>Venta</div>
-        <div className="text-right">Variación</div>
+        <div className="text-right">Variación 24h</div>
       </div>
       
       <motion.div
@@ -122,18 +121,16 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
               {formatExchangeRateValue(rate.sell)}
             </div>
             <div className="flex justify-end">
-              {!rate.reference && (
-                <Badge 
-                  variant={rate.change >= 0 ? "default" : "destructive"} 
-                  className={`inline-flex items-center ${rate.change >= 0 ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
-                >
-                  {rate.change >= 0 ? 
-                    <ArrowUp className="h-3 w-3 mr-0.5" /> : 
-                    <ArrowDown className="h-3 w-3 mr-0.5" />
-                  }
-                  {formatPercentage(rate.change)}
-                </Badge>
-              )}
+              <Badge 
+                variant={rate.change >= 0 ? "default" : "destructive"} 
+                className={`inline-flex items-center ${rate.change >= 0 ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
+              >
+                {rate.change >= 0 ? 
+                  <ArrowUp className="h-3 w-3 mr-0.5" /> : 
+                  <ArrowDown className="h-3 w-3 mr-0.5" />
+                }
+                {formatPercentage(rate.change)}
+              </Badge>
             </div>
           </motion.div>
         ))}

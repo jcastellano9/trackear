@@ -3,23 +3,30 @@ import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Updated data to match the image (60% Cripto, 40% CEDEARs)
-const MOCK_DATA = [
-  { name: "Cripto", value: 60, color: "#3b82f6" },  // Brighter blue 
-  { name: "CEDEARs", value: 40, color: "#f97316" }, // Orange for better contrast
+// Default data for when no investments are present
+const EMPTY_DATA = [
+  { name: "Cripto", value: 0, color: "#3b82f6" },
+  { name: "CEDEARs", value: 0, color: "#f97316" },
 ];
 
 export function AssetAllocation() {
-  const [data, setData] = useState<typeof MOCK_DATA>([]);
+  const [data, setData] = useState<typeof EMPTY_DATA>([]);
   const [loading, setLoading] = useState(true);
+  const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
-    // Simulate API call
-    const fetchData = () => {
-      setTimeout(() => {
-        setData(MOCK_DATA);
+    // Simulate API call to fetch actual investment data
+    const fetchData = async () => {
+      try {
+        // In a real app, we'd fetch the asset allocation data from an API or database
+        // For now, we're setting it to empty data to simulate no investments
+        setData(EMPTY_DATA);
+        setHasData(false); // No real data
+      } catch (error) {
+        console.error("Error fetching asset allocation:", error);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     fetchData();
@@ -45,7 +52,7 @@ export function AssetAllocation() {
         {payload.map((entry: any, index: number) => (
           <li key={`item-${index}`} className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }} />
-            <span className="text-sm">{entry.value}</span>
+            <span className="text-sm">{entry.value === 0 ? `${entry.name}: 0%` : entry.value}</span>
           </li>
         ))}
       </ul>
@@ -62,6 +69,11 @@ export function AssetAllocation() {
             <Skeleton className="h-4 w-1/2 mx-auto" />
           </div>
         </div>
+      ) : !hasData ? (
+        <div className="h-[250px] flex flex-col items-center justify-center text-muted-foreground">
+          <p className="text-center">No hay inversiones cargadas</p>
+          <p className="text-xs text-center mt-1">Agregue inversiones para visualizar la distribución</p>
+        </div>
       ) : (
         <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -71,12 +83,12 @@ export function AssetAllocation() {
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
-                outerRadius={90} // Increased from 80 to 90
+                outerRadius={90}
                 paddingAngle={4}
                 dataKey="value"
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 labelLine={false}
-                strokeWidth={2} // Added stroke width
+                strokeWidth={2}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />

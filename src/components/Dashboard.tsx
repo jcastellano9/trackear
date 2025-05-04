@@ -66,9 +66,26 @@ export function Dashboard() {
             profit,
             profitPercentage
           });
+        } else {
+          // No investments found, reset stats to zero
+          setInvestmentStats({
+            totalInvested: 0,
+            currentValue: 0,
+            profit: 0,
+            profitPercentage: 0
+          });
+          setHasInvestments(false);
         }
       } catch (error) {
         console.error("Error checking investments:", error);
+        // On error, reset stats to zero
+        setInvestmentStats({
+          totalInvested: 0,
+          currentValue: 0,
+          profit: 0,
+          profitPercentage: 0
+        });
+        setHasInvestments(false);
       }
     };
     
@@ -153,7 +170,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className="text-2xl font-bold">
-            {hasInvestments ? formatCurrency(investmentStats.totalInvested) : "US$ 0.00"}
+            {formatCurrency(investmentStats.totalInvested)}
           </h2>
         </motion.div>
         
@@ -172,7 +189,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className="text-2xl font-bold">
-            {hasInvestments ? formatCurrency(investmentStats.currentValue) : "US$ 0.00"}
+            {formatCurrency(investmentStats.currentValue)}
           </h2>
         </motion.div>
         
@@ -191,7 +208,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className={`text-2xl font-bold ${investmentStats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {hasInvestments ? formatCurrency(investmentStats.profit) : "US$ 0.00"}
+            {formatCurrency(investmentStats.profit)}
           </h2>
         </motion.div>
         
@@ -210,7 +227,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className={`text-2xl font-bold ${investmentStats.profitPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {hasInvestments ? `${investmentStats.profitPercentage.toFixed(2)}%` : "0.00%"}
+            {`${investmentStats.profitPercentage.toFixed(2)}%`}
           </h2>
         </motion.div>
       </motion.div>
