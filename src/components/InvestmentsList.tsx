@@ -90,7 +90,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         
         return {
           ...inv,
-          symbol: inv.symbol || "", // Ensure symbol is at least an empty string
+          symbol: inv.symbol || "", // Ensure symbol is always a string, even if null/undefined in database
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
           price_change_absolute: priceDifference,
