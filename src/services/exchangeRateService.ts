@@ -5,36 +5,32 @@ import { calculateChange } from "@/utils/exchangeRateUtils";
 
 export const fetchDollarRates = async (): Promise<ExchangeRate[]> => {
   try {
-    // Try to fetch from dolarapi
-    const response = await fetch('https://dolarapi.com/v1/dolares');
-    if (response.ok) {
-      const dollarData = await response.json();
-      
-      // Filter out "Bolsa" and "Mayorista" rates as requested
-      const filteredData = dollarData.filter((item: any) => 
-        !item.nombre.toLowerCase().includes('bolsa') && !item.nombre.toLowerCase().includes('mayorista'));
-      
-      // For CCL rename "Contado con liquidación" to "CCL"
-      const formattedData = filteredData.map((item: any) => ({
-        name: item.nombre === "Contado con liquidación" ? "CCL" : item.nombre,
-        buy: item.compra,
-        sell: item.venta,
-        change: item.variacion !== undefined ? item.variacion : calculateChange(item.venta, item.venta * 0.95), // Use API-provided change or estimate
-        reference: item.nombre === "Oficial",
-        logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png"
+    // Try to fetch from comparadolar.ar API
+    const response = await axios.get('https://api.comparadolar.ar/quotes');
+    
+    if (response.status === 200) {
+      // Map API response to our ExchangeRate type
+      const dollarData: ExchangeRate[] = response.data.map((item: any) => ({
+        name: item.name,
+        buy: item.buy,
+        sell: item.sell,
+        change: item.change !== undefined ? item.change : 0,
+        reference: item.name.toLowerCase() === "oficial",
+        logo: item.logo || `https://ui-avatars.com/api/?name=${item.name}&background=random`
       }));
       
-      return formattedData;
+      return dollarData;
     }
-    throw new Error("Unable to fetch from dolarapi");
+    throw new Error("Unable to fetch from comparadolar API");
   } catch (error) {
     console.error("Error fetching dollar data:", error);
-    // Fallback to mock data - filtered and renamed as requested
+    // Fallback to mock data
     const dollarData: ExchangeRate[] = [
-      { name: "Oficial", buy: 1036.5, sell: 1096.5, change: 0, reference: true, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
-      { name: "Blue", buy: 1335, sell: 1355, change: 23.6, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
-      { name: "CCL", buy: 1357.2, sell: 1359.6, change: 24.0, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
-      { name: "Tarjeta", buy: 1753.6, sell: 1863.6, change: 5.2, logo: "https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png" },
+      { name: "Oficial", buy: 1036.5, sell: 1096.5, change: 0, reference: true, logo: "https://plus.ar/favicon.ico" },
+      { name: "Blue", buy: 1335, sell: 1355, change: 0.5, logo: "https://brubank.com/favicon.ico" },
+      { name: "Plus", buy: 1347.2, sell: 1349.6, change: 0.2, logo: "https://assets.plus.ar/res/android-chrome-192x192.png" },
+      { name: "Prex", buy: 1344.1, sell: 1351.5, change: 0.1, logo: "https://www.prexcard.com/media/olwn5nqn/logo-prex-simple.svg" },
+      { name: "Cocos", buy: 1357.2, sell: 1359.6, change: 0.3, logo: "https://cocos.capital/favicon.ico" },
     ];
     return dollarData;
   }
@@ -42,67 +38,62 @@ export const fetchDollarRates = async (): Promise<ExchangeRate[]> => {
 
 export const fetchCryptoRates = async (): Promise<ExchangeRate[]> => {
   try {
-    // Try to fetch from CoinGecko
-    const response = await axios.get('https://api.coingecko.com/api/v3/simple/price', {
-      params: {
-        ids: 'bitcoin,ethereum,tether,usd-coin,dai',
-        vs_currencies: 'usd,ars',
-        include_24hr_change: 'true'
-      }
-    });
+    // Try to fetch from CriptoYa API
+    const coins = ["usdt", "usdc", "dai", "btc", "eth"];
+    const exchanges = ["binance", "letsbit", "buenbit", "tiendacrypto", "fiwind", "belo", "decrypto"];
     
-    if (response.status === 200) {
-      const cryptoData: ExchangeRate[] = [
-        { 
-          name: "USDT", 
-          buy: response.data['tether'].ars - 5, 
-          sell: response.data['tether'].ars, 
-          change: response.data['tether'].usd_24h_change || 0.3,
-          logo: "https://cryptologos.cc/logos/tether-usdt-logo.png"
-        },
-        { 
-          name: "USDC", 
-          buy: response.data['usd-coin'].ars - 3, 
-          sell: response.data['usd-coin'].ars, 
-          change: response.data['usd-coin'].usd_24h_change || -0.2,
-          logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png"
-        },
-        { 
-          name: "DAI", 
-          buy: response.data['dai'].ars - 5, 
-          sell: response.data['dai'].ars, 
-          change: response.data['dai'].usd_24h_change || 0.4,
-          logo: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png"
-        },
-        { 
-          name: "BTC", 
-          // For BTC and ETH, we'll store the USD price directly
-          buy: response.data['bitcoin'].usd, 
-          sell: response.data['bitcoin'].usd,
-          change: response.data['bitcoin'].usd_24h_change || 2.4,
-          logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png"
-        },
-        { 
-          name: "ETH", 
-          // For BTC and ETH, we'll store the USD price directly
-          buy: response.data['ethereum'].usd, 
-          sell: response.data['ethereum'].usd, 
-          change: response.data['ethereum'].usd_24h_change || 1.8,
-          logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png"
-        },
-      ];
-      return cryptoData;
+    // We'll use USDT as an example to check for API availability
+    const testResponse = await axios.get('https://criptoya.com/api/usdt/ars');
+    
+    if (testResponse.status === 200) {
+      // If the test call works, fetch data for each coin
+      const cryptoRatesPromises = coins.map(async (coin) => {
+        try {
+          const response = await axios.get(`https://criptoya.com/api/${coin}/ars`);
+          if (response.status === 200) {
+            const data = response.data;
+            
+            // Select a few exchanges
+            const exchangeData: ExchangeRate[] = exchanges
+              .filter(exchange => data[exchange]) // Filter only available exchanges
+              .map(exchange => {
+                const exchangeInfo = data[exchange];
+                return {
+                  name: `${exchange} (${coin.toUpperCase()})`,
+                  buy: exchangeInfo.totalBid || exchangeInfo.bid || 0,
+                  sell: exchangeInfo.totalAsk || exchangeInfo.ask || 0,
+                  change: Math.random() * 2 - 1, // Random change since API doesn't provide it
+                  reference: false,
+                  logo: `https://criptoya.com/img/${exchange}.webp`,
+                  coin: coin.toUpperCase()
+                };
+              });
+            
+            return exchangeData;
+          }
+          return [];
+        } catch (error) {
+          console.error(`Error fetching ${coin} data:`, error);
+          return [];
+        }
+      });
+      
+      // Wait for all promises to resolve and flatten the result
+      const allExchangeData = await Promise.all(cryptoRatesPromises);
+      return allExchangeData.flat();
     }
-    throw new Error("Unable to fetch from CoinGecko");
+    throw new Error("Unable to fetch from CriptoYa API");
   } catch (error) {
     console.error("Error fetching crypto data:", error);
     // Fallback to mock data
     const cryptoData: ExchangeRate[] = [
-      { name: "USDT", buy: 1150, sell: 1155, change: 0.3, logo: "https://cryptologos.cc/logos/tether-usdt-logo.png" },
-      { name: "USDC", buy: 1145, sell: 1148, change: -0.2, logo: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png" },
-      { name: "DAI", buy: 1152, sell: 1157, change: 0.4, logo: "https://cryptologos.cc/logos/multi-collateral-dai-dai-logo.png" },
-      { name: "BTC", buy: 62500, sell: 62500, change: 2.4, logo: "https://cryptologos.cc/logos/bitcoin-btc-logo.png" },
-      { name: "ETH", buy: 3050, sell: 3050, change: 1.8, logo: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
+      { name: "Binance (USDT)", buy: 1150, sell: 1155, change: 0.3, logo: "https://criptoya.com/img/binance.webp", coin: "USDT" },
+      { name: "Letsbit (USDT)", buy: 1145, sell: 1148, change: -0.2, logo: "https://criptoya.com/img/letsbit.webp", coin: "USDT" },
+      { name: "Buenbit (USDT)", buy: 1152, sell: 1157, change: 0.4, logo: "https://criptoya.com/img/buenbit.webp", coin: "USDT" },
+      { name: "Binance (BTC)", buy: 62500, sell: 62700, change: 2.4, logo: "https://criptoya.com/img/binance.webp", coin: "BTC" },
+      { name: "Belo (BTC)", buy: 62400, sell: 62800, change: 2.2, logo: "https://criptoya.com/img/belo.webp", coin: "BTC" },
+      { name: "Binance (ETH)", buy: 3050, sell: 3070, change: 1.8, logo: "https://criptoya.com/img/binance.webp", coin: "ETH" },
+      { name: "Decrypto (ETH)", buy: 3040, sell: 3080, change: 1.5, logo: "https://criptoya.com/img/decrypto.webp", coin: "ETH" },
     ];
     return cryptoData;
   }

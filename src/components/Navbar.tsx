@@ -7,7 +7,6 @@ import {
   Home, 
   Briefcase, 
   LineChart, 
-  Lightbulb, 
   Calculator, 
   User,
   Menu,
@@ -30,7 +29,6 @@ export function Navbar() {
     { path: "/", label: "Inicio", icon: <Home className="mr-2 h-4 w-4" /> },
     { path: "/investments", label: "Mi Cartera", icon: <Briefcase className="mr-2 h-4 w-4" /> },
     { path: "/analysis", label: "Análisis", icon: <LineChart className="mr-2 h-4 w-4" /> },
-    { path: "/opportunities", label: "Oportunidades", icon: <Lightbulb className="mr-2 h-4 w-4" /> },
     { path: "/simulation", label: "Simulador", icon: <Calculator className="mr-2 h-4 w-4" /> },
   ];
   

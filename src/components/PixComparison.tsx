@@ -39,9 +39,29 @@ export function PixComparison() {
     queryKey: ["pixQuotes", currency],
     queryFn: async () => {
       try {
-        // Use a mock response for now since we might not have direct API access
-        // In a production app, this would be: const response = await axios.get("https://pix.ferminrp.com/quotes");
+        // Try to fetch from the pix.ferminrp.com API
+        const response = await axios.get("https://pix.ferminrp.com/quotes");
         
+        if (response.status === 200) {
+          const formattedData: PixQuoteProvider[] = response.data.map((item: any) => ({
+            id: item.id || String(Math.random()),
+            name: item.name,
+            logo: item.logo || `https://ui-avatars.com/api/?name=${item.name}&background=random`,
+            exchange_rate: item.exchange_rate,
+            payment_methods: item.payment_methods || ["Transferencia bancaria"],
+            fee_percentage: item.fee_percentage,
+            min_amount: item.min_amount,
+            max_amount: item.max_amount
+          }));
+          
+          return formattedData;
+        }
+        
+        throw new Error("Failed to fetch PIX quotes");
+      } catch (error) {
+        console.error("Error fetching PIX quotes:", error);
+        
+        // Use mock data if API call fails
         const mockData: PixQuoteProvider[] = [
           {
             id: "dolarapp",
@@ -96,9 +116,6 @@ export function PixComparison() {
         }
 
         return mockData;
-      } catch (error) {
-        console.error("Error fetching PIX quotes:", error);
-        throw new Error("No se pudieron cargar las cotizaciones de PIX");
       }
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -151,7 +168,7 @@ export function PixComparison() {
                     <div>
                       <h3 className="text-lg font-medium">{bestProvider.name} tiene el mejor tipo de cambio</h3>
                       <div className="text-xl md:text-2xl font-bold">
-                        1 BRL = {currency === "ARS" ? "$" : "US$"} {bestProvider.exchange_rate.toFixed(2)}
+                        1 R$ = {currency === "ARS" ? "$" : "US$"} {bestProvider.exchange_rate.toFixed(2)}
                       </div>
                     </div>
                   </div>
@@ -190,7 +207,7 @@ export function PixComparison() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        1 BRL = {currency === "ARS" ? "$" : "US$"} {provider.exchange_rate.toFixed(2)}
+                        1 R$ = {currency === "ARS" ? "$" : "US$"} {provider.exchange_rate.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-right">
                         {provider.fee_percentage ? `${provider.fee_percentage}%` : "—"}

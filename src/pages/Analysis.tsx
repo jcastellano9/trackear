@@ -1,7 +1,7 @@
 
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExchangeRates } from "@/components/ExchangeRates";
+import { ExchangeRatesComparison } from "@/components/ExchangeRatesComparison";
 import { CryptoPrices } from "@/components/CryptoPrices";
 import { CryptoWalletComparison } from "@/components/CryptoWalletComparison";
 import { PixComparison } from "@/components/PixComparison";
@@ -26,7 +26,7 @@ const Analysis = () => {
         </ScrollArea>
         
         <TabsContent value="exchange-rates" className="space-y-6">
-          <ExchangeRates />
+          <ExchangeRatesComparison />
         </TabsContent>
         
         <TabsContent value="crypto-performance" className="space-y-6">

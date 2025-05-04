@@ -1,40 +1,18 @@
+
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUp, ArrowDown, DollarSign, CreditCard, Building, Briefcase, Users, Bitcoin } from "lucide-react";
+import { ArrowUp, ArrowDown, DollarSign } from "lucide-react";
 import { ExchangeRate } from "@/types/exchangeRate";
 import { formatExchangeRateValue, formatPercentage } from "@/utils/exchangeRateUtils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ExchangeRateTableProps {
   data: ExchangeRate[];
   loading: boolean;
   lastUpdated: Date;
 }
-
-// Helper function to get the appropriate icon for each rate type
-const getRateIcon = (rateName: string) => {
-  const iconClassName = "h-5 w-5 text-muted-foreground";
-  
-  switch(rateName.toLowerCase()) {
-    case "oficial":
-      return <DollarSign className={iconClassName} />;
-    case "blue":
-      return <DollarSign className={`${iconClassName} text-blue-500`} />;
-    case "bolsa":
-      return <Briefcase className={iconClassName} />;
-    case "contado con liquidación":
-      return <Building className={iconClassName} />;
-    case "mayorista":
-      return <Users className={iconClassName} />;
-    case "cripto":
-      return <Bitcoin className={iconClassName} />;
-    case "tarjeta":
-      return <CreditCard className={iconClassName} />;
-    default:
-      return <DollarSign className={iconClassName} />;
-  }
-};
 
 export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({ 
   data, 
@@ -75,10 +53,10 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
   return (
     <div className="space-y-2">
       <div className="grid grid-cols-4 text-sm font-medium border-b pb-2">
-        <div>Tipo</div>
+        <div>Proveedor</div>
         <div>Compra</div>
         <div>Venta</div>
-        <div className="text-right">Variación 24h</div>
+        <div className="text-right">Spread</div>
       </div>
       
       <motion.div
@@ -87,53 +65,65 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
         animate="show"
         className="space-y-1"
       >
-        {data.map((rate, index) => (
-          <motion.div 
-            key={index} 
-            variants={item}
-            className="grid grid-cols-4 py-4 border-b items-center bg-white/5 rounded-lg hover:bg-white/10 transition-colors p-2"
-          >
-            <div className="flex items-center gap-2">
-              <div className="bg-white/10 p-2 rounded-full flex items-center justify-center">
-                {rate.logo ? (
-                  <img 
-                    src={rate.logo} 
-                    alt={rate.name}
-                    className="h-6 w-6 object-contain"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "https://via.placeholder.com/24?text=?";
-                    }}
-                  />
-                ) : (
-                  getRateIcon(rate.name)
-                )}
-              </div>
-              <div>
-                <div className="font-medium">{rate.name}</div>
-                {rate.reference && <span className="text-xs text-muted-foreground">Referencia</span>}
-              </div>
-            </div>
-            <div className="font-medium">
-              {formatExchangeRateValue(rate.buy)}
-            </div>
-            <div className="font-medium">
-              {formatExchangeRateValue(rate.sell)}
-            </div>
-            <div className="flex justify-end">
-              <Badge 
-                variant={rate.change >= 0 ? "default" : "destructive"} 
-                className={`inline-flex items-center ${rate.change >= 0 ? 'bg-green-500/20 text-green-500 hover:bg-green-500/30' : 'bg-red-500/20 text-red-500 hover:bg-red-500/30'}`}
+        {data
+          .sort((a, b) => b.buy - a.buy) // Sort by buy price desc
+          .map((rate, index) => {
+            const spread = rate.sell - rate.buy;
+            const spreadPercentage = (spread / rate.buy) * 100;
+            
+            return (
+              <motion.div 
+                key={index} 
+                variants={item}
+                className="grid grid-cols-4 py-4 border-b items-center bg-white/5 rounded-lg hover:bg-white/10 transition-colors p-2"
               >
-                {rate.change >= 0 ? 
-                  <ArrowUp className="h-3 w-3 mr-0.5" /> : 
-                  <ArrowDown className="h-3 w-3 mr-0.5" />
-                }
-                {formatPercentage(rate.change)}
-              </Badge>
-            </div>
-          </motion.div>
-        ))}
+                <div className="flex items-center gap-2">
+                  <div className="bg-white/10 p-2 rounded-full flex items-center justify-center">
+                    {rate.logo ? (
+                      <img 
+                        src={rate.logo} 
+                        alt={rate.name}
+                        className="h-6 w-6 object-contain"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://ui-avatars.com/api/?name=${rate.name}&background=random`;
+                        }}
+                      />
+                    ) : (
+                      <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium">{rate.name}</div>
+                    {rate.reference && <span className="text-xs text-muted-foreground">Referencia</span>}
+                  </div>
+                </div>
+                <div className="font-medium">
+                  ${formatExchangeRateValue(rate.buy)}
+                </div>
+                <div className="font-medium">
+                  ${formatExchangeRateValue(rate.sell)}
+                </div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex justify-end">
+                        <Badge 
+                          variant="outline" 
+                          className="inline-flex items-center"
+                        >
+                          ${spread.toFixed(2)}
+                        </Badge>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{spreadPercentage.toFixed(2)}%</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </motion.div>
+            );
+        })}
       </motion.div>
       
       <div className="text-xs text-muted-foreground text-right pt-2">
