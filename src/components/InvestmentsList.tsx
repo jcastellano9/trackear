@@ -88,9 +88,10 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         const totalValue = currentPrice * inv.cantidad;
         const priceDifference = currentPrice - inv.precio_compra;
         
+        // Ensure symbol is always defined to prevent TypeScript errors
         return {
           ...inv,
-          symbol: inv.symbol || "", // Ensure symbol is always a string, even if null/undefined in database
+          symbol: inv.symbol || "", // Always provide a default empty string for symbol
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
           price_change_absolute: priceDifference,

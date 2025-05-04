@@ -14,12 +14,12 @@ export type InvestmentType = {
   fecha_compra: string;
   created_at: string;
   updated_at?: string | null;
-  symbol?: string; // Symbol for the asset (BTC, AAPL, etc.)
+  symbol: string; // Changed from optional to required
   ratio?: number; // Ratio for CEDEARs (example: 20:1)
   // Extended properties for UI functionality
   current_price?: number; 
   price_change_percent?: number;
-  price_change_absolute?: number; // Added property
+  price_change_absolute?: number;
   total_value?: number;
   ppc?: number; // Precio Promedio de Compra
 };
