@@ -97,7 +97,7 @@ export const ProfileHeader = ({
         <h3 className="text-lg font-medium">{fullName || 'Usuario'}</h3>
         <p className="text-sm text-muted-foreground">{email}</p>
         <p className="text-xs text-muted-foreground mt-1">
-          Miembro desde {new Date(createdAt).toLocaleDateString()}
+          Miembro desde {new Date(createdAt).toLocaleDateString('es-ES')}
         </p>
 
         {/* Investment stats if available */}

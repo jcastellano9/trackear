@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,6 +53,33 @@ export const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
       confirmPassword: "",
     },
   });
+  
+  // Check for existing block on component mount
+  useEffect(() => {
+    const blockedUntil = localStorage.getItem('passwordChangeBlockUntil');
+    
+    if (blockedUntil) {
+      const blockEndTime = new Date(blockedUntil);
+      
+      if (blockEndTime > new Date()) {
+        // Still in block period
+        setIsBlocked(true);
+        setBlockEndTime(blockEndTime);
+        
+        // Set timeout to clear the block
+        const timeoutMs = blockEndTime.getTime() - Date.now();
+        setTimeout(() => {
+          setIsBlocked(false);
+          setAttemptCount(0);
+          setBlockEndTime(null);
+          localStorage.removeItem('passwordChangeBlockUntil');
+        }, timeoutMs);
+      } else {
+        // Block period has ended, clear it
+        localStorage.removeItem('passwordChangeBlockUntil');
+      }
+    }
+  }, []);
   
   const handlePasswordChange = async (values: ChangePasswordValues) => {
     if (isBlocked) {
@@ -130,33 +157,6 @@ export const ChangePasswordForm = ({ onSuccess }: ChangePasswordFormProps) => {
       setIsLoading(false);
     }
   };
-
-  // Check for existing block on component mount
-  useState(() => {
-    const blockedUntil = localStorage.getItem('passwordChangeBlockUntil');
-    
-    if (blockedUntil) {
-      const blockEndTime = new Date(blockedUntil);
-      
-      if (blockEndTime > new Date()) {
-        // Still in block period
-        setIsBlocked(true);
-        setBlockEndTime(blockEndTime);
-        
-        // Set timeout to clear the block
-        const timeoutMs = blockEndTime.getTime() - Date.now();
-        setTimeout(() => {
-          setIsBlocked(false);
-          setAttemptCount(0);
-          setBlockEndTime(null);
-          localStorage.removeItem('passwordChangeBlockUntil');
-        }, timeoutMs);
-      } else {
-        // Block period has ended, clear it
-        localStorage.removeItem('passwordChangeBlockUntil');
-      }
-    }
-  });
   
   return (
     <Form {...form}>
