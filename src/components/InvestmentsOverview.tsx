@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvestmentsList } from "./investments/InvestmentsList";
 import { AddInvestmentForm } from "./AddInvestmentForm";
 import { InvestmentSummaryTable } from "./InvestmentSummaryTable";
-import { PlusCircle, X, Bitcoin, DollarSign, Filter, Database } from "lucide-react";
+import { PlusCircle, X, Bitcoin, DollarSign, Filter, Database, RefreshCw } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { ExportInvestments } from "./ExportInvestments";
@@ -14,6 +14,7 @@ import { supabase, InvestmentType } from "@/lib/supabase";
 import { Input } from "./ui/input";
 import { formatCurrency } from "@/utils/formatUtils";
 import { Skeleton } from "./ui/skeleton";
+import { toast } from "sonner";
 
 export function InvestmentsOverview() {
   const [showAddForm, setShowAddForm] = useState(false);
@@ -110,6 +111,12 @@ export function InvestmentsOverview() {
   const handleAddSuccess = () => {
     setShowAddForm(false);
     fetchInvestments();
+    toast.success("Inversión agregada exitosamente");
+  };
+  
+  const handleRefreshData = () => {
+    fetchInvestments();
+    toast.success("Datos de inversiones actualizados");
   };
   
   return (
@@ -121,6 +128,17 @@ export function InvestmentsOverview() {
         </div>
         
         <div className="flex flex-wrap items-center gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleRefreshData}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+            Actualizar
+          </Button>
+          
           <ExportInvestments />
           
           <Button onClick={() => setShowAddForm(!showAddForm)} className="ml-2">

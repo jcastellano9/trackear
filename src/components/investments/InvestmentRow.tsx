@@ -3,11 +3,11 @@ import React from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, ArrowUpRight, ArrowDownRight, Heart, Bitcoin } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { Edit, Trash2, ArrowUpRight, ArrowDownRight, Heart, DollarSign, Bitcoin } from "lucide-react";
 import { formatCurrency } from "@/utils/formatUtils";
-import { findAssetByValue } from "@/utils/investmentOptions";
 import { InvestmentType } from "@/lib/supabase";
+import { Progress } from "@/components/ui/progress";
+import { getLogoUrl } from "@/utils/logoUtils";
 
 interface InvestmentRowProps {
   investment: InvestmentType;
@@ -19,15 +19,18 @@ interface InvestmentRowProps {
   showRatio?: boolean;
 }
 
-export const InvestmentRow = ({
-  investment,
-  displayCurrency,
-  portfolioTotal,
+export const InvestmentRow = ({ 
+  investment, 
+  displayCurrency, 
+  portfolioTotal, 
   cclRate,
   onEdit,
   onDelete,
-  showRatio = false,
+  showRatio = false
 }: InvestmentRowProps) => {
+  // Calculate allocation percentage
+  const allocation = (investment.total_value || 0) / portfolioTotal * 100;
+  
   // Convert currency based on display preference
   const convertCurrency = (value: number, originalCurrency: "USD" | "ARS") => {
     if (displayCurrency === originalCurrency) return value;
@@ -51,11 +54,8 @@ export const InvestmentRow = ({
     return formatCurrency(convertedValue, displayCurrency);
   };
 
-  // Calculate allocation percentage
-  const allocation = (investment.total_value || 0) / portfolioTotal * 100;
-
   return (
-    <TableRow key={investment.id} className="hover:bg-muted/30">
+    <TableRow className="hover:bg-muted/30">
       <TableCell className="text-center">
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <Heart className="h-4 w-4 text-muted-foreground" />
@@ -65,7 +65,7 @@ export const InvestmentRow = ({
         <div className="flex items-center gap-2">
           {investment.symbol ? (
             <img 
-              src={findAssetByValue(investment.symbol)?.logo || `https://ui-avatars.com/api/?name=${investment.symbol}&background=random`} 
+              src={getLogoUrl(investment.symbol, investment.tipo)} 
               alt={investment.symbol}
               className="h-6 w-6 rounded-sm object-contain"
               onError={(e) => {

@@ -6,6 +6,8 @@ import { supabase, InvestmentType } from "@/lib/supabase";
 import { EditInvestmentModal } from "../EditInvestmentModal";
 import { CurrencyToggle } from "./CurrencyToggle";
 import { InvestmentsTable } from "./InvestmentsTable";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 interface InvestmentsListProps {
   filter: "all" | "crypto" | "cedears";
@@ -98,8 +100,8 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
         filteredInvestments = investmentsWithPrice.filter(inv => 
-          inv.activo.toLowerCase().includes(term) || 
-          inv.symbol.toLowerCase().includes(term)
+          (inv.activo && inv.activo.toLowerCase().includes(term)) || 
+          (inv.symbol && inv.symbol.toLowerCase().includes(term))
         );
       }
       
@@ -156,9 +158,28 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
     setDisplayCurrency(prev => prev === "USD" ? "ARS" : "USD");
   };
 
+  // Handle manual refresh
+  const handleRefresh = () => {
+    fetchInvestments();
+    toast.success("Datos de inversiones actualizados");
+  };
+
   return (
     <div className="space-y-4">
-      <CurrencyToggle displayCurrency={displayCurrency} onToggle={toggleCurrency} />
+      <div className="flex justify-between items-center">
+        <CurrencyToggle displayCurrency={displayCurrency} onToggle={toggleCurrency} />
+        
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+          Actualizar
+        </Button>
+      </div>
       
       <InvestmentsTable 
         investments={investments}

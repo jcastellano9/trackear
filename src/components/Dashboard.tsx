@@ -3,10 +3,11 @@ import { AssetAllocation } from "./AssetAllocation";
 import { ExchangeRates } from "./ExchangeRates";
 import { InvestmentChart } from "./InvestmentChart";
 import { motion } from "framer-motion";
-import { TrendingUp, DollarSign, PieChart, BarChart4 } from "lucide-react";
+import { TrendingUp, DollarSign, PieChart, BarChart4, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useSession } from "@supabase/auth-helpers-react";
+import { Button } from "@/components/ui/button";
 
 export function Dashboard() {
   const session = useSession();
@@ -17,68 +18,59 @@ export function Dashboard() {
     profit: 0,
     profitPercentage: 0
   });
+  const [loading, setLoading] = useState(true);
 
-  // Check if user has investments
-  useEffect(() => {
-    const checkInvestments = async () => {
-      if (!session?.user?.id) return;
-      
-      try {
-        const { data, error, count } = await supabase
-          .from('investments')
-          .select('*', { count: 'exact' })
-          .eq('user_id', session.user.id)
-          .limit(1);
-          
-        if (error) throw error;
+  // Check if user has investments and get stats
+  const fetchInvestmentData = async () => {
+    setLoading(true);
+    if (!session?.user?.id) {
+      setInvestmentStats({
+        totalInvested: 0,
+        currentValue: 0,
+        profit: 0,
+        profitPercentage: 0
+      });
+      setHasInvestments(false);
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const { data, error, count } = await supabase
+        .from('investments')
+        .select('*', { count: 'exact' })
+        .eq('user_id', session.user.id);
         
-        if (count && count > 0) {
-          setHasInvestments(true);
+      if (error) throw error;
+      
+      if (count && count > 0) {
+        setHasInvestments(true);
+        
+        // Calculate stats from actual investments
+        let totalInvested = 0;
+        let currentValue = 0;
+        
+        data?.forEach(investment => {
+          const investmentAmount = investment.precio_compra * investment.cantidad;
+          totalInvested += investmentAmount;
           
-          // Get investment stats
-          const { data: statsData, error: statsError } = await supabase
-            .from('investments')
-            .select('*')
-            .eq('user_id', session.user.id);
-            
-          if (statsError) throw statsError;
-          
-          // Calculate stats (this is a simplified calculation)
-          let totalInvested = 0;
-          let currentValue = 0;
-          
-          statsData?.forEach(investment => {
-            const investmentAmount = investment.precio_compra * investment.cantidad;
-            totalInvested += investmentAmount;
-            
-            // Mock current value with a random change
-            const randomChange = 1 + (Math.random() * 0.5 - 0.25); // -25% to +25%
-            const currentInvestmentValue = investmentAmount * randomChange;
-            currentValue += currentInvestmentValue;
-          });
-          
-          const profit = currentValue - totalInvested;
-          const profitPercentage = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
-          
-          setInvestmentStats({
-            totalInvested,
-            currentValue,
-            profit,
-            profitPercentage
-          });
-        } else {
-          // No investments found, reset stats to zero
-          setInvestmentStats({
-            totalInvested: 0,
-            currentValue: 0,
-            profit: 0,
-            profitPercentage: 0
-          });
-          setHasInvestments(false);
-        }
-      } catch (error) {
-        console.error("Error checking investments:", error);
-        // On error, reset stats to zero
+          // Mock current value with a random change
+          const randomChange = 1 + (Math.random() * 0.5 - 0.25); // -25% to +25%
+          const currentInvestmentValue = investmentAmount * randomChange;
+          currentValue += currentInvestmentValue;
+        });
+        
+        const profit = currentValue - totalInvested;
+        const profitPercentage = totalInvested > 0 ? (profit / totalInvested) * 100 : 0;
+        
+        setInvestmentStats({
+          totalInvested,
+          currentValue,
+          profit,
+          profitPercentage
+        });
+      } else {
+        // No investments found, reset stats to zero
         setInvestmentStats({
           totalInvested: 0,
           currentValue: 0,
@@ -87,9 +79,23 @@ export function Dashboard() {
         });
         setHasInvestments(false);
       }
-    };
+    } catch (error) {
+      console.error("Error checking investments:", error);
+      // On error, reset stats to zero
+      setInvestmentStats({
+        totalInvested: 0,
+        currentValue: 0,
+        profit: 0,
+        profitPercentage: 0
+      });
+      setHasInvestments(false);
+    } finally {
+      setLoading(false);
+    }
+  };
     
-    checkInvestments();
+  useEffect(() => {
+    fetchInvestmentData();
   }, [session]);
   
   const fadeIn = {
@@ -141,12 +147,26 @@ export function Dashboard() {
         transition={{ duration: 0.6 }}
         className="text-center md:text-left"
       >
-        <h1 className="text-4xl font-bold text-gradient glow">
-          Bienvenido a TrackeAr
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Centraliza y gestiona todas tus inversiones en un solo lugar
-        </p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+          <div>
+            <h1 className="text-4xl font-bold text-gradient glow">
+              Bienvenido a TrackeAr
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Centraliza y gestiona todas tus inversiones en un solo lugar
+            </p>
+          </div>
+          
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={fetchInvestmentData}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Actualizar datos
+          </Button>
+        </div>
       </motion.div>
       
       <motion.div 
@@ -170,7 +190,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className="text-2xl font-bold">
-            {formatCurrency(investmentStats.totalInvested)}
+            {loading ? "Cargando..." : formatCurrency(investmentStats.totalInvested)}
           </h2>
         </motion.div>
         
@@ -189,7 +209,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className="text-2xl font-bold">
-            {formatCurrency(investmentStats.currentValue)}
+            {loading ? "Cargando..." : formatCurrency(investmentStats.currentValue)}
           </h2>
         </motion.div>
         
@@ -208,7 +228,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className={`text-2xl font-bold ${investmentStats.profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {formatCurrency(investmentStats.profit)}
+            {loading ? "Cargando..." : formatCurrency(investmentStats.profit)}
           </h2>
         </motion.div>
         
@@ -227,7 +247,7 @@ export function Dashboard() {
             </span>
           </div>
           <h2 className={`text-2xl font-bold ${investmentStats.profitPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {`${investmentStats.profitPercentage.toFixed(2)}%`}
+            {loading ? "Cargando..." : `${investmentStats.profitPercentage.toFixed(2)}%`}
           </h2>
         </motion.div>
       </motion.div>
@@ -273,7 +293,7 @@ export function Dashboard() {
       >
         <div>
           <h2 className="text-xl font-bold text-gradient">Cotizaciones</h2>
-          <p className="text-sm text-muted-foreground">Última actualización: hace 5 minutos</p>
+          <p className="text-sm text-muted-foreground">Última actualización: {new Date().toLocaleTimeString()}</p>
         </div>
         <ExchangeRates />
       </motion.div>

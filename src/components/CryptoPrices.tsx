@@ -147,6 +147,7 @@ export function CryptoPrices() {
                 <TableHead className="text-right">Compra</TableHead>
                 <TableHead className="text-right">Venta</TableHead>
                 <TableHead className="text-right">Spread</TableHead>
+                <TableHead className="text-right">Var. 24h</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,11 +159,12 @@ export function CryptoPrices() {
                     <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-16" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-16" /></TableCell>
                   </TableRow>
                 ))
               ) : sortedRates.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No hay datos disponibles
                   </TableCell>
                 </TableRow>
@@ -174,6 +176,14 @@ export function CryptoPrices() {
                   // Extract exchange name from format "Exchange (COIN)"
                   const exchangeName = rate.name.split(" (")[0];
                   const coinName = rate.coin || rate.name.split(" (")[1]?.replace(")", "") || "";
+                  
+                  // Format price based on coin type
+                  const formatPrice = (price: number) => {
+                    if (coinName === "BTC" || coinName === "ETH") {
+                      return `US$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    }
+                    return `$${price.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                  };
                   
                   return (
                     <TableRow key={index}>
@@ -197,15 +207,31 @@ export function CryptoPrices() {
                         <Badge variant="outline">{coinName}</Badge>
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        ${rate.buy.toLocaleString('es-AR')}
+                        {formatPrice(rate.buy)}
                       </TableCell>
                       <TableCell className="text-right font-medium">
-                        ${rate.sell.toLocaleString('es-AR')}
+                        {formatPrice(rate.sell)}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 text-muted-foreground">
-                          <span>${spread.toFixed(2)}</span>
+                          <span>{formatPrice(spread)}</span>
                           <span className="text-xs">({spreadPercentage.toFixed(2)}%)</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className={`flex items-center justify-end gap-1 ${
+                          (rate.change || 0) > 0 
+                            ? "text-green-500" 
+                            : (rate.change || 0) < 0 
+                              ? "text-red-500" 
+                              : ""
+                        }`}>
+                          {(rate.change || 0) > 0 ? (
+                            <ArrowUpRight className="h-4 w-4" />
+                          ) : (rate.change || 0) < 0 ? (
+                            <ArrowDownRight className="h-4 w-4" />
+                          ) : null}
+                          <span>{Math.abs(rate.change || 0).toFixed(2)}%</span>
                         </div>
                       </TableCell>
                     </TableRow>

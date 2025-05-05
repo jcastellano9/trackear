@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 // Default data for when no investments are present
 const EMPTY_DATA = [
@@ -14,22 +16,54 @@ export function AssetAllocation() {
   const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
-    // Simulate API call to fetch actual investment data
-    const fetchData = async () => {
-      try {
-        // In a real app, we'd fetch the asset allocation data from an API or database
-        // For now, we're setting it to empty data to simulate no investments
-        setData(EMPTY_DATA);
-        setHasData(false); // No real data
-      } catch (error) {
-        console.error("Error fetching asset allocation:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
+  
+  // Function to fetch allocation data
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // In a real app, we'd fetch the asset allocation data from an API or database
+      const { supabase } = await import('@/lib/supabase');
+      const { useSession } = await import('@supabase/auth-helpers-react');
+      const session = useSession();
+      
+      if (!session?.user?.id) {
+        setData(EMPTY_DATA);
+        setHasData(false);
+        return;
+      }
+      
+      // Check if the user has any investments
+      const { count, error } = await supabase
+        .from('investments')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', session.user.id);
+        
+      const userHasInvestments = count !== null && count > 0;
+      
+      if (userHasInvestments) {
+        // If we have investments, we'd calculate allocation here
+        // For now, we'll use the empty data
+        setData(EMPTY_DATA); 
+        setHasData(false);
+      } else {
+        setData(EMPTY_DATA);
+        setHasData(false);
+      }
+    } catch (error) {
+      console.error("Error fetching asset allocation:", error);
+      setData(EMPTY_DATA);
+      setHasData(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle refresh button click
+  const handleRefresh = () => {
+    fetchData();
+  };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length && hasData) {
@@ -68,6 +102,13 @@ export function AssetAllocation() {
 
   return (
     <div>
+      <div className="flex justify-end mb-4">
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+          Actualizar
+        </Button>
+      </div>
+      
       {loading ? (
         <div className="flex flex-col items-center space-y-4 pt-4">
           <Skeleton className="h-[180px] w-[180px] rounded-full" />
@@ -77,7 +118,7 @@ export function AssetAllocation() {
           </div>
         </div>
       ) : (
-        <div className="h-[250px]">
+        <div className="relative h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

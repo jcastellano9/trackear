@@ -1,7 +1,10 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer } from "@/components/ui/chart";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from "recharts";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 type InvestmentData = {
   date: string;
@@ -16,68 +19,90 @@ export function InvestmentChart() {
   const [timeframe, setTimeframe] = useState<'1m' | '3m' | '6m' | '1y' | 'all'>('3m');
   const [assetType, setAssetType] = useState<'all' | 'crypto' | 'cedears'>('all');
 
+  // Fetch investment data or check if user has investments
   useEffect(() => {
-    // Simulated fetch - in real app this would come from API
-    setTimeout(() => {
-      // Check if user has investments (mock for now)
-      const userHasInvestments = false; // This would come from a database check
-      
-      if (userHasInvestments) {
-        // Generate sample data based on the image
-        const today = new Date();
-        const data: InvestmentData[] = [];
+    const fetchInvestmentData = async () => {
+      setLoading(true);
+      try {
+        // Check if user has investments from the database
+        // This is a simplified approach for demonstration
         
-        const totalDays = timeframe === '1m' ? 30 : 
-                           timeframe === '3m' ? 90 : 
-                           timeframe === '6m' ? 180 : 
-                           timeframe === '1y' ? 365 : 90; // Default to 3m
-
-        // Starting values that match the image
-        let investedAmount = 3200;
-        let currentValue = 3200;
+        // In a real implementation, you would fetch actual data from the database
+        const { supabase } = await import('@/lib/supabase');
+        const session = (await import('@supabase/auth-helpers-react')).useSession();
         
-        // Adjust values based on asset type
-        if (assetType === 'crypto') {
-          currentValue = 3300;  // Slightly better performance
-        } else if (assetType === 'cedears') {
-          currentValue = 3100;  // Slightly worse performance
+        if (!session?.user?.id) {
+          setHasData(false);
+          setChartData([]);
+          return;
         }
         
-        // Generate data points that visually match the image pattern
-        for (let i = totalDays; i >= 0; i -= Math.floor(totalDays/20)) {
-          const date = new Date(today);
-          date.setDate(date.getDate() - i);
+        // Check if the user has any investments
+        const { count, error } = await supabase
+          .from('investments')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', session.user.id);
           
-          // Simulate investment and value changes to match the image pattern
-          if (i < totalDays) {
-            // Add growth pattern similar to the image
-            if (i < totalDays * 0.8 && i > totalDays * 0.6) {
-              // Dip in the middle
-              currentValue = currentValue * 0.995;
-            } else if (i < totalDays * 0.3) {
-              // Growth toward the end
-              currentValue = currentValue * 1.015;
-            }
-          }
-          
-          data.push({
-            date: date.toLocaleDateString('es-AR'),
-            invested: Number(investedAmount.toFixed(2)),
-            currentValue: Number(currentValue.toFixed(2))
-          });
-        }
+        const userHasInvestments = count !== null && count > 0;
         
-        setChartData(data);
-        setHasData(true);
-      } else {
-        // No investments, set empty data
-        setChartData([]);
+        if (userHasInvestments) {
+          // If user has investments, generate chart data based on their investments
+          // For now, we'll use placeholder data until real data can be fetched
+          generateChartData();
+        } else {
+          setHasData(false);
+          setChartData([]);
+        }
+      } catch (error) {
+        console.error("Error checking for investments:", error);
         setHasData(false);
+        setChartData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    const generateChartData = () => {
+      // This would be replaced with real data in production
+      const today = new Date();
+      const data: InvestmentData[] = [];
+      
+      const totalDays = timeframe === '1m' ? 30 : 
+                       timeframe === '3m' ? 90 : 
+                       timeframe === '6m' ? 180 : 
+                       timeframe === '1y' ? 365 : 90;
+      
+      // Starting with zero values since we want to show empty charts initially
+      // or when there's no data yet
+      let investedAmount = 0;
+      let currentValue = 0;
+      
+      // Generate data points for the selected timeframe
+      for (let i = totalDays; i >= 0; i -= Math.floor(totalDays/20)) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        
+        data.push({
+          date: date.toLocaleDateString('es-AR'),
+          invested: Number(investedAmount.toFixed(2)),
+          currentValue: Number(currentValue.toFixed(2))
+        });
       }
       
+      setChartData(data);
+      setHasData(investedAmount > 0); // Only show chart as having data if there's actual investment
+    };
+
+    fetchInvestmentData();
+  }, [timeframe, assetType]);
+
+  // Refresh the chart data
+  const handleRefresh = () => {
+    setLoading(true);
+    setTimeout(() => {
       setLoading(false);
     }, 1000);
-  }, [timeframe, assetType]);
+  };
 
   // Custom tooltip component for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -106,32 +131,39 @@ export function InvestmentChart() {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-2 mb-4">
-        <Tabs 
-          value={timeframe} 
-          onValueChange={(v) => setTimeframe(v as any)} 
-          className="w-full max-w-[300px]"
-        >
-          <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="1m" className="px-2 py-1 text-xs">1M</TabsTrigger>
-            <TabsTrigger value="3m" className="px-2 py-1 text-xs">3M</TabsTrigger>
-            <TabsTrigger value="6m" className="px-2 py-1 text-xs">6M</TabsTrigger>
-            <TabsTrigger value="1y" className="px-2 py-1 text-xs">1A</TabsTrigger>
-            <TabsTrigger value="all" className="px-2 py-1 text-xs">Todo</TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="flex flex-wrap justify-between gap-2 mb-4">
+        <div className="flex flex-wrap gap-2">
+          <Tabs 
+            value={timeframe} 
+            onValueChange={(v) => setTimeframe(v as any)} 
+            className="w-full max-w-[300px]"
+          >
+            <TabsList className="grid grid-cols-5 w-full">
+              <TabsTrigger value="1m" className="px-2 py-1 text-xs">1M</TabsTrigger>
+              <TabsTrigger value="3m" className="px-2 py-1 text-xs">3M</TabsTrigger>
+              <TabsTrigger value="6m" className="px-2 py-1 text-xs">6M</TabsTrigger>
+              <TabsTrigger value="1y" className="px-2 py-1 text-xs">1A</TabsTrigger>
+              <TabsTrigger value="all" className="px-2 py-1 text-xs">Todo</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          
+          <Tabs 
+            value={assetType} 
+            onValueChange={(v) => setAssetType(v as any)} 
+            className="w-full max-w-[240px]"
+          >
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="all" className="px-2 py-1 text-xs">Todos</TabsTrigger>
+              <TabsTrigger value="crypto" className="px-2 py-1 text-xs">Crypto</TabsTrigger>
+              <TabsTrigger value="cedears" className="px-2 py-1 text-xs">CEDEARs</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         
-        <Tabs 
-          value={assetType} 
-          onValueChange={(v) => setAssetType(v as any)} 
-          className="w-full max-w-[240px]"
-        >
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="all" className="px-2 py-1 text-xs">Todos</TabsTrigger>
-            <TabsTrigger value="crypto" className="px-2 py-1 text-xs">Crypto</TabsTrigger>
-            <TabsTrigger value="cedears" className="px-2 py-1 text-xs">CEDEARs</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading}>
+          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+          Actualizar
+        </Button>
       </div>
 
       {loading ? (
