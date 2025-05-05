@@ -77,8 +77,11 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
         {data
           .sort((a, b) => b.buy - a.buy) // Sort by buy price desc
           .map((rate, index) => {
-            const spread = rate.sell - rate.buy;
-            const spreadPercentage = (spread / rate.buy) * 100;
+            // Add null check here
+            const buy = typeof rate.buy === 'number' ? rate.buy : 0;
+            const sell = typeof rate.sell === 'number' ? rate.sell : 0;
+            const spread = sell - buy;
+            const spreadPercentage = buy > 0 ? (spread / buy) * 100 : 0;
             
             return (
               <motion.div 
@@ -108,10 +111,10 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
                   </div>
                 </div>
                 <div className="font-medium">
-                  ${formatExchangeRateValue(rate.buy)}
+                  ${formatExchangeRateValue(buy)}
                 </div>
                 <div className="font-medium">
-                  ${formatExchangeRateValue(rate.sell)}
+                  ${formatExchangeRateValue(sell)}
                 </div>
                 <TooltipProvider>
                   <Tooltip>
@@ -136,7 +139,7 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
       </motion.div>
       
       <div className="text-xs text-muted-foreground text-right pt-2">
-        Última actualización: {lastUpdated.toLocaleTimeString('es-AR')}
+        Última actualización: {lastUpdated ? lastUpdated.toLocaleTimeString('es-AR') : new Date().toLocaleTimeString('es-AR')}
       </div>
     </div>
   );

@@ -7,17 +7,17 @@ export const calculateChange = (current: number, reference: number) => {
 };
 
 export const formatExchangeRateValue = (value: number) => {
-  if (typeof value !== 'number') return '-';
+  if (typeof value !== 'number' || isNaN(value)) return '-';
   
   if (value > 1000000) {
-    return `$${(value / 1000000).toFixed(2)}M`;
+    return `${(value / 1000000).toFixed(2)}M`;
   } else {
-    return `$${value.toLocaleString('es-AR')}`;
+    return value.toLocaleString('es-AR');
   }
 };
 
 export const formatPercentage = (value: number) => {
-  if (typeof value !== 'number') return '-';
+  if (typeof value !== 'number' || isNaN(value)) return '-';
   return `${Math.abs(value).toFixed(2)}%`;
 };
 

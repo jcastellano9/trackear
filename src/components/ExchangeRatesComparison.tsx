@@ -20,7 +20,7 @@ export function ExchangeRatesComparison() {
   }, []);
 
   const calculateBestRates = (rates: ExchangeRate[]) => {
-    if (!rates.length) return;
+    if (!rates || !rates.length) return;
     
     // Find best buy (highest buy rate)
     const bestBuyRate = rates.reduce((best, current) => 
@@ -126,7 +126,8 @@ export function ExchangeRatesComparison() {
                   />
                 )}
                 <div>
-                  <div className="text-xl font-bold">${bestBuy.rate.toFixed(2)}</div>
+                  {/* Add null check before using toFixed() */}
+                  <div className="text-xl font-bold">${typeof bestBuy.rate === 'number' ? bestBuy.rate.toFixed(2) : '-'}</div>
                   <div className="text-sm text-white/70">{bestBuy.provider}</div>
                 </div>
               </div>
@@ -153,7 +154,8 @@ export function ExchangeRatesComparison() {
                   />
                 )}
                 <div>
-                  <div className="text-xl font-bold">${bestSell.rate.toFixed(2)}</div>
+                  {/* Add null check before using toFixed() */}
+                  <div className="text-xl font-bold">${typeof bestSell.rate === 'number' ? bestSell.rate.toFixed(2) : '-'}</div>
                   <div className="text-sm text-white/70">{bestSell.provider}</div>
                 </div>
               </div>
@@ -180,7 +182,8 @@ export function ExchangeRatesComparison() {
                   />
                 )}
                 <div>
-                  <div className="text-xl font-bold">${lowestSpread.spread.toFixed(2)}</div>
+                  {/* Add null check before using toFixed() */}
+                  <div className="text-xl font-bold">${typeof lowestSpread.spread === 'number' ? lowestSpread.spread.toFixed(2) : '-'}</div>
                   <div className="text-sm text-white/70">{lowestSpread.provider}</div>
                 </div>
               </div>
