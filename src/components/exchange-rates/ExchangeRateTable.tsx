@@ -34,6 +34,15 @@ export const ExchangeRateTable: React.FC<ExchangeRateTableProps> = ({
       </div>
     );
   }
+  
+  // Check if data is empty
+  if (!data || data.length === 0) {
+    return (
+      <div className="text-center py-8 border rounded-md">
+        <p className="text-muted-foreground">No hay datos disponibles</p>
+      </div>
+    );
+  }
 
   const container = {
     hidden: { opacity: 0 },
