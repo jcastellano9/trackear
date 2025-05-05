@@ -42,20 +42,22 @@ const Investments = () => {
       </div>
       
       <div className="space-y-6">
-        <TabsContent value="portfolio">
-          <InvestmentsOverview key={`investments-${refreshTrigger}`} />
-        </TabsContent>
-        
-        <TabsContent value="performance">
-          <div className="space-y-6">
-            <div className="rounded-lg p-6 bg-card text-card-foreground">
-              <h2 className="text-xl font-bold mb-4">Rendimiento de inversiones</h2>
-              <div className="h-[400px]">
-                <InvestmentChart key={`chart-${refreshTrigger}`} />
+        <Tabs value={activeTab}>
+          <TabsContent value="portfolio">
+            <InvestmentsOverview key={`investments-${refreshTrigger}`} />
+          </TabsContent>
+          
+          <TabsContent value="performance">
+            <div className="space-y-6">
+              <div className="rounded-lg p-6 bg-card text-card-foreground">
+                <h2 className="text-xl font-bold mb-4">Rendimiento de inversiones</h2>
+                <div className="h-[400px]">
+                  <InvestmentChart key={`chart-${refreshTrigger}`} />
+                </div>
               </div>
             </div>
-          </div>
-        </TabsContent>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );

@@ -133,6 +133,7 @@ export function InvestmentChart() {
     <div>
       <div className="flex flex-wrap justify-between gap-2 mb-4">
         <div className="flex flex-wrap gap-2">
+          {/* First Tabs component for timeframe selection */}
           <Tabs 
             value={timeframe} 
             onValueChange={(v) => setTimeframe(v as any)} 
@@ -147,6 +148,7 @@ export function InvestmentChart() {
             </TabsList>
           </Tabs>
           
+          {/* Second Tabs component for asset type selection */}
           <Tabs 
             value={assetType} 
             onValueChange={(v) => setAssetType(v as any)} 
