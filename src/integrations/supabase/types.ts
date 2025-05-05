@@ -20,6 +20,7 @@ export type Database = {
           ppc: number | null
           precio_compra: number
           ratio: number | null
+          symbol: string | null
           tipo: string
           updated_at: string | null
           user_id: string
@@ -34,6 +35,7 @@ export type Database = {
           ppc?: number | null
           precio_compra: number
           ratio?: number | null
+          symbol?: string | null
           tipo: string
           updated_at?: string | null
           user_id: string
@@ -48,6 +50,7 @@ export type Database = {
           ppc?: number | null
           precio_compra?: number
           ratio?: number | null
+          symbol?: string | null
           tipo?: string
           updated_at?: string | null
           user_id?: string

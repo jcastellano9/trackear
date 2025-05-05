@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useSession } from "@supabase/auth-helpers-react";
@@ -80,7 +81,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
           fecha_compra: inv.fecha_compra,
           created_at: inv.created_at,
           updated_at: inv.updated_at,
-          symbol: inv.activo, // Use activo as the default for symbol
+          symbol: inv.symbol || inv.activo, // Use activo as fallback if symbol is null
           ratio: inv.ratio,
           current_price: currentPrice,
           price_change_percent: priceChange * 100,
