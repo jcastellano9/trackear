@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { getLogoUrl, getCryptoExchangeLogo } from "@/utils/logoUtils";
 
 export function CryptoPrices() {
   const [cryptoRates, setCryptoRates] = useState<ExchangeRate[]>([]);
@@ -30,7 +31,21 @@ export function CryptoPrices() {
     try {
       setLoading(true);
       const data = await fetchCryptoRates();
-      setCryptoRates(data);
+      
+      // Enhance data with better logos
+      const enhancedData = data.map(rate => {
+        // Extract exchange name from format "Exchange (COIN)"
+        const exchangeName = rate.name.split(" (")[0];
+        const coinSymbol = rate.coin || rate.name.split(" (")[1]?.replace(")", "") || "";
+        
+        return {
+          ...rate,
+          // Try to get exchange logo first, then fallback to crypto logo if needed
+          logo: getCryptoExchangeLogo(exchangeName) || getLogoUrl(coinSymbol, "cripto")
+        };
+      });
+      
+      setCryptoRates(enhancedData);
       setLastUpdated(new Date());
     } catch (error) {
       console.error("Error in component while fetching crypto data:", error);
@@ -147,7 +162,7 @@ export function CryptoPrices() {
                 <TableHead className="text-right">Compra</TableHead>
                 <TableHead className="text-right">Venta</TableHead>
                 <TableHead className="text-right">Spread</TableHead>
-                <TableHead className="text-right">Var. 24h</TableHead>
+                <TableHead className="text-right">Variación 24h</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

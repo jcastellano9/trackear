@@ -2,6 +2,7 @@
 import axios from "axios";
 import { ExchangeRate } from "@/types/exchangeRate";
 import { calculateChange } from "@/utils/exchangeRateUtils";
+import { getLogoUrl, getCryptoExchangeLogo, getBankOrWalletLogo } from "@/utils/logoUtils";
 
 export const fetchDollarRates = async (): Promise<ExchangeRate[]> => {
   try {
@@ -16,7 +17,7 @@ export const fetchDollarRates = async (): Promise<ExchangeRate[]> => {
         sell: item.sell,
         change: item.change !== undefined ? item.change : 0,
         reference: item.name.toLowerCase() === "oficial",
-        logo: item.logo || `https://ui-avatars.com/api/?name=${item.name}&background=random`
+        logo: item.logo || getBankOrWalletLogo(item.name) || `https://ui-avatars.com/api/?name=${item.name}&background=random`
       }));
       
       return dollarData;
@@ -26,11 +27,11 @@ export const fetchDollarRates = async (): Promise<ExchangeRate[]> => {
     console.error("Error fetching dollar data:", error);
     // Fallback to mock data
     const dollarData: ExchangeRate[] = [
-      { name: "Oficial", buy: 1036.5, sell: 1096.5, change: 0, reference: true, logo: "https://plus.ar/favicon.ico" },
-      { name: "Blue", buy: 1335, sell: 1355, change: 0.5, logo: "https://brubank.com/favicon.ico" },
-      { name: "Plus", buy: 1347.2, sell: 1349.6, change: 0.2, logo: "https://assets.plus.ar/res/android-chrome-192x192.png" },
-      { name: "Prex", buy: 1344.1, sell: 1351.5, change: 0.1, logo: "https://www.prexcard.com/media/olwn5nqn/logo-prex-simple.svg" },
-      { name: "Cocos", buy: 1357.2, sell: 1359.6, change: 0.3, logo: "https://cocos.capital/favicon.ico" },
+      { name: "Oficial", buy: 1036.5, sell: 1096.5, change: 0, reference: true, logo: getBankOrWalletLogo("oficial") },
+      { name: "Blue", buy: 1335, sell: 1355, change: 0.5, logo: getBankOrWalletLogo("blue") },
+      { name: "Plus", buy: 1347.2, sell: 1349.6, change: 0.2, logo: getBankOrWalletLogo("plus") },
+      { name: "Prex", buy: 1344.1, sell: 1351.5, change: 0.1, logo: getBankOrWalletLogo("prex") },
+      { name: "Cocos", buy: 1357.2, sell: 1359.6, change: 0.3, logo: getBankOrWalletLogo("cocos") },
     ];
     return dollarData;
   }
@@ -64,7 +65,7 @@ export const fetchCryptoRates = async (): Promise<ExchangeRate[]> => {
                   sell: exchangeInfo.totalAsk || exchangeInfo.ask || 0,
                   change: Math.random() * 2 - 1, // Random change since API doesn't provide it
                   reference: false,
-                  logo: `https://criptoya.com/img/${exchange}.webp`,
+                  logo: getCryptoExchangeLogo(exchange),
                   coin: coin.toUpperCase()
                 };
               });
@@ -87,13 +88,62 @@ export const fetchCryptoRates = async (): Promise<ExchangeRate[]> => {
     console.error("Error fetching crypto data:", error);
     // Fallback to mock data
     const cryptoData: ExchangeRate[] = [
-      { name: "Binance (USDT)", buy: 1150, sell: 1155, change: 0.3, logo: "https://criptoya.com/img/binance.webp", coin: "USDT" },
-      { name: "Letsbit (USDT)", buy: 1145, sell: 1148, change: -0.2, logo: "https://criptoya.com/img/letsbit.webp", coin: "USDT" },
-      { name: "Buenbit (USDT)", buy: 1152, sell: 1157, change: 0.4, logo: "https://criptoya.com/img/buenbit.webp", coin: "USDT" },
-      { name: "Binance (BTC)", buy: 62500, sell: 62700, change: 2.4, logo: "https://criptoya.com/img/binance.webp", coin: "BTC" },
-      { name: "Belo (BTC)", buy: 62400, sell: 62800, change: 2.2, logo: "https://criptoya.com/img/belo.webp", coin: "BTC" },
-      { name: "Binance (ETH)", buy: 3050, sell: 3070, change: 1.8, logo: "https://criptoya.com/img/binance.webp", coin: "ETH" },
-      { name: "Decrypto (ETH)", buy: 3040, sell: 3080, change: 1.5, logo: "https://criptoya.com/img/decrypto.webp", coin: "ETH" },
+      { 
+        name: "Binance (USDT)", 
+        buy: 1150, 
+        sell: 1155, 
+        change: 0.3, 
+        logo: getCryptoExchangeLogo("binance"),
+        coin: "USDT" 
+      },
+      { 
+        name: "Letsbit (USDT)", 
+        buy: 1145, 
+        sell: 1148, 
+        change: -0.2, 
+        logo: getCryptoExchangeLogo("letsbit"),
+        coin: "USDT" 
+      },
+      { 
+        name: "Buenbit (USDT)", 
+        buy: 1152, 
+        sell: 1157, 
+        change: 0.4, 
+        logo: getCryptoExchangeLogo("buenbit"),
+        coin: "USDT" 
+      },
+      { 
+        name: "Binance (BTC)", 
+        buy: 62500, 
+        sell: 62700, 
+        change: 2.4, 
+        logo: getCryptoExchangeLogo("binance"),
+        coin: "BTC" 
+      },
+      { 
+        name: "Belo (BTC)", 
+        buy: 62400, 
+        sell: 62800, 
+        change: 2.2, 
+        logo: getCryptoExchangeLogo("belo"),
+        coin: "BTC" 
+      },
+      { 
+        name: "Binance (ETH)", 
+        buy: 3050, 
+        sell: 3070, 
+        change: 1.8, 
+        logo: getCryptoExchangeLogo("binance"),
+        coin: "ETH" 
+      },
+      { 
+        name: "Decrypto (ETH)", 
+        buy: 3040, 
+        sell: 3080, 
+        change: 1.5, 
+        logo: getCryptoExchangeLogo("decrypto"),
+        coin: "ETH" 
+      },
     ];
     return cryptoData;
   }
