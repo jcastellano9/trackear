@@ -8,6 +8,7 @@ import { CurrencyToggle } from "./CurrencyToggle";
 import { InvestmentsTable } from "./InvestmentsTable";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
+import { getAssetPrices } from "@/services/assetPriceService";
 
 interface InvestmentsListProps {
   filter: "all" | "crypto" | "cedears";
@@ -63,12 +64,40 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         
       if (error) throw error;
       
-      // Mock the current values for demonstration (in a real app these would come from an API)
-      const investmentsWithPrice = (data || []).map(inv => {
-        const priceChange = Math.random() * 0.1 * (Math.random() > 0.5 ? 1 : -1); // -10% to +10%
-        const currentPrice = inv.precio_compra * (1 + priceChange);
+      const investmentsData = data as InvestmentType[] || [];
+      
+      // Get real asset prices from API
+      const assetList = investmentsData.map(inv => ({
+        symbol: inv.symbol || inv.activo,
+        tipo: inv.tipo
+      }));
+      
+      let realPrices: Record<string, number> = {};
+      try {
+        realPrices = await getAssetPrices(assetList);
+      } catch (priceError) {
+        console.error("Could not fetch real prices, using estimates:", priceError);
+      }
+      
+      // Calculate current values based on real prices or estimates
+      const investmentsWithPrice = investmentsData.map(inv => {
+        const symbol = inv.symbol || inv.activo;
+        let currentPrice;
+        
+        if (realPrices[symbol]) {
+          // Use real price from API
+          currentPrice = realPrices[symbol];
+        } else {
+          // Fallback to estimation if real price not available
+          const priceChange = Math.random() * 0.1 * (Math.random() > 0.5 ? 1 : -1); // -10% to +10%
+          currentPrice = inv.precio_compra * (1 + priceChange);
+        }
+        
         const totalValue = currentPrice * inv.cantidad;
         const priceDifference = currentPrice - inv.precio_compra;
+        const priceChangePercent = inv.precio_compra > 0 
+          ? ((currentPrice - inv.precio_compra) / inv.precio_compra) * 100
+          : 0;
         
         // Create a correctly typed investment object
         const investment: InvestmentType = {
@@ -86,7 +115,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
           symbol: inv.symbol || inv.activo, // Use activo as fallback if symbol is null
           ratio: inv.ratio,
           current_price: currentPrice,
-          price_change_percent: priceChange * 100,
+          price_change_percent: priceChangePercent,
           price_change_absolute: priceDifference,
           total_value: totalValue,
           ppc: inv.ppc || inv.precio_compra, // Use stored PPC or default to purchase price

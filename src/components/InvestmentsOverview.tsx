@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvestmentsList } from "./investments/InvestmentsList";
 import { AddInvestmentForm } from "./AddInvestmentForm";
 import { InvestmentSummaryTable } from "./InvestmentSummaryTable";
-import { PlusCircle, X, Bitcoin, DollarSign, Filter, Database, RefreshCw } from "lucide-react";
+import { PlusCircle, X, Bitcoin, DollarSign, Filter, Database } from "lucide-react";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 import { ExportInvestments } from "./ExportInvestments";
@@ -114,11 +113,6 @@ export function InvestmentsOverview() {
     toast.success("Inversión agregada exitosamente");
   };
   
-  const handleRefreshData = () => {
-    fetchInvestments();
-    toast.success("Datos de inversiones actualizados");
-  };
-  
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -128,17 +122,6 @@ export function InvestmentsOverview() {
         </div>
         
         <div className="flex flex-wrap items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRefreshData}
-            disabled={isLoading}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-            Actualizar
-          </Button>
-          
           <ExportInvestments />
           
           <Button onClick={() => setShowAddForm(!showAddForm)} className="ml-2">
