@@ -5,7 +5,7 @@ import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { ExchangeRate } from "@/types/exchangeRate";
 import { ExchangeRateTable } from "@/components/exchange-rates/ExchangeRateTable";
-import axios from "axios";
+import { fetchDollarRates } from "@/services/exchangeRateService";
 
 export function ExchangeRatesComparison() {
   const [data, setData] = useState<ExchangeRate[]>([]);
@@ -16,7 +16,16 @@ export function ExchangeRatesComparison() {
   const [lowestSpread, setLowestSpread] = useState<{spread: number, provider: string, logo?: string} | null>(null);
 
   useEffect(() => {
-    fetchDollarRates();
+    fetchDollarRates().then(dollarData => {
+      setData(dollarData);
+      calculateBestRates(dollarData);
+      setLastUpdated(new Date());
+      setLoading(false);
+    }).catch(error => {
+      console.error("Error fetching dollar rates:", error);
+      toast.error("Error al cargar cotizaciones. Mostrando datos de respaldo.");
+      setLoading(false);
+    });
   }, []);
 
   const calculateBestRates = (rates: ExchangeRate[]) => {
@@ -58,49 +67,19 @@ export function ExchangeRatesComparison() {
     });
   };
 
-  const fetchDollarRates = async () => {
+  const refreshData = () => {
     setLoading(true);
-    try {
-      // Try to fetch from comparadolar.ar API
-      const response = await axios.get('https://api.comparadolar.ar/quotes');
-      
-      if (response.status === 200) {
-        const dollarData: ExchangeRate[] = response.data.map((item: any) => ({
-          name: item.name,
-          buy: item.buy,
-          sell: item.sell,
-          change: item.change || 0,
-          reference: item.name.toLowerCase() === "oficial",
-          logo: item.logo || `https://ui-avatars.com/api/?name=${item.name}&background=random`
-        }));
-        
-        setData(dollarData);
-        calculateBestRates(dollarData);
-      } else {
-        throw new Error("Unable to fetch from comparadolar API");
-      }
-    } catch (error) {
-      console.error("Error fetching dollar data:", error);
-      // Fallback to mock data
-      const dollarData: ExchangeRate[] = [
-        { name: "Oficial", buy: 1036.5, sell: 1096.5, change: 0, reference: true, logo: "https://plus.ar/favicon.ico" },
-        { name: "Blue", buy: 1335, sell: 1355, change: 0.5, logo: "https://brubank.com/favicon.ico" },
-        { name: "Cocos", buy: 1357.2, sell: 1359.6, change: 0.3, logo: "https://cocos.capital/favicon.ico" },
-        { name: "Plus", buy: 1347.2, sell: 1349.6, change: 0.2, logo: "https://assets.plus.ar/res/android-chrome-192x192.png" },
-        { name: "Prex", buy: 1344.1, sell: 1351.5, change: 0.1, logo: "https://www.prexcard.com/media/olwn5nqn/logo-prex-simple.svg" },
-      ];
+    fetchDollarRates().then(dollarData => {
       setData(dollarData);
       calculateBestRates(dollarData);
-      toast.error("Error al cargar cotizaciones. Mostrando datos de respaldo.");
-    } finally {
       setLastUpdated(new Date());
       setLoading(false);
-    }
-  };
-
-  const refreshData = () => {
-    fetchDollarRates();
-    toast.success("Cotizaciones actualizadas");
+      toast.success("Cotizaciones actualizadas");
+    }).catch(error => {
+      console.error("Error refreshing dollar rates:", error);
+      toast.error("Error al actualizar cotizaciones");
+      setLoading(false);
+    });
   };
 
   return (
