@@ -86,7 +86,9 @@ export const getBankOrWalletLogo = (name: string): string => {
     'provincia': 'https://www.bancoprovincia.com.ar/CDN/themes/theme_provincia/images/logo.png',
     'nacion': 'https://www.bna.com.ar/Images/Logo_BNA.png',
     'bbva': 'https://www.bbva.com.ar/etc/designs/bbva/favicon.ico',
-    'santander': 'https://www.santander.com.ar/banco/wcm/connect/443e7a8b-a7a7-4e0e-aaf9-882d73cd6a3b/logo-santander-nav.svg'
+    'santander': 'https://www.santander.com.ar/banco/wcm/connect/443e7a8b-a7a7-4e0e-aaf9-882d73cd6a3b/logo-santander-nav.svg',
+    'oficial': 'https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar.png',
+    'blue': 'https://cdn.jsdelivr.net/gh/Yesenia-AriasC/imagenes@main/dolar-blue.png',
   };
 
   // Check if we have a custom logo mapping for this wallet

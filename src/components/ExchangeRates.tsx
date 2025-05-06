@@ -161,8 +161,10 @@ export function ExchangeRates() {
     return () => clearInterval(interval);
   }, [activeTab]);
 
-  const formatCurrency = (value: number) => {
-    if (value > 1000000) {
+  const formatCurrency = (value: number, isBtcOrEth = false) => {
+    if (isBtcOrEth) {
+      return `US$${(value / 1000000).toFixed(2)}M`;
+    } else if (value > 1000000) {
       return `$${(value / 1000000).toFixed(2)}M`;
     } else {
       return `$${value.toLocaleString('es-AR')}`;
@@ -234,45 +236,52 @@ export function ExchangeRates() {
           <div className="grid grid-cols-3 text-xs text-muted-foreground py-2 border-b">
             <div>Tipo</div>
             <div>Compra</div>
-            <div>Venta</div>
+            <div className="flex justify-between">
+              <span>Venta</span>
+              <span>Var. 24h</span>
+            </div>
           </div>
           
           {activeTab === 'crypto' && (
             <div className="text-sm font-medium pt-2 pb-1">Criptomonedas</div>
           )}
           
-          {data.map((rate, index) => (
-            <div key={index} className="grid grid-cols-3 py-3 border-b text-sm items-center">
-              <div className="flex items-center gap-1.5">
-                <img 
-                  src={rate.logo || 'https://via.placeholder.com/24?text=?'} 
-                  alt={rate.name}
-                  className="h-4 w-4 object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "https://via.placeholder.com/20?text=?";
-                  }}
-                />
-                <span>{rate.name}</span>
+          {data.map((rate, index) => {
+            const isBtcOrEth = rate.name === "BTC" || rate.name === "ETH";
+            
+            return (
+              <div key={index} className="grid grid-cols-3 py-3 border-b text-sm items-center">
+                <div className="flex items-center gap-1.5">
+                  <img 
+                    src={rate.logo || 'https://via.placeholder.com/24?text=?'} 
+                    alt={rate.name}
+                    className="h-4 w-4 object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "https://via.placeholder.com/20?text=?";
+                    }}
+                  />
+                  <span>{rate.name}</span>
+                </div>
+                <div>{formatCurrency(rate.buy, isBtcOrEth)}</div>
+                <div className="flex items-center justify-between">
+                  <span>{formatCurrency(rate.sell, isBtcOrEth)}</span>
+                  {!rate.reference && (
+                    <Badge 
+                      variant={rate.change >= 0 ? "default" : "destructive"} 
+                      className="inline-flex items-center px-1.5 py-0.5 text-xs"
+                    >
+                      {rate.change >= 0 ? 
+                        <ArrowUp className="h-3 w-3 mr-0.5" /> : 
+                        <ArrowDown className="h-3 w-3 mr-0.5" />
+                      }
+                      {formatPercentage(Math.abs(rate.change))}%
+                    </Badge>
+                  )}
+                </div>
               </div>
-              <div>{formatCurrency(rate.buy)}</div>
-              <div className="flex items-center justify-between">
-                <span>{formatCurrency(rate.sell)}</span>
-                {!rate.reference && (
-                  <Badge 
-                    variant={rate.change >= 0 ? "default" : "destructive"} 
-                    className="inline-flex items-center px-1.5 py-0.5 text-xs"
-                  >
-                    {rate.change >= 0 ? 
-                      <ArrowUp className="h-3 w-3 mr-0.5" /> : 
-                      <ArrowDown className="h-3 w-3 mr-0.5" />
-                    }
-                    {formatPercentage(Math.abs(rate.change))}%
-                  </Badge>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

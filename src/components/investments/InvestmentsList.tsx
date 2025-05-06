@@ -95,7 +95,7 @@ export function InvestmentsList({ filter, searchTerm = "" }: InvestmentsListProp
         return investment;
       });
       
-      // Filter by search term if provided
+      // Filter by search term if provided - search in both activo and symbol fields
       let filteredInvestments = investmentsWithPrice;
       if (searchTerm) {
         const term = searchTerm.toLowerCase();

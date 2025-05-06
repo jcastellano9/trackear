@@ -25,15 +25,14 @@ export function InvestmentChart() {
       setLoading(true);
       try {
         // Check if user has investments from the database
-        // This is a simplified approach for demonstration
-        
-        // In a real implementation, you would fetch actual data from the database
         const { supabase } = await import('@/lib/supabase');
-        const session = (await import('@supabase/auth-helpers-react')).useSession();
+        const { useSession } = await import('@supabase/auth-helpers-react');
+        const session = useSession();
         
         if (!session?.user?.id) {
           setHasData(false);
           setChartData([]);
+          setLoading(false);
           return;
         }
         
@@ -46,9 +45,9 @@ export function InvestmentChart() {
         const userHasInvestments = count !== null && count > 0;
         
         if (userHasInvestments) {
-          // If user has investments, generate chart data based on their investments
-          // For now, we'll use placeholder data until real data can be fetched
-          generateChartData();
+          // For now, generate empty starting data to show structure but with zero values
+          generateEmptyChartData();
+          setHasData(false); // Set to false until real data is loaded
         } else {
           setHasData(false);
           setChartData([]);
@@ -62,8 +61,8 @@ export function InvestmentChart() {
       }
     };
     
-    const generateChartData = () => {
-      // This would be replaced with real data in production
+    const generateEmptyChartData = () => {
+      // Generate empty data structure with zero values
       const today = new Date();
       const data: InvestmentData[] = [];
       
@@ -72,25 +71,19 @@ export function InvestmentChart() {
                        timeframe === '6m' ? 180 : 
                        timeframe === '1y' ? 365 : 90;
       
-      // Starting with zero values since we want to show empty charts initially
-      // or when there's no data yet
-      let investedAmount = 0;
-      let currentValue = 0;
-      
-      // Generate data points for the selected timeframe
+      // Starting with zero values
       for (let i = totalDays; i >= 0; i -= Math.floor(totalDays/20)) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         
         data.push({
           date: date.toLocaleDateString('es-AR'),
-          invested: Number(investedAmount.toFixed(2)),
-          currentValue: Number(currentValue.toFixed(2))
+          invested: 0,
+          currentValue: 0
         });
       }
       
       setChartData(data);
-      setHasData(investedAmount > 0); // Only show chart as having data if there's actual investment
     };
 
     fetchInvestmentData();
@@ -106,7 +99,7 @@ export function InvestmentChart() {
 
   // Custom tooltip component for the chart
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length && hasData) {
       return (
         <div className="bg-card border rounded p-2 shadow-sm">
           <p className="text-xs font-medium">{label}</p>

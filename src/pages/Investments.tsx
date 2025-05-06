@@ -5,7 +5,7 @@ import { InvestmentsOverview } from "@/components/InvestmentsOverview";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InvestmentChart } from "@/components/InvestmentChart";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 const Investments = () => {
