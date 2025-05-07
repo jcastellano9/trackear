@@ -62,7 +62,7 @@ const Login = () => {
 
       <footer className="py-6 text-center text-sm text-white/70 z-10">
         <div className="container mx-auto px-4">
-          © 2025 <Logo size="sm" withText={true} className="inline-flex mx-1 text-white" /> - Universidad Siglo 21 - Trabajo Final de Grado en Ingeniería de Software
+          © 2025 - TrackeAr
         </div>
       </footer>
     </div>
