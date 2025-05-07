@@ -218,7 +218,6 @@ export function LoginForm() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, delay: 0.5 }}
         >
-          <Button variant="link" className="p-0 h-auto" onClick={handleForgotPassword}>¿Olvidaste tu contraseña?</Button>
         </motion.div>
       </CardFooter>
     </Card>
